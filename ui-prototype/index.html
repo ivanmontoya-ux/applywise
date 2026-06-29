@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ApplyWise UI Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">AW</div>
+          <div>
+            <p class="brand-name">ApplyWise</p>
+            <p class="brand-subtitle">Private beta</p>
+          </div>
+        </div>
+
+        <nav class="side-nav">
+          <button class="nav-item is-active" type="button" data-view="home">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z" />
+              </svg>
+            </span>
+            Home
+          </button>
+          <button class="nav-item" type="button" data-view="jobs">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M10 6h4a2 2 0 0 1 2 2v1h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3V8a2 2 0 0 1 2-2zm0 3h4V8h-4z" />
+              </svg>
+            </span>
+            Jobs
+          </button>
+          <button class="nav-item" type="button" data-view="tracker">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M5 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm10 0h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+              </svg>
+            </span>
+            Tracker
+          </button>
+          <button class="nav-item" type="button" data-view="documents">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm7 1.5V9h4.5" />
+              </svg>
+            </span>
+            Documents
+          </button>
+          <button class="nav-item" type="button" data-view="coach">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M6 5h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-5 4V7a2 2 0 0 1 2-2zm3 5h6M9 13h4" />
+              </svg>
+            </span>
+            Coach
+          </button>
+          <button class="nav-item" type="button" data-view="reminders">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M7 3v3M17 3v3M5 8h14M6 5h12a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm3 8 2 2 4-5" />
+              </svg>
+            </span>
+            Reminders
+          </button>
+        </nav>
+
+        <button class="secondary-action full-width" type="button" data-view="landing">
+          Waitlist preview
+        </button>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Graduate job-search workspace</p>
+            <p class="topbar-title">Private data. Clear next actions.</p>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-action" type="button" data-view="reminders">View reminders</button>
+            <button class="profile-button" type="button" aria-label="Open profile menu">TH</button>
+          </div>
+        </header>
+
+        <section class="view is-visible" id="view-home" aria-labelledby="home-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Home</p>
+              <h1 id="home-title">Here is your next best step.</h1>
+              <p class="page-summary">
+                Focus on the applications that need action today, then move the rest forward in order.
+              </p>
+            </div>
+            <button class="primary-action" type="button" data-view="jobs">Find jobs</button>
+          </div>
+
+          <div class="home-layout">
+            <section class="surface today-panel" aria-labelledby="today-heading">
+              <div class="section-heading">
+                <div>
+                  <h2 id="today-heading">Today</h2>
+                  <p>Three applications need a decision or update.</p>
+                </div>
+                <span class="privacy-chip">Private workspace</span>
+              </div>
+              <div class="task-list">
+                <article class="task-row">
+                  <div class="task-marker is-warning"></div>
+                  <div>
+                    <h3>Follow up on BCG Graduate Consultant</h3>
+                    <p>Applied seven days ago. Add a follow-up reminder or mark it complete.</p>
+                  </div>
+                  <button class="ghost-action" type="button" data-view="application">Open</button>
+                </article>
+                <article class="task-row">
+                  <div class="task-marker"></div>
+                  <div>
+                    <h3>Finish cover letter for Revolut Analyst</h3>
+                    <p>The draft is ready to review, not ready to send automatically.</p>
+                  </div>
+                  <button class="ghost-action" type="button" data-view="documents">Review</button>
+                </article>
+                <article class="task-row">
+                  <div class="task-marker is-muted"></div>
+                  <div>
+                    <h3>Add deadline for Deloitte Graduate Scheme</h3>
+                    <p>No deadline yet. Add one if the posting includes it.</p>
+                  </div>
+                  <button class="ghost-action" type="button" data-view="tracker">Update</button>
+                </article>
+              </div>
+            </section>
+
+            <aside class="surface coach-nudge" aria-labelledby="coach-nudge-title">
+              <div class="section-heading">
+                <div>
+                  <h2 id="coach-nudge-title">Coach suggestion</h2>
+                  <p>Based on missing evidence in one saved application.</p>
+                </div>
+              </div>
+              <div class="coach-quote">
+                <p>Your CV could be stronger for this role.</p>
+                <span>Add evidence for stakeholder reporting before generating the cover letter.</span>
+              </div>
+              <button class="primary-action full-width" type="button" data-view="coach">Improve CV</button>
+            </aside>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="surface" aria-labelledby="active-heading">
+              <div class="section-heading">
+                <div>
+                  <h2 id="active-heading">Active applications</h2>
+                  <p>Grouped by current stage.</p>
+                </div>
+                <button class="ghost-action" type="button" data-view="tracker">Open tracker</button>
+              </div>
+              <div class="status-summary">
+                <div>
+                  <span class="mono-value">4</span>
+                  <p>Saved</p>
+                </div>
+                <div>
+                  <span class="mono-value">7</span>
+                  <p>Applied</p>
+                </div>
+                <div>
+                  <span class="mono-value">2</span>
+                  <p>Interview</p>
+                </div>
+                <div>
+                  <span class="mono-value">1</span>
+                  <p>Assessment</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="surface" aria-labelledby="deadline-heading">
+              <div class="section-heading">
+                <div>
+                  <h2 id="deadline-heading">Upcoming deadlines</h2>
+                  <p>Deadlines and reminders stay visible until completed.</p>
+                </div>
+              </div>
+              <div class="timeline-list">
+                <article class="timeline-row">
+                  <time>Fri</time>
+                  <div>
+                    <h3>Deloitte Graduate Scheme</h3>
+                    <p>Application deadline</p>
+                  </div>
+                </article>
+                <article class="timeline-row">
+                  <time>Mon</time>
+                  <div>
+                    <h3>Spotify Associate Program</h3>
+                    <p>Assessment reminder</p>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="surface span-2" aria-labelledby="recommended-heading">
+              <div class="section-heading">
+                <div>
+                  <h2 id="recommended-heading">Relevant jobs</h2>
+                  <p>Saved jobs and seeded roles that match your target roles, locations, and industries.</p>
+                </div>
+                <button class="secondary-action" type="button" data-view="jobs">Browse all</button>
+              </div>
+              <div class="job-strip">
+                <article class="compact-job">
+                  <span class="status-badge">Graduate scheme</span>
+                  <h3>Business Analyst Graduate Program</h3>
+                  <p>Capgemini · Paris · Hybrid</p>
+                  <button class="ghost-action" type="button" data-view="jobs">View job</button>
+                </article>
+                <article class="compact-job">
+                  <span class="status-badge">Entry level</span>
+                  <h3>Marketing Operations Associate</h3>
+                  <p>Zalando · Berlin · Hybrid</p>
+                  <button class="ghost-action" type="button" data-view="jobs">View job</button>
+                </article>
+                <article class="compact-job">
+                  <span class="status-badge">Graduate role</span>
+                  <h3>Finance Analyst Program</h3>
+                  <p>ING · Amsterdam · Onsite</p>
+                  <button class="ghost-action" type="button" data-view="jobs">View job</button>
+                </article>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-jobs" aria-labelledby="jobs-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Jobs</p>
+              <h1 id="jobs-title">Find or add a job to start building your application list.</h1>
+              <p class="page-summary">
+                Search seeded graduate roles or add a posting manually from a company career page.
+              </p>
+            </div>
+            <button class="primary-action" type="button" data-scroll-target="add-job">Add job</button>
+          </div>
+
+          <section class="surface">
+            <div class="filter-bar" role="search">
+              <label class="field compact-field">
+                <span>Search</span>
+                <input id="job-search" type="search" placeholder="Role, company, or keyword" />
+              </label>
+              <label class="field compact-field">
+                <span>Industry</span>
+                <select id="industry-filter">
+                  <option value="all">All industries</option>
+                  <option value="consulting">Consulting</option>
+                  <option value="finance">Finance</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="tech">Tech</option>
+                </select>
+              </label>
+              <label class="field compact-field">
+                <span>Work model</span>
+                <select id="work-filter">
+                  <option value="all">All models</option>
+                  <option value="hybrid">Hybrid</option>
+                  <option value="remote">Remote</option>
+                  <option value="onsite">Onsite</option>
+                </select>
+              </label>
+              <button class="secondary-action" type="button" id="clear-filters">Clear</button>
+            </div>
+          </section>
+
+          <div class="jobs-grid" id="job-list">
+            <article class="job-card" data-industry="consulting" data-work="hybrid" data-search="bcg graduate consultant consulting london strategy">
+              <div class="job-card-main">
+                <span class="status-badge">Graduate scheme</span>
+                <h2>Graduate Consultant</h2>
+                <p>BCG · London · Hybrid</p>
+                <div class="metadata-line">
+                  <span>Consulting</span>
+                  <span>Deadline 30 Jun</span>
+                  <span>Entry level</span>
+                </div>
+              </div>
+              <div class="job-card-actions">
+                <button class="secondary-action" type="button" data-view="application">Assess fit</button>
+                <button class="primary-action save-job" type="button">Save job</button>
+              </div>
+            </article>
+
+            <article class="job-card" data-industry="finance" data-work="remote" data-search="revolut junior product analyst finance remote analytics">
+              <div class="job-card-main">
+                <span class="status-badge">Entry level</span>
+                <h2>Junior Product Analyst</h2>
+                <p>Revolut · Remote Europe</p>
+                <div class="metadata-line">
+                  <span>Finance</span>
+                  <span>No deadline yet</span>
+                  <span>Analytics</span>
+                </div>
+              </div>
+              <div class="job-card-actions">
+                <button class="secondary-action" type="button" data-view="application">Assess fit</button>
+                <button class="primary-action save-job" type="button">Save job</button>
+              </div>
+            </article>
+
+            <article class="job-card" data-industry="marketing" data-work="hybrid" data-search="zalando marketing operations associate berlin graduate">
+              <div class="job-card-main">
+                <span class="status-badge">Starting role</span>
+                <h2>Marketing Operations Associate</h2>
+                <p>Zalando · Berlin · Hybrid</p>
+                <div class="metadata-line">
+                  <span>Marketing</span>
+                  <span>Deadline 12 Jul</span>
+                  <span>Operations</span>
+                </div>
+              </div>
+              <div class="job-card-actions">
+                <button class="secondary-action" type="button" data-view="application">Assess fit</button>
+                <button class="primary-action save-job" type="button">Save job</button>
+              </div>
+            </article>
+
+            <article class="job-card" data-industry="tech" data-work="onsite" data-search="spotify associate program product operations stockholm tech">
+              <div class="job-card-main">
+                <span class="status-badge">Assessment</span>
+                <h2>Associate Product Operations Program</h2>
+                <p>Spotify · Stockholm · Onsite</p>
+                <div class="metadata-line">
+                  <span>Tech</span>
+                  <span>Assessment Monday</span>
+                  <span>Graduate role</span>
+                </div>
+              </div>
+              <div class="job-card-actions">
+                <button class="secondary-action" type="button" data-view="application">Assess fit</button>
+                <button class="primary-action save-job" type="button">Save job</button>
+              </div>
+            </article>
+          </div>
+
+          <section class="surface" id="add-job" aria-labelledby="add-job-title">
+            <div class="section-heading">
+              <div>
+                <h2 id="add-job-title">Add a job manually</h2>
+                <p>ApplyWise stores the source URL but does not scrape the page.</p>
+              </div>
+              <span class="privacy-chip">User-approved data only</span>
+            </div>
+            <form class="add-job-form" id="add-job-form">
+              <label class="field">
+                <span>Role title</span>
+                <input required name="role" type="text" placeholder="Junior Consultant" />
+              </label>
+              <label class="field">
+                <span>Company</span>
+                <input required name="company" type="text" placeholder="Bain" />
+              </label>
+              <label class="field">
+                <span>Location</span>
+                <input name="location" type="text" placeholder="Madrid, hybrid" />
+              </label>
+              <label class="field">
+                <span>Deadline</span>
+                <input name="deadline" type="date" />
+              </label>
+              <label class="field wide-field">
+                <span>Source URL</span>
+                <input name="url" type="url" placeholder="https://company.com/careers/role" />
+              </label>
+              <label class="field wide-field">
+                <span>Job description</span>
+                <textarea name="description" rows="5" placeholder="Paste the job description before generating CV suggestions."></textarea>
+              </label>
+              <div class="form-actions">
+                <p class="form-feedback" id="add-job-feedback" role="status"></p>
+                <button class="primary-action" type="submit">Save job to Tracker</button>
+              </div>
+            </form>
+          </section>
+        </section>
+
+        <section class="view" id="view-tracker" aria-labelledby="tracker-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Tracker</p>
+              <h1 id="tracker-title">Applications by status.</h1>
+              <p class="page-summary">
+                Move every application from saved role to final outcome, with deadlines and documents visible.
+              </p>
+            </div>
+            <button class="primary-action" type="button" data-view="jobs">Save another job</button>
+          </div>
+
+          <div class="mobile-status-tabs" aria-label="Filter tracker status">
+            <button class="segment is-active" type="button" data-status-filter="all">All</button>
+            <button class="segment" type="button" data-status-filter="Saved">Saved</button>
+            <button class="segment" type="button" data-status-filter="Applied">Applied</button>
+            <button class="segment" type="button" data-status-filter="Interview">Interview</button>
+            <button class="segment" type="button" data-status-filter="Assessment">Assessment</button>
+          </div>
+
+          <div class="kanban-board" id="kanban-board">
+            <section class="tracker-column" aria-labelledby="saved-column">
+              <div class="column-header">
+                <h2 id="saved-column">Saved</h2>
+                <span class="mono-count">02</span>
+              </div>
+              <article class="application-card" data-status="Saved">
+                <span class="status-badge">Saved</span>
+                <h3>Deloitte Graduate Scheme</h3>
+                <p>Deloitte · Madrid</p>
+                <div class="metadata-line">
+                  <span>No deadline</span>
+                  <span>Documents missing</span>
+                </div>
+                <button class="ghost-action" type="button" data-view="application">Open detail</button>
+              </article>
+              <article class="application-card" data-status="Saved">
+                <span class="status-badge">Saved</span>
+                <h3>Marketing Operations Associate</h3>
+                <p>Zalando · Berlin</p>
+                <div class="metadata-line">
+                  <span>12 Jul</span>
+                  <span>CV ready</span>
+                </div>
+                <button class="ghost-action" type="button" data-view="application">Open detail</button>
+              </article>
+            </section>
+
+            <section class="tracker-column" aria-labelledby="applied-column">
+              <div class="column-header">
+                <h2 id="applied-column">Applied</h2>
+                <span class="mono-count">03</span>
+              </div>
+              <article class="application-card" data-status="Applied">
+                <span class="status-badge">Applied</span>
+                <h3>Graduate Consultant</h3>
+                <p>BCG · London</p>
+                <div class="metadata-line">
+                  <span>Follow up today</span>
+                  <span>Partial documents</span>
+                </div>
+                <button class="ghost-action" type="button" data-view="application">Open detail</button>
+              </article>
+              <article class="application-card" data-status="Applied">
+                <span class="status-badge">Applied</span>
+                <h3>Junior Product Analyst</h3>
+                <p>Revolut · Remote Europe</p>
+                <div class="metadata-line">
+                  <span>Cover letter draft</span>
+                  <span>Reminder set</span>
+                </div>
+                <button class="ghost-action" type="button" data-view="application">Open detail</button>
+              </article>
+              <article class="application-card" data-status="Applied">
+                <span class="status-badge">Applied</span>
+                <h3>Finance Analyst Program</h3>
+                <p>ING · Amsterdam</p>
+                <div class="metadata-line">
+                  <span>Follow up 03 Jul</span>
+                  <span>Complete</span>
+                </div>
+                <button class="ghost-action" type="button" data-view="application">Open detail</button>
+              </article>
+            </section>
+
+            <section class="tracker-column" aria-labelledby="interview-column">
+              <div class="column-header">
+                <h2 id="interview-column">Interview</h2>
+                <span class="mono-count">01</span>
+              </div>
+              <article class="application-card" data-status="Interview">
+                <span class="status-badge">Interview</span>
+                <h3>Associate Program</h3>
+                <p>Spotify · Stockholm</p>
+                <div class="metadata-line">
+                  <span>Interview 08 Jul</span>
+                  <span>Prep reminder</span>
+                </div>
+                <button class="ghost-action" type="button" data-view="application">Open detail</button>
+              </article>
+            </section>
+
+            <section class="tracker-column" aria-labelledby="assessment-column">
+              <div class="column-header">
+                <h2 id="assessment-column">Assessment</h2>
+                <span class="mono-count">01</span>
+              </div>
+              <article class="application-card" data-status="Assessment">
+                <span class="status-badge">Assessment</span>
+                <h3>Strategy Graduate Role</h3>
+                <p>Siemens · Munich</p>
+                <div class="metadata-line">
+                  <span>Assessment Monday</span>
+                  <span>Complete</span>
+                </div>
+                <button class="ghost-action" type="button" data-view="application">Open detail</button>
+              </article>
+            </section>
+
+            <section class="tracker-column terminal-column" aria-labelledby="terminal-column">
+              <div class="column-header">
+                <h2 id="terminal-column">Closed</h2>
+                <span class="mono-count">02</span>
+              </div>
+              <article class="application-card" data-status="Rejected">
+                <span class="status-badge">Rejected</span>
+                <h3>Junior Finance Associate</h3>
+                <p>Allianz · Frankfurt</p>
+                <div class="metadata-line">
+                  <span>Closed</span>
+                  <span>Notes saved</span>
+                </div>
+                <button class="ghost-action" type="button" data-view="application">Open detail</button>
+              </article>
+              <article class="application-card" data-status="Withdrawn">
+                <span class="status-badge">Withdrawn</span>
+                <h3>Operations Graduate</h3>
+                <p>Booking.com · Amsterdam</p>
+                <div class="metadata-line">
+                  <span>Withdrawn</span>
+                  <span>Archive</span>
+                </div>
+                <button class="ghost-action" type="button" data-view="application">Open detail</button>
+              </article>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-application" aria-labelledby="application-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Application detail</p>
+              <h1 id="application-title">Graduate Consultant · BCG</h1>
+              <p class="page-summary">
+                Single source of truth for status, dates, documents, reminders, notes, and activity.
+              </p>
+            </div>
+            <div class="button-row">
+              <button class="secondary-action" type="button" data-view="tracker">Back to Tracker</button>
+              <button class="primary-action" type="button" data-view="coach">Review CV</button>
+            </div>
+          </div>
+
+          <div class="application-layout">
+            <section class="surface application-main">
+              <div class="detail-header">
+                <div>
+                  <span class="status-badge" id="detail-status-badge">Applied</span>
+                  <h2>Follow up by 30 Jun</h2>
+                  <p>This application has a next action and partial document readiness.</p>
+                </div>
+                <label class="field status-field">
+                  <span>Status</span>
+                  <select id="detail-status">
+                    <option>Saved</option>
+                    <option selected>Applied</option>
+                    <option>Interview</option>
+                    <option>Assessment</option>
+                    <option>Offer</option>
+                    <option>Rejected</option>
+                    <option>Withdrawn</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="detail-grid">
+                <section class="detail-section">
+                  <h3>Key dates</h3>
+                  <dl class="data-list">
+                    <div><dt>Applied</dt><dd>23 Jun 2026</dd></div>
+                    <div><dt>Follow-up</dt><dd>30 Jun 2026</dd></div>
+                    <div><dt>Deadline</dt><dd>Not added</dd></div>
+                  </dl>
+                </section>
+                <section class="detail-section">
+                  <h3>Documents</h3>
+                  <dl class="data-list">
+                    <div><dt>CV</dt><dd>Base CV v3 linked</dd></div>
+                    <div><dt>Cover letter</dt><dd>Draft needs review</dd></div>
+                    <div><dt>Readiness</dt><dd>Partial</dd></div>
+                  </dl>
+                </section>
+              </div>
+
+              <section class="ai-panel" aria-labelledby="ai-panel-title">
+                <div>
+                  <h3 id="ai-panel-title">CV fit gaps</h3>
+                  <p>Confirmed evidence is separated from assumptions before any suggestion is saved.</p>
+                </div>
+                <ul class="check-list">
+                  <li>Strong evidence for market research and slide writing.</li>
+                  <li>Missing evidence for client-facing stakeholder updates.</li>
+                  <li>This claim needs evidence before you include it: advanced pricing strategy.</li>
+                </ul>
+                <div class="button-row">
+                  <button class="primary-action" type="button" data-view="coach">Improve CV</button>
+                  <button class="secondary-action" type="button" data-view="documents">Open draft</button>
+                </div>
+              </section>
+            </section>
+
+            <aside class="surface detail-side">
+              <div class="section-heading">
+                <div>
+                  <h2>Activity timeline</h2>
+                  <p id="status-feedback" role="status">Latest update: application moved to Applied.</p>
+                </div>
+              </div>
+              <div class="timeline-list">
+                <article class="timeline-row">
+                  <time>Today</time>
+                  <div>
+                    <h3>Follow-up reminder due</h3>
+                    <p>Reminder remains visible until completed.</p>
+                  </div>
+                </article>
+                <article class="timeline-row">
+                  <time>23 Jun</time>
+                  <div>
+                    <h3>Status changed</h3>
+                    <p>Saved to Applied.</p>
+                  </div>
+                </article>
+                <article class="timeline-row">
+                  <time>21 Jun</time>
+                  <div>
+                    <h3>Job saved</h3>
+                    <p>Application created in Saved status.</p>
+                  </div>
+                </article>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-documents" aria-labelledby="documents-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Documents</p>
+              <h1 id="documents-title">Store the versions tied to each application.</h1>
+              <p class="page-summary">
+                P0 focuses on pasted CV text, approved CV suggestions, and generated cover letters.
+              </p>
+            </div>
+            <button class="primary-action" type="button" data-scroll-target="cv-text">Paste CV text</button>
+          </div>
+
+          <section class="surface">
+            <div class="section-heading">
+              <div>
+                <h2>Document library</h2>
+                <p>Every item shows type, linked application, version, and updated date.</p>
+              </div>
+              <div class="button-row">
+                <button class="segment is-active" type="button">All</button>
+                <button class="segment" type="button">CV</button>
+                <button class="segment" type="button">Cover letters</button>
+              </div>
+            </div>
+            <div class="document-list">
+              <article class="document-row">
+                <div>
+                  <span class="status-badge">Base CV</span>
+                  <h3>Graduate CV master text</h3>
+                  <p>Profile-wide · Version 3 · Updated 28 Jun</p>
+                </div>
+                <button class="ghost-action" type="button">Edit</button>
+              </article>
+              <article class="document-row">
+                <div>
+                  <span class="status-badge">Cover letter</span>
+                  <h3>BCG Graduate Consultant draft</h3>
+                  <p>Linked to BCG · Version 1 · Updated today</p>
+                </div>
+                <button class="ghost-action" type="button">Review</button>
+              </article>
+              <article class="document-row">
+                <div>
+                  <span class="status-badge">CV suggestion</span>
+                  <h3>Revolut analyst CV edits</h3>
+                  <p>Linked to Revolut · Draft · Updated yesterday</p>
+                </div>
+                <button class="ghost-action" type="button">Approve</button>
+              </article>
+            </div>
+          </section>
+
+          <section class="surface" id="cv-text">
+            <div class="section-heading">
+              <div>
+                <h2>Base CV text</h2>
+                <p>Stored privately and used only for selected tailoring tasks.</p>
+              </div>
+              <span class="privacy-chip">Authenticated access only</span>
+            </div>
+            <label class="field">
+              <span>CV text</span>
+              <textarea rows="8">Education, internship experience, project work, languages, tools, and evidence points appear here after the user pastes their CV text.</textarea>
+            </label>
+            <div class="form-actions">
+              <p class="helper-copy">Generated suggestions remain editable and user-approved.</p>
+              <button class="primary-action" type="button">Save CV text</button>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="view-coach" aria-labelledby="coach-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Coach</p>
+              <h1 id="coach-title">Task-specific help for one application at a time.</h1>
+              <p class="page-summary">
+                The coach uses selected job and document context, and asks for missing evidence before drafting.
+              </p>
+            </div>
+            <button class="secondary-action" type="button" data-view="application">Use current application</button>
+          </div>
+
+          <section class="surface coach-workspace">
+            <div class="coach-context">
+              <label class="field">
+                <span>Application context</span>
+                <select>
+                  <option>Graduate Consultant · BCG</option>
+                  <option>Junior Product Analyst · Revolut</option>
+                  <option>Marketing Operations Associate · Zalando</option>
+                  <option>No application selected</option>
+                </select>
+              </label>
+              <div class="context-note">
+                <h2>Current bottleneck</h2>
+                <p>Missing evidence for stakeholder updates before finalizing the BCG cover letter.</p>
+              </div>
+            </div>
+
+            <div class="coach-task-grid" aria-label="Coach task modes">
+              <button class="task-button is-active" type="button" data-coach-mode="fit">Check job fit</button>
+              <button class="task-button" type="button" data-coach-mode="cv">Improve CV</button>
+              <button class="task-button" type="button" data-coach-mode="letter">Draft cover letter</button>
+              <button class="task-button" type="button" data-coach-mode="next">What should I do next?</button>
+            </div>
+
+            <section class="coach-output" aria-live="polite">
+              <div>
+                <p class="eyebrow" id="coach-mode-label">Check job fit</p>
+                <h2 id="coach-output-title">Your evidence is strongest for research and structured analysis.</h2>
+                <p id="coach-output-copy">
+                  The job description asks for client communication, analysis, and structured problem solving. Your CV supports the analysis points, but the client communication point needs a more specific example.
+                </p>
+              </div>
+              <div class="output-grid">
+                <div>
+                  <h3>Confirmed evidence</h3>
+                  <ul class="check-list">
+                    <li>Market sizing project with written recommendation.</li>
+                    <li>Internship experience preparing weekly reporting slides.</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3>Missing evidence</h3>
+                  <ul class="check-list">
+                    <li>Client-facing update or stakeholder meeting example.</li>
+                    <li>One measurable outcome from analysis work.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="form-actions">
+                <button class="secondary-action" type="button">Save to notes</button>
+                <button class="primary-action" type="button" data-view="documents">Save as document draft</button>
+              </div>
+            </section>
+          </section>
+        </section>
+
+        <section class="view" id="view-reminders" aria-labelledby="reminders-title">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Reminders</p>
+              <h1 id="reminders-title">Deadlines, follow-ups, and missing documents.</h1>
+              <p class="page-summary">
+                Reminders stay visible until completed so applications do not disappear into a spreadsheet.
+              </p>
+            </div>
+            <button class="primary-action" type="button">Add reminder</button>
+          </div>
+
+          <section class="surface">
+            <div class="reminder-list">
+              <article class="reminder-row is-warning">
+                <div>
+                  <span class="status-badge">Follow-up</span>
+                  <h2>BCG Graduate Consultant</h2>
+                  <p>Due today. Applied seven days ago.</p>
+                </div>
+                <button class="secondary-action complete-reminder" type="button">Mark done</button>
+              </article>
+              <article class="reminder-row">
+                <div>
+                  <span class="status-badge">Application deadline</span>
+                  <h2>Deloitte Graduate Scheme</h2>
+                  <p>Due Friday. Add final CV and cover letter.</p>
+                </div>
+                <button class="secondary-action complete-reminder" type="button">Mark done</button>
+              </article>
+              <article class="reminder-row">
+                <div>
+                  <span class="status-badge">Missing documents</span>
+                  <h2>Revolut Junior Product Analyst</h2>
+                  <p>Cover letter draft needs review.</p>
+                </div>
+                <button class="secondary-action complete-reminder" type="button">Mark done</button>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="view-landing" aria-labelledby="landing-title">
+          <div class="landing-page">
+            <section class="landing-hero">
+              <div class="landing-copy">
+                <p class="eyebrow">ApplyWise waitlist</p>
+                <h1 id="landing-title">Find and track better job applications with less chaos.</h1>
+                <p>
+                  ApplyWise helps graduates find better-fit jobs, tailor applications, and track every opportunity in one private workspace.
+                </p>
+                <form class="waitlist-form" id="waitlist-form">
+                  <label class="field">
+                    <span>Email</span>
+                    <input id="waitlist-email" type="email" placeholder="you@example.com" required />
+                  </label>
+                  <button class="primary-action" type="submit">Join the Waitlist</button>
+                  <p class="form-feedback" id="waitlist-feedback" role="status">
+                    We only use this email to manage early access.
+                  </p>
+                </form>
+              </div>
+              <div class="product-preview" aria-label="ApplyWise product preview">
+                <div class="preview-header">
+                  <span>Today</span>
+                  <span class="privacy-chip">Private</span>
+                </div>
+                <div class="preview-row">
+                  <strong>Follow up: BCG Graduate Consultant</strong>
+                  <span>Due today</span>
+                </div>
+                <div class="preview-row">
+                  <strong>Finish cover letter: Revolut Analyst</strong>
+                  <span>Draft</span>
+                </div>
+                <div class="preview-board">
+                  <div><span>Saved</span><strong>4</strong></div>
+                  <div><span>Applied</span><strong>7</strong></div>
+                  <div><span>Interview</span><strong>2</strong></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="landing-workflow" aria-label="Product workflow">
+              <div>
+                <h2>From saved job to next action</h2>
+                <p>Find relevant roles, save them to Tracker, review fit, prepare documents, and keep reminders visible.</p>
+              </div>
+              <ol class="workflow-list">
+                <li><span>01</span> Find graduate-relevant skilled jobs.</li>
+                <li><span>02</span> Save each role into the application tracker.</li>
+                <li><span>03</span> Review CV evidence before drafting materials.</li>
+                <li><span>04</span> Add follow-ups, deadlines, and missing-document reminders.</li>
+              </ol>
+            </section>
+
+            <section class="privacy-band">
+              <h2>Private by design</h2>
+              <p>
+                CVs, notes, cover letters, and applications are personal career data. ApplyWise keeps user approval in the loop before document suggestions are saved.
+              </p>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <nav class="mobile-nav" aria-label="Mobile primary">
+        <button class="mobile-nav-item is-active" type="button" data-view="home">Home</button>
+        <button class="mobile-nav-item" type="button" data-view="jobs">Jobs</button>
+        <button class="mobile-nav-item" type="button" data-view="tracker">Tracker</button>
+        <button class="mobile-nav-item" type="button" data-view="documents">Docs</button>
+        <button class="mobile-nav-item" type="button" data-view="coach">Coach</button>
+      </nav>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
