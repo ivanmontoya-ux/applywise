@@ -4,13 +4,16 @@ import {
   Briefcase,
   CheckCircle2,
   FileText,
+  GraduationCap,
   Lightbulb,
   ListChecks,
+  Mail,
   RefreshCw,
   ShieldCheck,
   Upload,
+  UserRound,
 } from 'lucide-react'
-import { fetchAiStatus, fetchTracker, reviewCv } from '../lib/api'
+import { extractCvProfile, fetchAiStatus, fetchTracker, reviewCv } from '../lib/api'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
@@ -167,10 +170,10 @@ function EmptyReview() {
       </span>
       <div>
         <h2 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '5px' }}>
-          CV recommendations will appear here
+          CV insights will appear here
         </h2>
         <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', maxWidth: '360px' }}>
-          Upload or paste a CV, add the job description, then review evidence-based improvements.
+          Upload or paste a CV to extract profile details, or add a job description to review role-specific improvements.
         </p>
       </div>
     </div>
@@ -239,6 +242,280 @@ function PairList({ items, fields }) {
           ))}
         </article>
       ))}
+    </div>
+  )
+}
+
+function DetailList({ items }) {
+  if (!items?.length) return null
+
+  return (
+    <ul style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginTop: '10px' }}>
+      {items.map((item, index) => (
+        <li
+          key={`${item}-${index}`}
+          style={{
+            color: 'var(--color-text-secondary)',
+            fontSize: '13px',
+            lineHeight: '1.5',
+            paddingLeft: '12px',
+            position: 'relative',
+          }}
+        >
+          <span style={{
+            position: 'absolute',
+            left: 0,
+            top: '9px',
+            width: 4,
+            height: 4,
+            borderRadius: '50%',
+            background: 'var(--color-applied-teal)',
+          }} />
+          {item}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function PillList({ items }) {
+  if (!items?.length) {
+    return <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>No items returned.</p>
+  }
+
+  return (
+    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      {items.map((item, index) => (
+        <span
+          key={`${item}-${index}`}
+          style={{
+            border: '1px solid #b9dada',
+            background: '#edf7f7',
+            color: 'var(--color-applied-teal)',
+            borderRadius: '999px',
+            padding: '5px 9px',
+            fontSize: '12px',
+            fontWeight: '600',
+          }}
+        >
+          {item}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function FieldRows({ rows }) {
+  const visibleRows = rows.filter(row => row.value)
+
+  if (!visibleRows.length) {
+    return <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>No items returned.</p>
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {visibleRows.map(row => (
+        <div key={row.label}>
+          <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0', marginBottom: '2px' }}>
+            {row.label}
+          </p>
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45', overflowWrap: 'anywhere' }}>
+            {row.value}
+          </p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function dateRange(item) {
+  return [item?.start_date, item?.end_date].filter(Boolean).join(' - ')
+}
+
+function CvProfileResults({ profile }) {
+  const contactRows = [
+    { label: 'Email', value: profile.contact?.email },
+    { label: 'Phone', value: profile.contact?.phone },
+    { label: 'Location', value: profile.contact?.location },
+    { label: 'LinkedIn', value: profile.contact?.linkedin },
+    { label: 'Portfolio', value: profile.contact?.portfolio },
+  ]
+  const skillGroups = [
+    { label: 'Technical', items: profile.skills?.technical },
+    { label: 'Business', items: profile.skills?.business },
+    { label: 'Tools', items: profile.skills?.tools },
+    { label: 'Languages', items: profile.skills?.languages },
+    { label: 'Other', items: profile.skills?.other },
+  ].filter(group => group.items?.length)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <section style={{ ...panelStyle, padding: '24px' }}>
+        <div style={{ display: 'flex', gap: '13px', alignItems: 'flex-start' }}>
+          <span style={{
+            width: 42,
+            height: 42,
+            borderRadius: 'var(--radius-md)',
+            background: '#edf7f7',
+            color: 'var(--color-applied-teal)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <UserRound size={21} strokeWidth={2.3} />
+          </span>
+          <div>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0', marginBottom: '6px' }}>
+              Gemini CV extraction
+            </p>
+            <h2 style={{ fontSize: '19px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '6px' }}>
+              {profile.candidate_name || 'Extracted CV profile'}
+            </h2>
+            {profile.headline && (
+              <p style={{ fontSize: '14px', color: 'var(--color-text-primary)', fontWeight: '600', lineHeight: '1.45', marginBottom: '5px' }}>
+                {profile.headline}
+              </p>
+            )}
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55' }}>
+              {profile.summary || 'Review the extracted fields below before saving or using them elsewhere.'}
+            </p>
+          </div>
+        </div>
+        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '16px' }}>
+          ApplyWise only extracts visible CV information. Check the fields before using them in applications.
+        </p>
+      </section>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <Section icon={Mail} title="Contact details">
+          <FieldRows rows={contactRows} />
+        </Section>
+        <Section icon={Lightbulb} title="Skills">
+          {skillGroups.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {skillGroups.map(group => (
+                <div key={group.label}>
+                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', fontWeight: '700', marginBottom: '8px' }}>
+                    {group.label}
+                  </p>
+                  <PillList items={group.items} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>No skills returned.</p>
+          )}
+        </Section>
+      </div>
+
+      <Section icon={Briefcase} title="Experience">
+        {profile.experience?.length ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {profile.experience.map((item, index) => (
+              <article key={index} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '13px 14px', background: '#fbfdff' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+                  {item.role || item.organization || 'Experience'}
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '6px' }}>
+                  {[item.organization, item.location, dateRange(item)].filter(Boolean).join(' - ')}
+                </p>
+                <DetailList items={item.achievements} />
+                {item.skills_used?.length ? (
+                  <div style={{ marginTop: '11px' }}>
+                    <PillList items={item.skills_used} />
+                  </div>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>No experience returned.</p>
+        )}
+      </Section>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <Section icon={GraduationCap} title="Education">
+          {profile.education?.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {profile.education.map((item, index) => (
+                <article key={index} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '13px 14px', background: '#fbfdff' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+                    {[item.degree, item.field].filter(Boolean).join(' in ') || item.institution || 'Education'}
+                  </h3>
+                  <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '6px' }}>
+                    {[item.institution, item.location, dateRange(item)].filter(Boolean).join(' - ')}
+                  </p>
+                  <DetailList items={item.details} />
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>No education returned.</p>
+          )}
+        </Section>
+        <Section icon={FileText} title="Projects">
+          {profile.projects?.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {profile.projects.map((item, index) => (
+                <article key={index} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '13px 14px', background: '#fbfdff' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+                    {item.title || 'Project'}
+                  </h3>
+                  {[item.context, item.description].filter(Boolean).map((text, textIndex) => (
+                    <p key={textIndex} style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.5', marginBottom: '6px' }}>
+                      {text}
+                    </p>
+                  ))}
+                  <DetailList items={item.outcomes} />
+                  {item.skills_used?.length ? (
+                    <div style={{ marginTop: '11px' }}>
+                      <PillList items={item.skills_used} />
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>No projects returned.</p>
+          )}
+        </Section>
+      </div>
+
+      <Section icon={ShieldCheck} title="Certifications">
+        {profile.certifications?.length ? (
+          <PairList
+            items={profile.certifications}
+            fields={[
+              { key: 'name', label: 'Name', strong: true },
+              { key: 'issuer', label: 'Issuer' },
+              { key: 'date', label: 'Date' },
+            ]}
+          />
+        ) : (
+          <p style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>No certifications returned.</p>
+        )}
+      </Section>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <Section icon={CheckCircle2} title="Evidence points">
+          <PairList
+            items={profile.evidence_points}
+            fields={[
+              { key: 'evidence', label: 'Evidence', strong: true },
+              { key: 'category', label: 'Category' },
+              { key: 'source_section', label: 'Source' },
+            ]}
+          />
+        </Section>
+        <Section icon={AlertCircle} title="Missing or unclear fields">
+          <TextList items={profile.missing_fields} />
+        </Section>
+      </div>
+
+      <Section icon={ShieldCheck} title="Extraction notes">
+        <TextList items={profile.extraction_notes} />
+      </Section>
     </div>
   )
 }
@@ -355,7 +632,9 @@ export default function Documents() {
   const [cvText, setCvText] = useState('')
   const [cvFile, setCvFile] = useState(null)
   const [jobDescription, setJobDescription] = useState('')
+  const [profile, setProfile] = useState(null)
   const [review, setReview] = useState(null)
+  const [extracting, setExtracting] = useState(false)
   const [loading, setLoading] = useState(false)
   const [loadingContext, setLoadingContext] = useState(true)
   const [error, setError] = useState('')
@@ -393,6 +672,7 @@ export default function Documents() {
     const file = event.target.files?.[0]
     setError('')
     setReview(null)
+    setProfile(null)
     if (!file) return
 
     if (file.size > MAX_FILE_BYTES) {
@@ -425,6 +705,7 @@ export default function Documents() {
     event.preventDefault()
     setError('')
     setReview(null)
+    setProfile(null)
 
     if (!cvText.trim() && !cvFile) {
       setError('We need CV text before reviewing fit. Upload a CV or paste CV text first.')
@@ -454,6 +735,30 @@ export default function Documents() {
     }
   }
 
+  async function handleExtractProfile() {
+    setError('')
+    setReview(null)
+    setProfile(null)
+
+    if (!cvText.trim() && !cvFile) {
+      setError('Upload a CV or paste CV text first.')
+      return
+    }
+
+    setExtracting(true)
+    try {
+      const result = await extractCvProfile({
+        cv_text: cvText,
+        cv_file: cvFile,
+      })
+      setProfile(result)
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Gemini could not extract CV information yet.')
+    } finally {
+      setExtracting(false)
+    }
+  }
+
   const connected = aiStatus?.gemini_configured
 
   return (
@@ -461,7 +766,7 @@ export default function Documents() {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '18px', alignItems: 'flex-start', marginBottom: '28px' }}>
         <div>
           <h1 style={titleStyle}>Documents</h1>
-          <p style={subtitleStyle}>Upload a CV and get role-specific improvement recommendations.</p>
+          <p style={subtitleStyle}>Upload a CV to extract profile details or get role-specific improvement recommendations.</p>
         </div>
         <div style={{
           display: 'flex',
@@ -547,6 +852,7 @@ export default function Documents() {
               onChange={event => {
                 setCvText(event.target.value)
                 setReview(null)
+                setProfile(null)
               }}
               rows={10}
               placeholder="Paste your approved base CV text here, or upload a PDF or Word CV above."
@@ -600,12 +906,25 @@ export default function Documents() {
 
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button
-              type="submit"
-              disabled={loading || !connected}
+              type="button"
+              onClick={handleExtractProfile}
+              disabled={extracting || loading || !connected}
               style={{
                 ...primaryButtonStyle,
-                opacity: loading || !connected ? 0.6 : 1,
-                cursor: loading || !connected ? 'default' : 'pointer',
+                opacity: extracting || loading || !connected ? 0.6 : 1,
+                cursor: extracting || loading || !connected ? 'default' : 'pointer',
+              }}
+            >
+              {extracting ? <RefreshCw size={15} strokeWidth={2.5} /> : <UserRound size={15} strokeWidth={2.5} />}
+              {extracting ? 'Extracting CV info...' : 'Extract CV profile'}
+            </button>
+            <button
+              type="submit"
+              disabled={loading || extracting || !connected}
+              style={{
+                ...secondaryButtonStyle,
+                opacity: loading || extracting || !connected ? 0.6 : 1,
+                cursor: loading || extracting || !connected ? 'default' : 'pointer',
               }}
             >
               {loading ? <RefreshCw size={15} strokeWidth={2.5} /> : <ListChecks size={15} strokeWidth={2.5} />}
@@ -615,6 +934,7 @@ export default function Documents() {
               type="button"
               style={secondaryButtonStyle}
               onClick={() => {
+                setProfile(null)
                 setReview(null)
                 setError('')
                 setCvText('')
@@ -625,14 +945,16 @@ export default function Documents() {
               Clear
             </button>
           </div>
-          {loading && (
+          {(loading || extracting) && (
             <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
-              Reading job requirements, checking CV evidence, and separating confirmed strengths from gaps.
+              {extracting
+                ? 'Reading the CV and separating confirmed profile details from missing fields.'
+                : 'Reading job requirements, checking CV evidence, and separating confirmed strengths from gaps.'}
             </p>
           )}
         </form>
 
-        {review ? <ReviewResults review={review} /> : <EmptyReview />}
+        {profile ? <CvProfileResults profile={profile} /> : review ? <ReviewResults review={review} /> : <EmptyReview />}
       </div>
     </div>
   )

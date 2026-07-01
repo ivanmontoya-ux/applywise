@@ -117,9 +117,137 @@ const cvReviewSchema = {
   ],
 }
 
+const cvProfileSchema = {
+  type: 'object',
+  properties: {
+    candidate_name: { type: 'string' },
+    headline: { type: 'string' },
+    summary: { type: 'string' },
+    contact: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        phone: { type: 'string' },
+        location: { type: 'string' },
+        linkedin: { type: 'string' },
+        portfolio: { type: 'string' },
+      },
+      required: ['email', 'phone', 'location', 'linkedin', 'portfolio'],
+    },
+    education: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          institution: { type: 'string' },
+          degree: { type: 'string' },
+          field: { type: 'string' },
+          location: { type: 'string' },
+          start_date: { type: 'string' },
+          end_date: { type: 'string' },
+          details: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['institution', 'degree', 'field', 'location', 'start_date', 'end_date', 'details'],
+      },
+    },
+    experience: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          organization: { type: 'string' },
+          role: { type: 'string' },
+          location: { type: 'string' },
+          start_date: { type: 'string' },
+          end_date: { type: 'string' },
+          achievements: { type: 'array', items: { type: 'string' } },
+          skills_used: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['organization', 'role', 'location', 'start_date', 'end_date', 'achievements', 'skills_used'],
+      },
+    },
+    projects: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          context: { type: 'string' },
+          description: { type: 'string' },
+          outcomes: { type: 'array', items: { type: 'string' } },
+          skills_used: { type: 'array', items: { type: 'string' } },
+        },
+        required: ['title', 'context', 'description', 'outcomes', 'skills_used'],
+      },
+    },
+    skills: {
+      type: 'object',
+      properties: {
+        technical: { type: 'array', items: { type: 'string' } },
+        business: { type: 'array', items: { type: 'string' } },
+        tools: { type: 'array', items: { type: 'string' } },
+        languages: { type: 'array', items: { type: 'string' } },
+        other: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['technical', 'business', 'tools', 'languages', 'other'],
+    },
+    certifications: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          issuer: { type: 'string' },
+          date: { type: 'string' },
+        },
+        required: ['name', 'issuer', 'date'],
+      },
+    },
+    evidence_points: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          evidence: { type: 'string' },
+          category: { type: 'string' },
+          source_section: { type: 'string' },
+        },
+        required: ['evidence', 'category', 'source_section'],
+      },
+    },
+    missing_fields: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    extraction_notes: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  },
+  required: [
+    'candidate_name',
+    'headline',
+    'summary',
+    'contact',
+    'education',
+    'experience',
+    'projects',
+    'skills',
+    'certifications',
+    'evidence_points',
+    'missing_fields',
+    'extraction_notes',
+  ],
+}
+
 function cleanText(value, maxLength) {
   if (typeof value !== 'string') return ''
   return value.replace(/\r\n/g, '\n').trim().slice(0, maxLength)
+}
+
+function toText(value) {
+  if (value === null || value === undefined) return ''
+  return String(value).trim()
 }
 
 function estimateBase64Bytes(data) {
@@ -172,6 +300,24 @@ function buildPrompt({ cvText, jobTitle, company, jobDescription, applicationNot
   ].join('\n')
 }
 
+function buildExtractionPrompt({ cvText }) {
+  return [
+    'Extract structured candidate information from this CV.',
+    '',
+    'Rules:',
+    '- Only extract information that is explicitly present in the CV.',
+    '- Do not infer employers, grades, dates, locations, tools, languages, metrics, or achievements.',
+    '- Use empty strings and empty arrays for missing information.',
+    '- Preserve useful wording where it helps the user review the extracted profile.',
+    '- Separate responsibilities, achievements, skills, education, projects, and contact details.',
+    '- Put any important missing profile fields in missing_fields.',
+    '- Keep extraction_notes short and practical.',
+    '',
+    'CV text pasted by user:',
+    cvText || 'The CV was uploaded as a document. Read the attached document content.',
+  ].join('\n')
+}
+
 function extractTextBlock(block) {
   if (!block) return ''
   if (typeof block === 'string') return block
@@ -203,50 +349,21 @@ function asArray(value) {
   return Array.isArray(value) ? value : []
 }
 
+function textArray(value, limit = 12) {
+  return asArray(value).map(toText).filter(Boolean).slice(0, limit)
+}
+
 function clampScore(value) {
   const score = Number(value)
   if (!Number.isFinite(score)) return 0
   return Math.max(0, Math.min(100, Math.round(score)))
 }
 
-function normalizeReview(review) {
-  return {
-    summary: String(review.summary || '').trim(),
-    fit_score: clampScore(review.fit_score),
-    recommendation: ['strong_match', 'possible_match', 'weak_match'].includes(review.recommendation)
-      ? review.recommendation
-      : 'possible_match',
-    role_focus: String(review.role_focus || '').trim(),
-    top_strengths: asArray(review.top_strengths).slice(0, 5),
-    evidence_gaps: asArray(review.evidence_gaps).slice(0, 6),
-    bullet_rewrites: asArray(review.bullet_rewrites).slice(0, 6),
-    keyword_suggestions: asArray(review.keyword_suggestions).slice(0, 8),
-    risks: asArray(review.risks).slice(0, 5),
-    next_steps: asArray(review.next_steps).slice(0, 5),
-    cover_letter_angles: asArray(review.cover_letter_angles).slice(0, 4),
-  }
-}
-
-export function isGeminiConfigured() {
-  return Boolean(process.env.GEMINI_API_KEY)
-}
-
-export async function reviewCvWithGemini(payload = {}) {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) {
-    const err = new Error('Gemini API key is not configured on the server.')
-    err.status = 503
-    throw err
-  }
-
+function buildCvDocumentInput(payload = {}, missingMessage) {
   const cvText = cleanText(payload.cv_text, MAX_CV_TEXT_CHARS)
-  const jobTitle = cleanText(payload.job_title, 200)
-  const company = cleanText(payload.company, 200)
-  const jobDescription = cleanText(payload.job_description, MAX_JOB_TEXT_CHARS)
-  const applicationNotes = cleanText(payload.application_notes, 4000)
   const cvFile = payload.cv_file && typeof payload.cv_file === 'object' ? payload.cv_file : null
-
   const input = []
+
   if (cvFile?.data) {
     const mimeType = normalizeMimeType(cvFile.mime_type, cvFile.name)
     if (!DOCUMENT_MIME_TYPES.has(mimeType)) {
@@ -269,10 +386,161 @@ export async function reviewCvWithGemini(payload = {}) {
   }
 
   if (!cvText && input.length === 0) {
-    const err = new Error('Add CV text or upload a CV file before requesting a review.')
+    const err = new Error(missingMessage)
     err.status = 400
     throw err
   }
+
+  return { cvText, input }
+}
+
+function normalizeReview(review) {
+  return {
+    summary: String(review.summary || '').trim(),
+    fit_score: clampScore(review.fit_score),
+    recommendation: ['strong_match', 'possible_match', 'weak_match'].includes(review.recommendation)
+      ? review.recommendation
+      : 'possible_match',
+    role_focus: String(review.role_focus || '').trim(),
+    top_strengths: asArray(review.top_strengths).slice(0, 5),
+    evidence_gaps: asArray(review.evidence_gaps).slice(0, 6),
+    bullet_rewrites: asArray(review.bullet_rewrites).slice(0, 6),
+    keyword_suggestions: asArray(review.keyword_suggestions).slice(0, 8),
+    risks: asArray(review.risks).slice(0, 5),
+    next_steps: asArray(review.next_steps).slice(0, 5),
+    cover_letter_angles: asArray(review.cover_letter_angles).slice(0, 4),
+  }
+}
+
+function normalizeEducation(item = {}) {
+  return {
+    institution: toText(item.institution),
+    degree: toText(item.degree),
+    field: toText(item.field),
+    location: toText(item.location),
+    start_date: toText(item.start_date),
+    end_date: toText(item.end_date),
+    details: textArray(item.details, 5),
+  }
+}
+
+function normalizeExperience(item = {}) {
+  return {
+    organization: toText(item.organization),
+    role: toText(item.role),
+    location: toText(item.location),
+    start_date: toText(item.start_date),
+    end_date: toText(item.end_date),
+    achievements: textArray(item.achievements, 8),
+    skills_used: textArray(item.skills_used, 12),
+  }
+}
+
+function normalizeProject(item = {}) {
+  return {
+    title: toText(item.title),
+    context: toText(item.context),
+    description: toText(item.description),
+    outcomes: textArray(item.outcomes, 6),
+    skills_used: textArray(item.skills_used, 12),
+  }
+}
+
+function normalizeProfile(profile = {}) {
+  const contact = profile.contact && typeof profile.contact === 'object' ? profile.contact : {}
+  const skills = profile.skills && typeof profile.skills === 'object' ? profile.skills : {}
+
+  return {
+    candidate_name: toText(profile.candidate_name),
+    headline: toText(profile.headline),
+    summary: toText(profile.summary),
+    contact: {
+      email: toText(contact.email),
+      phone: toText(contact.phone),
+      location: toText(contact.location),
+      linkedin: toText(contact.linkedin),
+      portfolio: toText(contact.portfolio),
+    },
+    education: asArray(profile.education).map(normalizeEducation).slice(0, 8),
+    experience: asArray(profile.experience).map(normalizeExperience).slice(0, 10),
+    projects: asArray(profile.projects).map(normalizeProject).slice(0, 8),
+    skills: {
+      technical: textArray(skills.technical, 20),
+      business: textArray(skills.business, 20),
+      tools: textArray(skills.tools, 20),
+      languages: textArray(skills.languages, 20),
+      other: textArray(skills.other, 20),
+    },
+    certifications: asArray(profile.certifications).map(item => ({
+      name: toText(item?.name),
+      issuer: toText(item?.issuer),
+      date: toText(item?.date),
+    })).slice(0, 10),
+    evidence_points: asArray(profile.evidence_points).map(item => ({
+      evidence: toText(item?.evidence),
+      category: toText(item?.category),
+      source_section: toText(item?.source_section),
+    })).slice(0, 12),
+    missing_fields: textArray(profile.missing_fields, 12),
+    extraction_notes: textArray(profile.extraction_notes, 8),
+  }
+}
+
+async function readGeminiJsonResponse(response, emptyMessage) {
+  const rawText = await response.text()
+  let data = null
+  try {
+    data = rawText ? JSON.parse(rawText) : null
+  } catch {
+    data = null
+  }
+
+  if (!response.ok) {
+    const detail = data?.error?.message || rawText || `Gemini request failed with status ${response.status}`
+    const err = new Error(detail)
+    err.status = response.status
+    throw err
+  }
+
+  const outputText = extractOutputText(data)
+  if (!outputText) {
+    const err = new Error(emptyMessage)
+    err.status = 502
+    throw err
+  }
+
+  try {
+    return {
+      parsed: JSON.parse(outputText),
+      data,
+    }
+  } catch {
+    const err = new Error('Gemini returned a response that could not be parsed as JSON.')
+    err.status = 502
+    throw err
+  }
+}
+
+export function isGeminiConfigured() {
+  return Boolean(process.env.GEMINI_API_KEY)
+}
+
+export async function reviewCvWithGemini(payload = {}) {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    const err = new Error('Gemini API key is not configured on the server.')
+    err.status = 503
+    throw err
+  }
+
+  const { cvText, input } = buildCvDocumentInput(
+    payload,
+    'Add CV text or upload a CV file before requesting a review.',
+  )
+  const jobTitle = cleanText(payload.job_title, 200)
+  const company = cleanText(payload.company, 200)
+  const jobDescription = cleanText(payload.job_description, MAX_JOB_TEXT_CHARS)
+  const applicationNotes = cleanText(payload.application_notes, 4000)
 
   input.push({
     type: 'text',
@@ -301,39 +569,59 @@ export async function reviewCvWithGemini(payload = {}) {
     }),
   })
 
-  const rawText = await response.text()
-  let data = null
-  try {
-    data = rawText ? JSON.parse(rawText) : null
-  } catch {
-    data = null
-  }
-
-  if (!response.ok) {
-    const detail = data?.error?.message || rawText || `Gemini request failed with status ${response.status}`
-    const err = new Error(detail)
-    err.status = response.status
-    throw err
-  }
-
-  const outputText = extractOutputText(data)
-  if (!outputText) {
-    const err = new Error('Gemini returned no review text.')
-    err.status = 502
-    throw err
-  }
-
-  let review
-  try {
-    review = JSON.parse(outputText)
-  } catch {
-    const err = new Error('Gemini returned a response that could not be parsed as JSON.')
-    err.status = 502
-    throw err
-  }
+  const { parsed: review, data } = await readGeminiJsonResponse(response, 'Gemini returned no review text.')
 
   return {
     ...normalizeReview(review),
+    model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
+    interaction_id: data?.id || null,
+  }
+}
+
+export async function extractCvProfileWithGemini(payload = {}) {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    const err = new Error('Gemini API key is not configured on the server.')
+    err.status = 503
+    throw err
+  }
+
+  const { cvText, input } = buildCvDocumentInput(
+    payload,
+    'Add CV text or upload a CV file before extracting profile information.',
+  )
+
+  input.push({
+    type: 'text',
+    text: buildExtractionPrompt({ cvText }),
+  })
+
+  const response = await fetch(GEMINI_INTERACTIONS_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
+    body: JSON.stringify({
+      model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
+      system_instruction: 'You are ApplyWise, a private CV information extractor. Extract only confirmed candidate information from CVs. Never fabricate experience or personal details.',
+      input,
+      generation_config: {
+        temperature: 0.1,
+        thinking_level: 'low',
+      },
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema: cvProfileSchema,
+      },
+    }),
+  })
+
+  const { parsed: profile, data } = await readGeminiJsonResponse(response, 'Gemini returned no CV extraction text.')
+
+  return {
+    ...normalizeProfile(profile),
     model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
     interaction_id: data?.id || null,
   }

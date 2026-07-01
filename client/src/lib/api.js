@@ -62,6 +62,11 @@ export async function reviewCv(payload) {
   return data
 }
 
+export async function extractCvProfile(payload) {
+  const { data } = await api.post('/ai/cv-extract', payload)
+  return data
+}
+
 export async function joinWaitlist(signup) {
   const { data } = await api.post('/waitlist', signup)
   return data

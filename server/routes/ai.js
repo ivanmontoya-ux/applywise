@@ -1,5 +1,5 @@
 import express from 'express'
-import { isGeminiConfigured, reviewCvWithGemini } from '../services/gemini.js'
+import { extractCvProfileWithGemini, isGeminiConfigured, reviewCvWithGemini } from '../services/gemini.js'
 
 const router = express.Router()
 
@@ -18,6 +18,18 @@ router.post('/cv-review', async (req, res) => {
     const status = error.status && Number.isInteger(error.status) ? error.status : 500
     res.status(status).json({
       error: error.message || 'CV review failed.',
+    })
+  }
+})
+
+router.post('/cv-extract', async (req, res) => {
+  try {
+    const profile = await extractCvProfileWithGemini(req.body)
+    res.json(profile)
+  } catch (error) {
+    const status = error.status && Number.isInteger(error.status) ? error.status : 500
+    res.status(status).json({
+      error: error.message || 'CV extraction failed.',
     })
   }
 })
