@@ -37,7 +37,7 @@ export default function AddApplicationModal({ onClose, onSaved }) {
   }
 
   const inputStyle = (hasError) => ({
-    width: '100%', padding: '8px 12px', fontSize: '13px',
+    width: '100%', minHeight: 44, padding: '8px 12px', fontSize: '13px',
     border: `1px solid ${hasError ? 'var(--color-danger)' : 'var(--color-border)'}`,
     borderRadius: 'var(--radius-md)', outline: 'none',
     color: 'var(--color-text-primary)', background: 'var(--color-bg)',
@@ -73,12 +73,12 @@ export default function AddApplicationModal({ onClose, onSaved }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={labelStyle}>Job Title *</label>
-              <input style={inputStyle(errors.title)} value={form.title} onChange={e => set('title', e.target.value)} placeholder="Analyst, Associate…" onFocus={e => e.target.style.borderColor = 'var(--color-navy-light)'} onBlur={e => e.target.style.borderColor = errors.title ? 'var(--color-danger)' : 'var(--color-border)'} />
+              <input style={inputStyle(errors.title)} value={form.title} onChange={e => set('title', e.target.value)} placeholder="Analyst, Associate…" onFocus={e => e.target.style.borderColor = 'var(--color-applied-teal)'} onBlur={e => e.target.style.borderColor = errors.title ? 'var(--color-danger)' : 'var(--color-border)'} />
               {errors.title && <p style={{ fontSize: '11px', color: 'var(--color-danger)', margin: '3px 0 0' }}>{errors.title}</p>}
             </div>
             <div>
               <label style={labelStyle}>Company *</label>
-              <input style={inputStyle(errors.company)} value={form.company} onChange={e => set('company', e.target.value)} placeholder="Goldman Sachs…" onFocus={e => e.target.style.borderColor = 'var(--color-navy-light)'} onBlur={e => e.target.style.borderColor = errors.company ? 'var(--color-danger)' : 'var(--color-border)'} />
+              <input style={inputStyle(errors.company)} value={form.company} onChange={e => set('company', e.target.value)} placeholder="Goldman Sachs…" onFocus={e => e.target.style.borderColor = 'var(--color-applied-teal)'} onBlur={e => e.target.style.borderColor = errors.company ? 'var(--color-danger)' : 'var(--color-border)'} />
               {errors.company && <p style={{ fontSize: '11px', color: 'var(--color-danger)', margin: '3px 0 0' }}>{errors.company}</p>}
             </div>
           </div>
@@ -87,7 +87,7 @@ export default function AddApplicationModal({ onClose, onSaved }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={labelStyle}>Location</label>
-              <input style={inputStyle(false)} value={form.location} onChange={e => set('location', e.target.value)} placeholder="London, Madrid…" onFocus={e => e.target.style.borderColor = 'var(--color-navy-light)'} onBlur={e => e.target.style.borderColor = 'var(--color-border)'} />
+              <input style={inputStyle(false)} value={form.location} onChange={e => set('location', e.target.value)} placeholder="London, Madrid…" onFocus={e => e.target.style.borderColor = 'var(--color-applied-teal)'} onBlur={e => e.target.style.borderColor = 'var(--color-border)'} />
             </div>
             <div>
               <label style={labelStyle}>Sector</label>
@@ -109,7 +109,7 @@ export default function AddApplicationModal({ onClose, onSaved }) {
           {/* URL */}
           <div>
             <label style={labelStyle}>Job Posting URL</label>
-            <input type="url" style={inputStyle(false)} value={form.url} onChange={e => set('url', e.target.value)} placeholder="https://…" onFocus={e => e.target.style.borderColor = 'var(--color-navy-light)'} onBlur={e => e.target.style.borderColor = 'var(--color-border)'} />
+            <input type="url" style={inputStyle(false)} value={form.url} onChange={e => set('url', e.target.value)} placeholder="https://…" onFocus={e => e.target.style.borderColor = 'var(--color-applied-teal)'} onBlur={e => e.target.style.borderColor = 'var(--color-border)'} />
           </div>
 
           {/* Notes */}
@@ -121,7 +121,7 @@ export default function AddApplicationModal({ onClose, onSaved }) {
               placeholder="Referral, deadline, any other notes…"
               rows={3}
               style={{ ...inputStyle(false), resize: 'vertical', lineHeight: '1.5' }}
-              onFocus={e => e.target.style.borderColor = 'var(--color-navy-light)'}
+              onFocus={e => e.target.style.borderColor = 'var(--color-applied-teal)'}
               onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
             />
           </div>
@@ -133,7 +133,7 @@ export default function AddApplicationModal({ onClose, onSaved }) {
               Cancel
             </button>
             <button type="submit" disabled={saving}
-              style={{ padding: '8px 18px', fontSize: '13px', fontWeight: '500', background: 'var(--color-navy)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.7 : 1 }}>
+              style={{ minHeight: 44, padding: '0 18px', fontSize: '13px', fontWeight: '700', background: 'var(--color-applied-teal)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.7 : 1 }}>
               {saving ? 'Saving…' : 'Save Application'}
             </button>
           </div>

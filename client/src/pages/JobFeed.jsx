@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { RefreshCw, Search, ChevronDown, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { RefreshCw, Search, ChevronDown, X, Plus } from 'lucide-react'
 import { fetchJobs, refreshJobs } from '../lib/api'
 import { classifyJob } from '../lib/classifier'
 import JobCard from '../components/JobCard'
@@ -30,13 +31,28 @@ const JOB_TYPE_GROUPS = [
 
 const pageStyle        = { padding: '36px 40px', maxWidth: '1140px' }
 const headerRowStyle   = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px' }
-const titleStyle       = { fontSize: '22px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '4px', letterSpacing: '-0.4px' }
-const subtitleStyle    = { fontSize: '14px', color: 'var(--color-text-secondary)', fontWeight: '400' }
+const titleStyle       = { fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: '0' }
+const subtitleStyle    = { fontSize: '16px', color: 'var(--color-text-secondary)', fontWeight: '400' }
 const refreshBtnStyle  = {
   display: 'flex', alignItems: 'center', gap: '7px',
-  padding: '9px 18px', background: 'var(--color-navy)', color: '#ffffff',
-  border: 'none', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: '500',
+  minHeight: 44, padding: '0 16px', background: 'var(--color-applied-teal)', color: '#ffffff',
+  border: 'none', borderRadius: 'var(--radius-md)', fontSize: '14px', fontWeight: '700',
   cursor: 'pointer', transition: 'background 0.15s ease', flexShrink: 0,
+}
+const secondaryLinkStyle = {
+  minHeight: 44,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '7px',
+  padding: '0 14px',
+  borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--color-border)',
+  background: '#ffffff',
+  color: 'var(--color-text-primary)',
+  fontSize: '14px',
+  fontWeight: '700',
+  textDecoration: 'none',
 }
 const filterBarStyle   = {
   display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
@@ -111,17 +127,17 @@ function FilterDropdown({ label, unit, groups, selected, onChange, minWidth = '1
         onClick={() => setOpen(o => !o)}
         style={{
           display: 'flex', alignItems: 'center', gap: '6px',
-          background: isActive ? '#eef2ff' : '#ffffff',
-          border: `1.5px solid ${isActive ? '#818cf8' : 'var(--color-border)'}`,
+          background: isActive ? '#edf7f7' : '#ffffff',
+          border: `1.5px solid ${isActive ? '#b9dada' : 'var(--color-border)'}`,
           borderRadius: 'var(--radius-md)',
           padding: '8px 12px',
           fontSize: '13px',
-          color: isActive ? '#3730a3' : 'var(--color-text-primary)',
+          color: isActive ? 'var(--color-applied-teal)' : 'var(--color-text-primary)',
           fontWeight: isActive ? '500' : '400',
           cursor: 'pointer', transition: 'border-color 0.15s, background 0.15s',
           whiteSpace: 'nowrap', flexShrink: 0,
         }}
-        onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderColor = 'var(--color-navy-light)' }}
+        onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderColor = 'var(--color-applied-teal)' }}
         onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderColor = 'var(--color-border)' }}
       >
         {btnLabel}
@@ -144,7 +160,7 @@ function FilterDropdown({ label, unit, groups, selected, onChange, minWidth = '1
             <div style={{ padding: '8px 12px 6px', borderBottom: '1px solid var(--color-border)' }}>
               <button
                 onClick={() => onChange(new Set())}
-                style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#6366f1', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: '500' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: 'var(--color-applied-teal)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: '700' }}
               >
                 <X size={11} strokeWidth={2.5} />
                 Clear selection
@@ -175,10 +191,10 @@ function FilterDropdown({ label, unit, groups, selected, onChange, minWidth = '1
                       >
                         <span style={{
                           width: 14, height: 14, borderRadius: 3, flexShrink: 0,
-                          border: `1.5px solid ${allOn ? '#6366f1' : someOn ? '#a5b4fc' : '#cbd5e1'}`,
-                          background: allOn ? '#6366f1' : someOn ? '#e0e7ff' : 'transparent',
+                          border: `1.5px solid ${allOn ? 'var(--color-applied-teal)' : someOn ? '#b9dada' : '#cbd5e1'}`,
+                          background: allOn ? 'var(--color-applied-teal)' : someOn ? '#edf7f7' : 'transparent',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 9, color: allOn ? '#fff' : '#6366f1', lineHeight: 1,
+                          fontSize: 9, color: allOn ? '#fff' : 'var(--color-applied-teal)', lineHeight: 1,
                         }}>
                           {allOn ? '✓' : someOn ? '–' : ''}
                         </span>
@@ -205,7 +221,7 @@ function FilterDropdown({ label, unit, groups, selected, onChange, minWidth = '1
                       >
                         <input
                           type="checkbox" checked={checked} onChange={() => toggle(item)}
-                          style={{ width: 14, height: 14, cursor: 'pointer', accentColor: '#6366f1', flexShrink: 0 }}
+                          style={{ width: 14, height: 14, cursor: 'pointer', accentColor: 'var(--color-applied-teal)', flexShrink: 0 }}
                         />
                         {item}
                       </label>
@@ -352,19 +368,25 @@ export default function JobFeed() {
       {/* Header */}
       <div style={headerRowStyle}>
         <div>
-          <h1 style={titleStyle}>Job Feed</h1>
-          <p style={subtitleStyle}>Entry-level finance roles, aggregated daily</p>
+          <h1 style={titleStyle}>Jobs</h1>
+          <p style={subtitleStyle}>Search stored graduate roles, save strong matches, and keep source URLs attached.</p>
         </div>
-        <button
-          style={refreshBtnStyle}
-          onClick={handleRefresh}
-          disabled={refreshing}
-          onMouseEnter={e => { if (!refreshing) e.currentTarget.style.background = 'var(--color-navy-hover)' }}
-          onMouseLeave={e => e.currentTarget.style.background = 'var(--color-navy)'}
-        >
-          <RefreshCw size={14} strokeWidth={2.2} style={{ transform: refreshing ? 'rotate(360deg)' : 'none', transition: refreshing ? 'transform 0.7s ease' : 'none' }} />
-          {refreshing ? 'Refreshing…' : 'Refresh'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <Link to="/tracker" style={secondaryLinkStyle}>
+            <Plus size={15} strokeWidth={2.5} />
+            Add manual job
+          </Link>
+          <button
+            style={refreshBtnStyle}
+            onClick={handleRefresh}
+            disabled={refreshing}
+            onMouseEnter={e => { if (!refreshing) e.currentTarget.style.background = 'var(--color-navy-hover)' }}
+            onMouseLeave={e => e.currentTarget.style.background = 'var(--color-applied-teal)'}
+          >
+            <RefreshCw size={14} strokeWidth={2.2} />
+            {refreshing ? 'Refreshing...' : 'Refresh list'}
+          </button>
+        </div>
       </div>
 
       {/* Filter Bar */}
@@ -399,7 +421,7 @@ export default function JobFeed() {
           style={selectStyle}
           value={datePosted}
           onChange={e => setDatePosted(e.target.value)}
-          onFocus={e => { e.currentTarget.style.borderColor = 'var(--color-navy-light)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(45,82,130,0.12)' }}
+          onFocus={e => { e.currentTarget.style.borderColor = 'var(--color-applied-teal)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(47,111,115,0.14)' }}
           onBlur={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.boxShadow = 'none' }}
         >
           <option value="any">Any Time</option>
@@ -418,8 +440,8 @@ export default function JobFeed() {
             value={keyword}
             onChange={e => setKeyword(e.target.value)}
             onFocus={e => {
-              e.currentTarget.parentElement.style.borderColor = 'var(--color-navy-light)'
-              e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(45,82,130,0.12)'
+              e.currentTarget.parentElement.style.borderColor = 'var(--color-applied-teal)'
+              e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(47,111,115,0.14)'
             }}
             onBlur={e => {
               e.currentTarget.parentElement.style.borderColor = 'var(--color-border)'
@@ -431,7 +453,7 @@ export default function JobFeed() {
 
       {/* Error Banner */}
       {error && (
-        <div style={{ padding: '12px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-md)', color: '#dc2626', fontSize: '13px', marginBottom: '20px' }}>
+        <div style={{ padding: '12px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-md)', color: 'var(--color-danger)', fontSize: '14px', marginBottom: '20px' }}>
           {error}
         </div>
       )}
@@ -443,12 +465,18 @@ export default function JobFeed() {
         </div>
       ) : displayedJobs.length === 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '280px', gap: '8px' }}>
-          <p style={{ fontSize: '14px', color: 'var(--color-text-muted)' }}>No jobs found — try adjusting your filters</p>
-          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Or run the seed script to add sample data: <code style={{ background: 'var(--color-bg-secondary)', padding: '2px 6px', borderRadius: 4 }}>node server/db/seed.js</code></p>
+          <p style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-text-primary)' }}>Find or add a job to start building your application list.</p>
+          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>Try adjusting the filters or add a manual job from Tracker.</p>
         </div>
       ) : (
         <div style={gridStyle}>
-          {displayedJobs.map(job => <JobCard key={job.id} job={job} onSave={() => setToast('Saved to tracker!')} />)}
+          {displayedJobs.map(job => (
+            <JobCard
+              key={job.id}
+              job={job}
+              onSave={result => setToast(result?.existing ? 'This application already exists in Tracker.' : 'Job saved to Tracker.')}
+            />
+          ))}
         </div>
       )}
 

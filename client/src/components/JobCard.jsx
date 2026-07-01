@@ -4,37 +4,16 @@ import { formatDistanceToNow } from 'date-fns'
 import { saveJob } from '../lib/api'
 import { buildDirectUrl, isKnownEmployer } from '../lib/careers'
 
-const SECTOR_COLORS = {
-  // Original sectors
-  'Investment Banking':    { bg: '#dbeafe', color: '#1e40af', dot: '#3b82f6' },
-  'Asset Management':      { bg: '#dcfce7', color: '#166534', dot: '#22c55e' },
-  'Wealth Management':     { bg: '#f3e8ff', color: '#6b21a8', dot: '#a855f7' },
-  'M&A':                   { bg: '#ffedd5', color: '#9a3412', dot: '#f97316' },
-  'Private Equity':        { bg: '#fef9c3', color: '#854d0e', dot: '#eab308' },
-  'Venture Capital':       { bg: '#d1fae5', color: '#065f46', dot: '#10b981' },
-  'Commercial Banking':    { bg: '#e0f2fe', color: '#0c4a6e', dot: '#0ea5e9' },
-  'Private Banking':       { bg: '#fce7f3', color: '#831843', dot: '#ec4899' },
-  // New sectors
-  'Sales & Trading':              { bg: '#ccfbf1', color: '#115e59', dot: '#14b8a6' },
-  'Brokerage & Market Making':    { bg: '#ffe4e6', color: '#9f1239', dot: '#f43f5e' },
-  'Equity Research':              { bg: '#e0e7ff', color: '#3730a3', dot: '#6366f1' },
-  'Risk Management':              { bg: '#fee2e2', color: '#991b1b', dot: '#dc2626' },
-  'Quantitative Analysis':        { bg: '#f5f3ff', color: '#4c1d95', dot: '#8b5cf6' },
-  'Financial Advisory':           { bg: '#f7fee7', color: '#3f6212', dot: '#84cc16' },
-  'Corporate Finance':            { bg: '#cffafe', color: '#155e75', dot: '#0891b2' },
-  'Treasury':                     { bg: '#fefce8', color: '#713f12', dot: '#ca8a04' },
-  'Compliance & Regulatory':      { bg: '#fdf4ff', color: '#86198f', dot: '#c026d3' },
-  'Financial Technology (FinTech)': { bg: '#f0fdfa', color: '#134e4a', dot: '#0d9488' },
-}
-
+const NEUTRAL_CHIP_STYLE = { bg: '#f4f4f5', color: '#52525b', dot: '#71717a' }
+const TEAL_CHIP_STYLE = { bg: '#edf7f7', color: '#2f6f73', dot: '#2f6f73' }
 const LEVEL_STYLES = {
-  'Graduate':    { bg: '#dcfce7', color: '#15803d', dot: '#22c55e' },
-  'Internship':  { bg: '#dbeafe', color: '#1d4ed8', dot: '#3b82f6' },
-  'Analyst':     { bg: '#e0e7ff', color: '#3730a3', dot: '#6366f1' },
-  'Associate':   { bg: '#f3e8ff', color: '#7e22ce', dot: '#a855f7' },
-  'Entry Level': { bg: '#dcfce7', color: '#15803d', dot: '#22c55e' },
-  'Mid Level':   { bg: '#f0f9ff', color: '#0369a1', dot: '#0ea5e9' },
-  'Senior':      { bg: '#f1f5f9', color: '#64748b', dot: '#94a3b8' },
+  'Graduate': TEAL_CHIP_STYLE,
+  'Internship': TEAL_CHIP_STYLE,
+  'Analyst': TEAL_CHIP_STYLE,
+  'Associate': NEUTRAL_CHIP_STYLE,
+  'Entry Level': TEAL_CHIP_STYLE,
+  'Mid Level': NEUTRAL_CHIP_STYLE,
+  'Senior': NEUTRAL_CHIP_STYLE,
 }
 
 const DOMAIN_MAP = {
@@ -173,7 +152,7 @@ function DeadlineBadge({ deadlineType, deadlineDate }) {
     return (
       <div style={{
         display: 'flex', alignItems: 'center', gap: '5px',
-        fontSize: '12px', color: '#0891b2', fontWeight: '500',
+        fontSize: '12px', color: 'var(--color-info)', fontWeight: '700',
       }}>
         <RefreshCcw size={11} strokeWidth={2.5} />
         Rolling Applications
@@ -191,7 +170,7 @@ function DeadlineBadge({ deadlineType, deadlineDate }) {
     return (
       <div style={{
         display: 'flex', alignItems: 'center', gap: '5px',
-        fontSize: '12px', color: '#c2410c', fontWeight: '500',
+        fontSize: '12px', color: 'var(--color-warning)', fontWeight: '700',
       }}>
         <Calendar size={11} strokeWidth={2.5} />
         Apply by {formatted}
@@ -212,9 +191,9 @@ export default function JobCard({ job, onSave }) {
     if (saved || saving) return
     setSaving(true)
     try {
-      await saveJob(job)
+      const result = await saveJob(job)
       setSaved(true)
-      onSave?.()
+      onSave?.(result)
     } catch (err) {
       console.error('Save failed', err)
     } finally {
@@ -222,7 +201,7 @@ export default function JobCard({ job, onSave }) {
     }
   }
 
-  const sector = SECTOR_COLORS[job.sector] || { bg: '#f1f5f9', color: '#475569', dot: '#94a3b8' }
+  const sector = NEUTRAL_CHIP_STYLE
 
   let timeAgo = ''
   try {
@@ -320,19 +299,20 @@ export default function JobCard({ job, onSave }) {
             title={saved ? 'Saved to tracker' : 'Save to tracker'}
             style={{
               display: 'flex', alignItems: 'center', gap: '5px',
-              padding: '7px 13px', borderRadius: 'var(--radius-md)',
-              border: saved ? '1.5px solid #86efac' : '1.5px solid var(--color-border-strong)',
+              minHeight: 44,
+              padding: '0 14px', borderRadius: 'var(--radius-md)',
+              border: saved ? '1.5px solid #bbf7d0' : '1.5px solid var(--color-border-strong)',
               background: saved ? '#f0fdf4' : 'transparent',
-              color: saved ? '#16a34a' : 'var(--color-text-secondary)',
-              fontSize: '12px', fontWeight: '500',
+              color: saved ? 'var(--color-success)' : 'var(--color-text-secondary)',
+              fontSize: '12px', fontWeight: '700',
               cursor: saved ? 'default' : 'pointer',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={e => {
               if (!saved) {
-                e.currentTarget.style.borderColor = 'var(--color-navy)'
-                e.currentTarget.style.color = 'var(--color-navy)'
-                e.currentTarget.style.background = '#f0f4ff'
+                e.currentTarget.style.borderColor = 'var(--color-applied-teal)'
+                e.currentTarget.style.color = 'var(--color-applied-teal)'
+                e.currentTarget.style.background = '#edf7f7'
               }
             }}
             onMouseLeave={e => {
@@ -355,16 +335,17 @@ export default function JobCard({ job, onSave }) {
             title="View on original job board"
             style={{
               display: 'flex', alignItems: 'center', gap: '4px',
-              padding: '7px 11px', borderRadius: 'var(--radius-md)',
+              minHeight: 44,
+              padding: '0 12px', borderRadius: 'var(--radius-md)',
               background: 'transparent',
               color: 'var(--color-text-secondary)',
-              fontSize: '11px', fontWeight: '500', textDecoration: 'none',
+              fontSize: '12px', fontWeight: '700', textDecoration: 'none',
               border: '1.5px solid var(--color-border-strong)',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'var(--color-navy)'
-              e.currentTarget.style.color = 'var(--color-navy)'
+              e.currentTarget.style.borderColor = 'var(--color-applied-teal)'
+              e.currentTarget.style.color = 'var(--color-applied-teal)'
             }}
             onMouseLeave={e => {
               e.currentTarget.style.borderColor = 'var(--color-border-strong)'
@@ -383,14 +364,15 @@ export default function JobCard({ job, onSave }) {
             title={isKnownEmployer(job.company) ? `Go to ${job.company} careers portal` : 'Search on Google'}
             style={{
               display: 'flex', alignItems: 'center', gap: '5px',
-              padding: '7px 13px', borderRadius: 'var(--radius-md)',
-              background: 'var(--color-navy)', color: '#ffffff',
-              fontSize: '12px', fontWeight: '500', textDecoration: 'none',
+              minHeight: 44,
+              padding: '0 14px', borderRadius: 'var(--radius-md)',
+              background: 'var(--color-applied-teal)', color: '#ffffff',
+              fontSize: '12px', fontWeight: '700', textDecoration: 'none',
               transition: 'background 0.15s ease',
               border: '1.5px solid transparent',
             }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--color-navy-hover)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'var(--color-navy)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'var(--color-applied-teal)'}
           >
             <ExternalLink size={12} strokeWidth={2.5} />
             Apply Direct

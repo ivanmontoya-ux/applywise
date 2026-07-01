@@ -1,6 +1,15 @@
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Briefcase, ClipboardList, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
+import {
+  Bell,
+  Briefcase,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Home,
+  MessageSquareText,
+} from 'lucide-react'
 
 const EXPANDED_W = '220px'
 const COLLAPSED_W = '64px'
@@ -18,22 +27,29 @@ function NavItem({ to, icon: Icon, label, collapsed }) {
         padding: collapsed ? '9px 0' : '9px 12px',
         borderRadius: '8px',
         fontSize: '14px',
-        fontWeight: '500',
+        fontWeight: isActive ? '700' : '500',
         textDecoration: 'none',
-        color: '#e8edf5',
-        background: isActive ? '#2d4a7a' : 'transparent',
-        transition: 'background 0.12s ease',
+        color: isActive ? 'var(--color-applied-teal)' : 'var(--color-text-secondary)',
+        background: isActive ? '#edf7f7' : 'transparent',
+        border: isActive ? '1px solid #cfe7e8' : '1px solid transparent',
+        transition: 'background 0.12s ease, color 0.12s ease, border-color 0.12s ease',
         cursor: 'pointer',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
       })}
       onMouseEnter={(e) => {
         const isActive = e.currentTarget.getAttribute('aria-current') === 'page'
-        if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.09)'
+        if (!isActive) {
+          e.currentTarget.style.background = 'var(--color-bg-hover)'
+          e.currentTarget.style.color = 'var(--color-text-primary)'
+        }
       }}
       onMouseLeave={(e) => {
         const isActive = e.currentTarget.getAttribute('aria-current') === 'page'
-        if (!isActive) e.currentTarget.style.background = 'transparent'
+        if (!isActive) {
+          e.currentTarget.style.background = 'transparent'
+          e.currentTarget.style.color = 'var(--color-text-secondary)'
+        }
       }}
     >
       <Icon size={16} strokeWidth={2} style={{ flexShrink: 0 }} />
@@ -62,8 +78,8 @@ export default function Sidebar() {
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      background: '#1b2a4a',
-      borderRight: '1px solid rgba(255,255,255,0.07)',
+      background: 'var(--color-bg-sidebar)',
+      borderRight: '1px solid var(--color-border)',
       overflow: 'hidden',
       transition: 'width 0.22s ease, min-width 0.22s ease',
       flexShrink: 0,
@@ -74,13 +90,13 @@ export default function Sidebar() {
         alignItems: 'center',
         justifyContent: collapsed ? 'center' : 'space-between',
         padding: collapsed ? '18px 0 16px' : '18px 12px 16px 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        borderBottom: '1px solid var(--color-border)',
         minHeight: '61px',
       }}>
         {!collapsed && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
-            <Briefcase size={20} strokeWidth={2.5} color="#e8edf5" style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: '18px', fontWeight: '700', color: '#e8edf5', letterSpacing: '0', whiteSpace: 'nowrap' }}>
+            <Briefcase size={20} strokeWidth={2.5} color="var(--color-applied-teal)" style={{ flexShrink: 0 }} />
+            <span style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-text-primary)', letterSpacing: '0', whiteSpace: 'nowrap' }}>
               ApplyWise
             </span>
           </div>
@@ -91,13 +107,13 @@ export default function Sidebar() {
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             width: '28px', height: '28px', flexShrink: 0,
-            background: 'rgba(255,255,255,0.08)',
-            border: 'none', borderRadius: '6px',
-            cursor: 'pointer', color: '#e8edf5',
+            background: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border)', borderRadius: '6px',
+            cursor: 'pointer', color: 'var(--color-text-secondary)',
             transition: 'background 0.15s ease',
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.16)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--color-bg-hover)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'var(--color-bg-secondary)'}
         >
           {collapsed
             ? <ChevronRight size={14} strokeWidth={2.5} />
@@ -113,23 +129,26 @@ export default function Sidebar() {
         flexDirection: 'column',
         gap: '2px',
       }}>
-        <NavItem to="/feed" icon={Briefcase} label="Job Feed" collapsed={collapsed} />
+        <NavItem to="/home" icon={Home} label="Home" collapsed={collapsed} />
+        <NavItem to="/jobs" icon={Briefcase} label="Jobs" collapsed={collapsed} />
         <NavItem to="/tracker" icon={ClipboardList} label="Tracker" collapsed={collapsed} />
         <NavItem to="/documents" icon={FileText} label="Documents" collapsed={collapsed} />
+        <NavItem to="/coach" icon={MessageSquareText} label="Coach" collapsed={collapsed} />
+        <NavItem to="/reminders" icon={Bell} label="Reminders" collapsed={collapsed} />
       </nav>
 
       {/* Footer */}
       <div style={{
         padding: collapsed ? '14px 0' : '14px 20px',
-        borderTop: '1px solid rgba(255,255,255,0.07)',
+        borderTop: '1px solid var(--color-border)',
         fontSize: '12px',
-        color: 'rgba(232,237,245,0.35)',
+        color: 'var(--color-text-muted)',
         fontWeight: '400',
         textAlign: collapsed ? 'center' : 'left',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
       }}>
-        {collapsed ? 'v1' : 'v1.0 - Personal'}
+        {collapsed ? 'v1' : 'Private beta'}
       </div>
     </aside>
   )

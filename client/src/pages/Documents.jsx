@@ -8,7 +8,6 @@ import {
   ListChecks,
   RefreshCw,
   ShieldCheck,
-  Sparkles,
   Upload,
 } from 'lucide-react'
 import { fetchAiStatus, fetchTracker, reviewCv } from '../lib/api'
@@ -35,6 +34,7 @@ const inputStyle = {
   width: '100%',
   border: '1.5px solid var(--color-border)',
   borderRadius: 'var(--radius-md)',
+  minHeight: 44,
   padding: '10px 12px',
   background: '#ffffff',
   color: 'var(--color-text-primary)',
@@ -50,7 +50,7 @@ const primaryButtonStyle = {
   padding: '10px 16px',
   border: 'none',
   borderRadius: 'var(--radius-md)',
-  background: 'var(--color-navy)',
+  background: 'var(--color-applied-teal)',
   color: '#ffffff',
   fontSize: '13px',
   fontWeight: '600',
@@ -109,9 +109,9 @@ function recommendationLabel(value) {
 }
 
 function recommendationColor(value) {
-  if (value === 'strong_match') return { bg: '#dcfce7', color: '#15803d', border: '#86efac' }
-  if (value === 'weak_match') return { bg: '#fee2e2', color: '#b91c1c', border: '#fecaca' }
-  return { bg: '#dbeafe', color: '#1d4ed8', border: '#93c5fd' }
+  if (value === 'strong_match') return { bg: '#f0fdf4', color: 'var(--color-success)', border: '#bbf7d0' }
+  if (value === 'weak_match') return { bg: '#fef2f2', color: 'var(--color-danger)', border: '#fecaca' }
+  return { bg: '#edf7f7', color: 'var(--color-applied-teal)', border: '#b9dada' }
 }
 
 function Section({ icon: Icon, title, children }) {
@@ -122,8 +122,8 @@ function Section({ icon: Icon, title, children }) {
           width: 30,
           height: 30,
           borderRadius: 'var(--radius-md)',
-          background: '#eff6ff',
-          color: '#2563eb',
+          background: '#edf7f7',
+          color: 'var(--color-applied-teal)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -157,20 +157,20 @@ function EmptyReview() {
         width: 52,
         height: 52,
         borderRadius: '50%',
-        background: '#eff6ff',
-        color: '#2563eb',
+        background: '#edf7f7',
+        color: 'var(--color-applied-teal)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        <Sparkles size={24} strokeWidth={2.2} />
+        <ListChecks size={24} strokeWidth={2.2} />
       </span>
       <div>
         <h2 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '5px' }}>
           CV recommendations will appear here
         </h2>
         <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', maxWidth: '360px' }}>
-          Upload or paste a CV, add the role context, then ask Gemini for targeted improvements.
+          Upload or paste a CV, add the job description, then review evidence-based improvements.
         </p>
       </div>
     </div>
@@ -427,7 +427,12 @@ export default function Documents() {
     setReview(null)
 
     if (!cvText.trim() && !cvFile) {
-      setError('Upload a CV or paste CV text first.')
+      setError('We need CV text before reviewing fit. Upload a CV or paste CV text first.')
+      return
+    }
+
+    if (!jobDescription.trim()) {
+      setError('We need a job description before generating suggestions.')
       return
     }
 
@@ -512,7 +517,7 @@ export default function Documents() {
               background: '#f8fafc',
               cursor: 'pointer',
             }}>
-              <Upload size={20} strokeWidth={2.2} color="#2563eb" />
+              <Upload size={20} strokeWidth={2.2} color="var(--color-applied-teal)" />
               <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text-primary)' }}>
                 Upload CV
               </span>
@@ -528,7 +533,7 @@ export default function Documents() {
             </label>
             {cvFile && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-                <FileText size={14} strokeWidth={2.4} color="#2563eb" />
+                <FileText size={14} strokeWidth={2.4} color="var(--color-applied-teal)" />
                 <span style={{ fontWeight: '600', color: 'var(--color-text-primary)' }}>{cvFile.name}</span>
                 <span>{bytesToSize(cvFile.size)}</span>
               </div>
@@ -544,7 +549,7 @@ export default function Documents() {
                 setReview(null)
               }}
               rows={10}
-              placeholder="Paste your CV text here, or upload a PDF/Word CV above."
+              placeholder="Paste your approved base CV text here, or upload a PDF or Word CV above."
               style={{ ...inputStyle, resize: 'vertical' }}
             />
           </div>
@@ -603,8 +608,8 @@ export default function Documents() {
                 cursor: loading || !connected ? 'default' : 'pointer',
               }}
             >
-              {loading ? <RefreshCw size={15} strokeWidth={2.5} /> : <Sparkles size={15} strokeWidth={2.5} />}
-              {loading ? 'Reviewing CV...' : 'Review CV with Gemini'}
+              {loading ? <RefreshCw size={15} strokeWidth={2.5} /> : <ListChecks size={15} strokeWidth={2.5} />}
+              {loading ? 'Checking CV evidence...' : 'Review CV'}
             </button>
             <button
               type="button"
@@ -620,6 +625,11 @@ export default function Documents() {
               Clear
             </button>
           </div>
+          {loading && (
+            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
+              Reading job requirements, checking CV evidence, and separating confirmed strengths from gaps.
+            </p>
+          )}
         </form>
 
         {review ? <ReviewResults review={review} /> : <EmptyReview />}

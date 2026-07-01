@@ -58,6 +58,10 @@ export function initDb() {
   migrate('tracker', 'deadline_date',  'TEXT')
   migrate('jobs', 'experience_level', 'TEXT')
 
+  db.prepare("UPDATE tracker SET status = 'Interview' WHERE status IN ('Phone Screen', 'Final Round')").run()
+  db.prepare("UPDATE tracker SET status = 'Withdrawn' WHERE status IN ('Declined', 'Archived')").run()
+  db.prepare("UPDATE tracker SET status = 'Saved' WHERE status IS NULL OR status = ''").run()
+
   // Back-fill classification for any jobs that predate this migration
   const unclassified = db.prepare('SELECT id, title FROM jobs WHERE grand_category IS NULL').all()
   if (unclassified.length > 0) {

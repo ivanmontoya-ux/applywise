@@ -15,3 +15,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Add Supabase connection environment examples and frontend REST helper.
 - [x] Wire the static UI prototype waitlist form to Supabase.
 - [x] Connect Gemini-backed CV review endpoint and add the Documents review UI.
+- [x] Adapt the React app shell, Home, Jobs, Tracker, Documents, Coach, and Reminders toward `DESIGN.md` and `Final_PRD.md`.

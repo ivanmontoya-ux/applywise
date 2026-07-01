@@ -1,25 +1,13 @@
 import React, { useState } from 'react'
-import { ExternalLink, Trash2, Pencil, MapPin, Calendar, RefreshCcw } from 'lucide-react'
+import { Bell, Calendar, ExternalLink, FileText, MapPin, Pencil, RefreshCcw, Trash2 } from 'lucide-react'
 import { updateApplication, deleteApplication } from '../lib/api'
-
-const ALL_STATUSES = ['Saved', 'Applied', 'Phone Screen', 'Interview', 'Final Round', 'Offer', 'Rejected']
-
-const STATUS_COLORS = {
-  Saved:          { bg: '#f1f5f9', color: '#475569', accent: '#94a3b8', border: '#cbd5e1' },
-  Applied:        { bg: '#dbeafe', color: '#1d4ed8', accent: '#3b82f6', border: '#93c5fd' },
-  'Phone Screen': { bg: '#ede9fe', color: '#6d28d9', accent: '#7c3aed', border: '#c4b5fd' },
-  Interview:      { bg: '#ffedd5', color: '#c2410c', accent: '#ea580c', border: '#fdba74' },
-  'Final Round':  { bg: '#fef3c7', color: '#92400e', accent: '#d97706', border: '#fcd34d' },
-  Offer:          { bg: '#dcfce7', color: '#15803d', accent: '#16a34a', border: '#86efac' },
-  Rejected:       { bg: '#fee2e2', color: '#dc2626', accent: '#ef4444', border: '#fca5a5' },
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return null
-  try {
-    return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-  } catch { return null }
-}
+import {
+  APPLICATION_STATUSES,
+  formatApplicationDate,
+  getDocumentReadiness,
+  getNextAction,
+  getStatusStyle,
+} from '../lib/application'
 
 export default function ApplicationCard({ application, onUpdate, onDelete }) {
   const [editingNotes, setEditingNotes] = useState(false)
@@ -28,7 +16,9 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
   const [updatingStatus, setUpdatingStatus] = useState(null)
   const [hovered, setHovered] = useState(false)
 
-  const currentStatusColor = STATUS_COLORS[application.status] || STATUS_COLORS.Saved
+  const currentStatusColor = getStatusStyle(application.status)
+  const documentReadiness = getDocumentReadiness(application)
+  const nextAction = getNextAction(application)
 
   async function handleStatusChange(status) {
     if (status === application.status || updatingStatus) return
@@ -61,7 +51,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
       style={{
         background: '#ffffff',
         border: '1px solid var(--color-border)',
-        borderLeft: `4px solid ${currentStatusColor.accent}`,
+        borderTop: `3px solid ${currentStatusColor.accent}`,
         borderRadius: 'var(--radius-lg)',
         padding: '20px 24px',
         display: 'flex',
@@ -95,12 +85,26 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
             {application.sector && (
               <span style={{
                 fontSize: '11px', fontWeight: '600',
-                padding: '2px 8px', borderRadius: '999px',
-                background: '#f1f5f9', color: '#475569',
+                padding: '3px 8px', borderRadius: '6px',
+                background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)',
               }}>
                 {application.sector}
               </span>
             )}
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              minHeight: 24,
+              padding: '0 8px',
+              borderRadius: '6px',
+              border: `1px solid ${currentStatusColor.border}`,
+              background: currentStatusColor.bg,
+              color: currentStatusColor.color,
+              fontSize: '12px',
+              fontWeight: '800',
+            }}>
+              {application.status}
+            </span>
           </div>
         </div>
 
@@ -116,7 +120,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
                 transition: 'color 0.15s, background 0.15s',
                 textDecoration: 'none',
               }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-navy)'; e.currentTarget.style.background = '#f0f4ff' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-applied-teal)'; e.currentTarget.style.background = '#edf7f7' }}
               onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent' }}
             >
               <ExternalLink size={14} strokeWidth={2} />
@@ -159,19 +163,20 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
 
       {/* Status pipeline */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-        {ALL_STATUSES.map(status => {
+        {APPLICATION_STATUSES.map(status => {
           const isActive = application.status === status
-          const c = STATUS_COLORS[status]
+          const c = getStatusStyle(status)
           return (
             <button
               key={status}
               onClick={() => handleStatusChange(status)}
               disabled={!!updatingStatus}
               style={{
-                padding: '5px 13px',
-                borderRadius: '999px',
+                minHeight: 32,
+                padding: '0 12px',
+                borderRadius: '6px',
                 fontSize: '12px',
-                fontWeight: isActive ? '700' : '500',
+                fontWeight: isActive ? '800' : '600',
                 cursor: updatingStatus ? 'default' : 'pointer',
                 border: isActive ? `1.5px solid ${c.border}` : '1.5px solid var(--color-border)',
                 background: isActive ? c.bg : 'transparent',
@@ -200,20 +205,37 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
         })}
       </div>
 
+      {/* Next action + readiness */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff' }}>
+          <Bell size={14} strokeWidth={2.4} style={{ color: 'var(--color-applied-teal)', flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <p style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0', marginBottom: '2px' }}>Next action</p>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{nextAction}</p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff' }}>
+          <FileText size={14} strokeWidth={2.4} style={{ color: documentReadiness === 'Complete' ? 'var(--color-success)' : 'var(--color-warning)', flexShrink: 0 }} />
+          <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+            Documents: <strong style={{ color: 'var(--color-text-primary)', fontWeight: '800' }}>{documentReadiness}</strong>
+          </span>
+        </div>
+      </div>
+
       {/* Dates + Deadline */}
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', fontSize: '12px', color: 'var(--color-text-muted)', alignItems: 'center' }}>
-        {application.date_saved && <span>Saved: <strong style={{ color: 'var(--color-text-secondary)', fontWeight: '500' }}>{formatDate(application.date_saved)}</strong></span>}
-        {application.date_applied && <span>Applied: <strong style={{ color: 'var(--color-text-secondary)', fontWeight: '500' }}>{formatDate(application.date_applied)}</strong></span>}
+        {application.date_saved && <span>Saved: <strong style={{ color: 'var(--color-text-secondary)', fontWeight: '600', fontFamily: 'var(--font-mono)' }}>{formatApplicationDate(application.date_saved)}</strong></span>}
+        {application.date_applied && <span>Applied: <strong style={{ color: 'var(--color-text-secondary)', fontWeight: '600', fontFamily: 'var(--font-mono)' }}>{formatApplicationDate(application.date_applied)}</strong></span>}
         {application.deadline_type === 'rolling' && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#0891b2', fontWeight: '500' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-info)', fontWeight: '700' }}>
             <RefreshCcw size={11} strokeWidth={2.5} />
             Rolling Applications
           </span>
         )}
         {application.deadline_type === 'date' && application.deadline_date && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#c2410c', fontWeight: '500' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--color-warning)', fontWeight: '700' }}>
             <Calendar size={11} strokeWidth={2.5} />
-            Apply by {formatDate(application.deadline_date)}
+            Apply by {formatApplicationDate(application.deadline_date)}
           </span>
         )}
       </div>
@@ -226,11 +248,11 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
             value={notes}
             onChange={e => setNotes(e.target.value)}
             onBlur={handleNotesSave}
-            placeholder="Add notes..."
+            placeholder="Add notes, follow-up details, or document context..."
             style={{
               width: '100%', minHeight: '76px', resize: 'vertical',
               padding: '10px 12px', fontSize: '13px',
-              border: '1.5px solid var(--color-navy-light)',
+              border: '1.5px solid var(--color-applied-teal)',
               borderRadius: 'var(--radius-md)',
               fontFamily: 'inherit', color: 'var(--color-text-primary)',
               background: '#fff',
@@ -264,7 +286,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
               color: notes ? 'var(--color-text-secondary)' : 'var(--color-text-muted)',
               lineHeight: '1.5', whiteSpace: 'pre-wrap',
             }}>
-              {notes || 'Add notes…'}
+              {notes || 'Add notes or missing context...'}
             </span>
           </button>
         )}
