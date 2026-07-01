@@ -4,4 +4,8 @@ client/dist/
 server/db/*.db-shm
 server/db/*.db-wal
 .env
+*.env.local
+client/.env
+client/.env.local
 server/.env
+server/.env.local

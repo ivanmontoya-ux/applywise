@@ -11,3 +11,5 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Restore the missing `memory/MEMORY.md` index.
 - [x] Create a CV and cover letter tailoring specialist markdown file.
 - [x] Set up the project memory protocol files.
+- [x] Create the initial Supabase database schema migration for ApplyWise.
+- [x] Add Supabase connection environment examples and frontend REST helper.
