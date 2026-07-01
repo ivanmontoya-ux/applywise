@@ -21,3 +21,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Save extracted CV profile data under Personal Information for reuse across the app.
 - [x] Add Supabase authentication with protected app routes and user-scoped database queries.
 - [x] Switch build-phase access to demo mode with visible features and account-required storage.
+- [x] Add Gemini-backed role-specific cover letter generator in Documents.

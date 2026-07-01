@@ -240,6 +240,48 @@ const cvProfileSchema = {
   ],
 }
 
+const coverLetterSchema = {
+  type: 'object',
+  properties: {
+    title: { type: 'string' },
+    opening_strategy: { type: 'string' },
+    cover_letter: { type: 'string' },
+    evidence_used: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          claim: { type: 'string' },
+          cv_evidence: { type: 'string' },
+          why_it_matters: { type: 'string' },
+        },
+        required: ['claim', 'cv_evidence', 'why_it_matters'],
+      },
+    },
+    personalization_notes: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    missing_inputs: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+    editing_checklist: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  },
+  required: [
+    'title',
+    'opening_strategy',
+    'cover_letter',
+    'evidence_used',
+    'personalization_notes',
+    'missing_inputs',
+    'editing_checklist',
+  ],
+}
+
 function cleanText(value, maxLength) {
   if (typeof value !== 'string') return ''
   return value.replace(/\r\n/g, '\n').trim().slice(0, maxLength)
@@ -312,6 +354,37 @@ function buildExtractionPrompt({ cvText }) {
     '- Separate responsibilities, achievements, skills, education, projects, and contact details.',
     '- Put any important missing profile fields in missing_fields.',
     '- Keep extraction_notes short and practical.',
+    '',
+    'CV text pasted by user:',
+    cvText || 'The CV was uploaded as a document. Read the attached document content.',
+  ].join('\n')
+}
+
+function buildCoverLetterPrompt({ cvText, jobTitle, company, jobDescription, applicationNotes, personalInfo }) {
+  const jobLine = [jobTitle, company].filter(Boolean).join(' at ')
+  return [
+    'Draft a tailored cover letter for a graduate or early-career skilled-role application.',
+    '',
+    'Rules:',
+    '- Use only evidence from the CV, saved personal information, and job context.',
+    '- Do not invent achievements, grades, employers, tools, languages, metrics, or motivations.',
+    '- If useful information is missing, list it in missing_inputs instead of guessing.',
+    '- Keep the tone professional, calm, direct, and specific.',
+    '- Write for European graduate and early-career roles.',
+    '- Make the letter easy to customize; avoid hype and guaranteed-outcome language.',
+    '- Use a normal business-letter style without postal addresses unless provided.',
+    '- Target roughly 300 to 450 words.',
+    '',
+    `Selected application: ${jobLine || 'Not specified'}`,
+    '',
+    'Job description or target-role context:',
+    jobDescription || 'No detailed job description provided. Use the selected application title/company and call out missing role context.',
+    '',
+    'Application notes:',
+    applicationNotes || 'No application notes provided.',
+    '',
+    'Saved personal information, if available:',
+    personalInfo || 'No saved personal information provided.',
     '',
     'CV text pasted by user:',
     cvText || 'The CV was uploaded as a document. Read the attached document content.',
@@ -486,6 +559,22 @@ function normalizeProfile(profile = {}) {
   }
 }
 
+function normalizeCoverLetter(letter = {}) {
+  return {
+    title: toText(letter.title) || 'Tailored cover letter draft',
+    opening_strategy: toText(letter.opening_strategy),
+    cover_letter: toText(letter.cover_letter),
+    evidence_used: asArray(letter.evidence_used).map(item => ({
+      claim: toText(item?.claim),
+      cv_evidence: toText(item?.cv_evidence),
+      why_it_matters: toText(item?.why_it_matters),
+    })).slice(0, 8),
+    personalization_notes: textArray(letter.personalization_notes, 8),
+    missing_inputs: textArray(letter.missing_inputs, 8),
+    editing_checklist: textArray(letter.editing_checklist, 8),
+  }
+}
+
 async function readGeminiJsonResponse(response, emptyMessage) {
   const rawText = await response.text()
   let data = null
@@ -622,6 +711,73 @@ export async function extractCvProfileWithGemini(payload = {}) {
 
   return {
     ...normalizeProfile(profile),
+    model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
+    interaction_id: data?.id || null,
+  }
+}
+
+export async function generateCoverLetterWithGemini(payload = {}) {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    const err = new Error('Gemini API key is not configured on the server.')
+    err.status = 503
+    throw err
+  }
+
+  const { cvText, input } = buildCvDocumentInput(
+    payload,
+    'Add CV text or upload a CV file before generating a cover letter.',
+  )
+  const jobTitle = cleanText(payload.job_title, 200)
+  const company = cleanText(payload.company, 200)
+  const jobDescription = cleanText(payload.job_description, MAX_JOB_TEXT_CHARS)
+  const applicationNotes = cleanText(payload.application_notes, 4000)
+  const personalInfo = cleanText(payload.personal_information, 12000)
+
+  if (!jobDescription && !jobTitle && !company) {
+    const err = new Error('Add a job description or select an application before generating a cover letter.')
+    err.status = 400
+    throw err
+  }
+
+  input.push({
+    type: 'text',
+    text: buildCoverLetterPrompt({
+      cvText,
+      jobTitle,
+      company,
+      jobDescription,
+      applicationNotes,
+      personalInfo,
+    }),
+  })
+
+  const response = await fetch(GEMINI_INTERACTIONS_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
+    body: JSON.stringify({
+      model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
+      system_instruction: 'You are ApplyWise, a private application-writing coach. Draft truthful, role-specific cover letters from provided evidence only. Never fabricate candidate experience.',
+      input,
+      generation_config: {
+        temperature: 0.35,
+        thinking_level: 'low',
+      },
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema: coverLetterSchema,
+      },
+    }),
+  })
+
+  const { parsed: letter, data } = await readGeminiJsonResponse(response, 'Gemini returned no cover letter text.')
+
+  return {
+    ...normalizeCoverLetter(letter),
     model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
     interaction_id: data?.id || null,
   }

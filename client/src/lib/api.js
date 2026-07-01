@@ -90,6 +90,11 @@ export async function extractCvProfile(payload) {
   return data
 }
 
+export async function generateCoverLetter(payload) {
+  const { data } = await api.post('/ai/cover-letter', payload)
+  return data
+}
+
 export async function fetchPersonalInformation() {
   const { data } = await api.get('/personal-information')
   return data

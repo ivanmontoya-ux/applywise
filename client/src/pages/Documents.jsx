@@ -9,13 +9,14 @@ import {
   Lightbulb,
   ListChecks,
   Mail,
+  PenLine,
   RefreshCw,
   ShieldCheck,
   Upload,
   UserRound,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
-import { extractCvProfile, fetchAiStatus, fetchTracker, reviewCv, savePersonalInformation } from '../lib/api'
+import { extractCvProfile, fetchAiStatus, fetchPersonalInformation, fetchTracker, generateCoverLetter, reviewCv, savePersonalInformation } from '../lib/api'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
@@ -175,7 +176,7 @@ function EmptyReview() {
           CV insights will appear here
         </h2>
         <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', maxWidth: '360px' }}>
-          Upload or paste a CV to extract profile details, or add a job description to review role-specific improvements.
+          Upload or paste a CV to extract profile details, review role-specific improvements, or draft a tailored cover letter.
         </p>
       </div>
     </div>
@@ -627,18 +628,93 @@ function ReviewResults({ review }) {
   )
 }
 
+function CoverLetterResults({ letter }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <section style={{ ...panelStyle, padding: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '18px', alignItems: 'flex-start', marginBottom: '16px' }}>
+          <div>
+            <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0', marginBottom: '6px' }}>
+              Gemini cover letter draft
+            </p>
+            <h2 style={{ fontSize: '19px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '6px' }}>
+              {letter.title || 'Tailored cover letter'}
+            </h2>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55' }}>
+              {letter.opening_strategy || 'Drafted from the CV and application context provided.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigator.clipboard?.writeText(letter.cover_letter || '')}
+            style={{ ...secondaryButtonStyle, flexShrink: 0 }}
+          >
+            Copy draft
+          </button>
+        </div>
+        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+          This is a draft. Check names, role details, and claims before sending.
+        </p>
+      </section>
+
+      <Section icon={FileText} title="Cover letter draft">
+        <div style={{
+          border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-md)',
+          padding: '18px',
+          background: '#fbfdff',
+          color: 'var(--color-text-primary)',
+          fontSize: '14px',
+          lineHeight: '1.7',
+          whiteSpace: 'pre-wrap',
+        }}>
+          {letter.cover_letter || 'No cover letter draft returned.'}
+        </div>
+      </Section>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <Section icon={CheckCircle2} title="Evidence used">
+          <PairList
+            items={letter.evidence_used}
+            fields={[
+              { key: 'claim', label: 'Claim', strong: true },
+              { key: 'cv_evidence', label: 'CV evidence' },
+              { key: 'why_it_matters', label: 'Why it matters' },
+            ]}
+          />
+        </Section>
+        <Section icon={Lightbulb} title="Personalization notes">
+          <TextList items={letter.personalization_notes} />
+        </Section>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+        <Section icon={AlertCircle} title="Missing inputs">
+          <TextList items={letter.missing_inputs} />
+        </Section>
+        <Section icon={ListChecks} title="Editing checklist">
+          <TextList items={letter.editing_checklist} />
+        </Section>
+      </div>
+    </div>
+  )
+}
+
 export default function Documents() {
   const auth = useAuth()
   const [applications, setApplications] = useState([])
   const [selectedApplicationId, setSelectedApplicationId] = useState('')
   const [aiStatus, setAiStatus] = useState(null)
+  const [personalInfo, setPersonalInfo] = useState(null)
   const [cvText, setCvText] = useState('')
   const [cvFile, setCvFile] = useState(null)
   const [jobDescription, setJobDescription] = useState('')
   const [profile, setProfile] = useState(null)
   const [review, setReview] = useState(null)
+  const [coverLetter, setCoverLetter] = useState(null)
   const [extracting, setExtracting] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [generatingLetter, setGeneratingLetter] = useState(false)
   const [loadingContext, setLoadingContext] = useState(true)
   const [error, setError] = useState('')
   const [saveNotice, setSaveNotice] = useState('')
@@ -648,13 +724,15 @@ export default function Documents() {
 
     async function loadContext() {
       try {
-        const [trackerData, statusData] = await Promise.all([
+        const [trackerData, statusData, personalInfoData] = await Promise.all([
           fetchTracker('All'),
           fetchAiStatus(),
+          fetchPersonalInformation().catch(() => ({ profile: null })),
         ])
         if (cancelled) return
         setApplications(trackerData)
         setAiStatus(statusData)
+        setPersonalInfo(personalInfoData?.profile || null)
         if (trackerData[0]?.id) setSelectedApplicationId(String(trackerData[0].id))
       } catch {
         if (!cancelled) setError('Could not load application context. Make sure the server is running.')
@@ -678,6 +756,7 @@ export default function Documents() {
     setSaveNotice('')
     setReview(null)
     setProfile(null)
+    setCoverLetter(null)
     if (!file) return
 
     if (file.size > MAX_FILE_BYTES) {
@@ -712,6 +791,7 @@ export default function Documents() {
     setSaveNotice('')
     setReview(null)
     setProfile(null)
+    setCoverLetter(null)
 
     if (!cvText.trim() && !cvFile) {
       setError('We need CV text before reviewing fit. Upload a CV or paste CV text first.')
@@ -732,6 +812,7 @@ export default function Documents() {
         company: selectedApplication?.company || '',
         application_notes: selectedApplication?.notes || '',
         job_description: jobDescription,
+        personal_information: personalInfo ? JSON.stringify(personalInfo) : '',
       })
       setReview(result)
     } catch (err) {
@@ -746,6 +827,7 @@ export default function Documents() {
     setSaveNotice('')
     setReview(null)
     setProfile(null)
+    setCoverLetter(null)
 
     if (!cvText.trim() && !cvFile) {
       setError('Upload a CV or paste CV text first.')
@@ -777,6 +859,41 @@ export default function Documents() {
     }
   }
 
+  async function handleGenerateCoverLetter() {
+    setError('')
+    setSaveNotice('')
+    setReview(null)
+    setProfile(null)
+    setCoverLetter(null)
+
+    if (!cvText.trim() && !cvFile) {
+      setError('Upload a CV or paste CV text before generating a cover letter.')
+      return
+    }
+
+    if (!jobDescription.trim() && !selectedApplication) {
+      setError('Add a job description or select an application before generating a cover letter.')
+      return
+    }
+
+    setGeneratingLetter(true)
+    try {
+      const result = await generateCoverLetter({
+        cv_text: cvText,
+        cv_file: cvFile,
+        job_title: selectedApplication?.title || '',
+        company: selectedApplication?.company || '',
+        application_notes: selectedApplication?.notes || '',
+        job_description: jobDescription,
+      })
+      setCoverLetter(result)
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Gemini could not generate the cover letter yet.')
+    } finally {
+      setGeneratingLetter(false)
+    }
+  }
+
   const connected = aiStatus?.gemini_configured
   const profileSaved = saveNotice === 'Saved under Personal Information.'
 
@@ -785,7 +902,7 @@ export default function Documents() {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '18px', alignItems: 'flex-start', marginBottom: '28px' }}>
         <div>
           <h1 style={titleStyle}>Documents</h1>
-          <p style={subtitleStyle}>Upload a CV to extract profile details or get role-specific improvement recommendations.</p>
+          <p style={subtitleStyle}>Upload a CV to extract profile details, review fit, or draft a tailored cover letter.</p>
         </div>
         <div style={{
           display: 'flex',
@@ -872,6 +989,7 @@ export default function Documents() {
                 setCvText(event.target.value)
                 setReview(null)
                 setProfile(null)
+                setCoverLetter(null)
                 setSaveNotice('')
               }}
               rows={10}
@@ -884,7 +1002,11 @@ export default function Documents() {
             <label style={labelStyle}>Job description or target-role requirements</label>
             <textarea
               value={jobDescription}
-              onChange={event => setJobDescription(event.target.value)}
+              onChange={event => {
+                setJobDescription(event.target.value)
+                setReview(null)
+                setCoverLetter(null)
+              }}
               rows={7}
               placeholder="Paste the job description, key requirements, or the role profile you want the CV tailored toward."
               style={{ ...inputStyle, resize: 'vertical' }}
@@ -955,11 +1077,11 @@ export default function Documents() {
             <button
               type="button"
               onClick={handleExtractProfile}
-              disabled={extracting || loading || !connected}
+              disabled={extracting || loading || generatingLetter || !connected}
               style={{
                 ...primaryButtonStyle,
-                opacity: extracting || loading || !connected ? 0.6 : 1,
-                cursor: extracting || loading || !connected ? 'default' : 'pointer',
+                opacity: extracting || loading || generatingLetter || !connected ? 0.6 : 1,
+                cursor: extracting || loading || generatingLetter || !connected ? 'default' : 'pointer',
               }}
             >
               {extracting ? <RefreshCw size={15} strokeWidth={2.5} /> : <UserRound size={15} strokeWidth={2.5} />}
@@ -967,11 +1089,11 @@ export default function Documents() {
             </button>
             <button
               type="submit"
-              disabled={loading || extracting || !connected}
+              disabled={loading || extracting || generatingLetter || !connected}
               style={{
                 ...secondaryButtonStyle,
-                opacity: loading || extracting || !connected ? 0.6 : 1,
-                cursor: loading || extracting || !connected ? 'default' : 'pointer',
+                opacity: loading || extracting || generatingLetter || !connected ? 0.6 : 1,
+                cursor: loading || extracting || generatingLetter || !connected ? 'default' : 'pointer',
               }}
             >
               {loading ? <RefreshCw size={15} strokeWidth={2.5} /> : <ListChecks size={15} strokeWidth={2.5} />}
@@ -979,10 +1101,24 @@ export default function Documents() {
             </button>
             <button
               type="button"
+              onClick={handleGenerateCoverLetter}
+              disabled={generatingLetter || loading || extracting || !connected}
+              style={{
+                ...secondaryButtonStyle,
+                opacity: generatingLetter || loading || extracting || !connected ? 0.6 : 1,
+                cursor: generatingLetter || loading || extracting || !connected ? 'default' : 'pointer',
+              }}
+            >
+              {generatingLetter ? <RefreshCw size={15} strokeWidth={2.5} /> : <PenLine size={15} strokeWidth={2.5} />}
+              {generatingLetter ? 'Drafting letter...' : 'Generate cover letter'}
+            </button>
+            <button
+              type="button"
               style={secondaryButtonStyle}
               onClick={() => {
                 setProfile(null)
                 setReview(null)
+                setCoverLetter(null)
                 setError('')
                 setSaveNotice('')
                 setCvText('')
@@ -993,16 +1129,24 @@ export default function Documents() {
               Clear
             </button>
           </div>
-          {(loading || extracting) && (
+          {(loading || extracting || generatingLetter) && (
             <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
               {extracting
                 ? 'Reading the CV and separating confirmed profile details from missing fields.'
-                : 'Reading job requirements, checking CV evidence, and separating confirmed strengths from gaps.'}
+                : generatingLetter
+                  ? 'Drafting a role-specific cover letter from confirmed CV evidence and job context.'
+                  : 'Reading job requirements, checking CV evidence, and separating confirmed strengths from gaps.'}
             </p>
           )}
         </form>
 
-        {profile ? <CvProfileResults profile={profile} /> : review ? <ReviewResults review={review} /> : <EmptyReview />}
+        {profile
+          ? <CvProfileResults profile={profile} />
+          : review
+            ? <ReviewResults review={review} />
+            : coverLetter
+              ? <CoverLetterResults letter={coverLetter} />
+              : <EmptyReview />}
       </div>
     </div>
   )
