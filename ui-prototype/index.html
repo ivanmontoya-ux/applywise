@@ -880,7 +880,7 @@
                   </label>
                   <label class="checkbox-field wide-field">
                     <input id="waitlist-consent" name="consent" type="checkbox" required />
-                    <span>I agree to be contacted about ApplyWise early access. This prototype stores the entry locally only.</span>
+                    <span>I agree to be contacted about ApplyWise early access. This prototype sends the entry to Supabase and mirrors it locally for the demo dashboard.</span>
                   </label>
                   <button class="primary-action" type="submit">Join the Waitlist</button>
                   <p class="form-feedback" id="waitlist-feedback" role="status">
@@ -913,9 +913,12 @@
               <div class="section-heading">
                 <div>
                   <h2 id="waitlist-dashboard-title">Waitlist dashboard</h2>
-                  <p>Prototype entries stay in this browser so the team can demo the signup flow safely.</p>
+                  <p>New entries are submitted to Supabase and mirrored in this browser for the local demo dashboard.</p>
                 </div>
-                <button class="secondary-action" type="button" id="clear-waitlist">Clear demo entries</button>
+                <div class="button-row">
+                  <button class="secondary-action" type="button" id="sync-waitlist">Sync local entries</button>
+                  <button class="secondary-action" type="button" id="clear-waitlist">Clear demo entries</button>
+                </div>
               </div>
               <div class="waitlist-stats">
                 <div>
@@ -968,6 +971,7 @@
       </nav>
     </div>
 
+    <script src="supabase-config.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

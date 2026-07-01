@@ -9,3 +9,4 @@ client/.env
 client/.env.local
 server/.env
 server/.env.local
+ui-prototype/supabase-config.js

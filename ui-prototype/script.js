@@ -175,7 +175,14 @@ const waitlistPrimaryRole = document.getElementById("waitlist-primary-role");
 const waitlistLatestDate = document.getElementById("waitlist-latest-date");
 const waitlistSignups = document.getElementById("waitlist-signups");
 const clearWaitlist = document.getElementById("clear-waitlist");
+const syncWaitlist = document.getElementById("sync-waitlist");
 const waitlistStorageKey = "applywise-waitlist-demo";
+const supabaseConfig = window.APPLYWISE_SUPABASE || {};
+const isSupabaseConfigured = Boolean(supabaseConfig.url && supabaseConfig.publishableKey);
+
+function normalizeSupabaseUrl(url) {
+  return url.replace(/\/$/, "");
+}
 
 function loadWaitlistEntries() {
   try {
@@ -187,6 +194,61 @@ function loadWaitlistEntries() {
 
 function saveWaitlistEntries(entries) {
   localStorage.setItem(waitlistStorageKey, JSON.stringify(entries));
+}
+
+async function sendWaitlistEntryToSupabase(entry) {
+  if (!isSupabaseConfigured) {
+    return { skipped: true };
+  }
+
+  const response = await fetch(`${normalizeSupabaseUrl(supabaseConfig.url)}/rest/v1/waitlist_signups`, {
+    method: "POST",
+    headers: {
+      apikey: supabaseConfig.publishableKey,
+      Authorization: `Bearer ${supabaseConfig.publishableKey}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({
+      email: entry.email,
+      full_name: entry.name,
+      location: entry.location || null,
+      target_role: entry.role || null,
+      strongest_need: entry.need || null,
+      source: "ui-prototype",
+      metadata: {
+        localPrototype: true,
+      },
+    }),
+  });
+
+  if (response.ok) {
+    return { saved: true };
+  }
+
+  const message = await response.text();
+  if (response.status === 409 || message.includes("duplicate key")) {
+    return { duplicate: true };
+  }
+
+  throw new Error(message || `Supabase request failed with ${response.status}`);
+}
+
+function upsertLocalWaitlistEntry(entry) {
+  const entries = loadWaitlistEntries();
+  const existingIndex = entries.findIndex((item) => item.email === entry.email);
+
+  if (existingIndex >= 0) {
+    entries[existingIndex] = {
+      ...entries[existingIndex],
+      ...entry,
+      createdAt: entries[existingIndex].createdAt || entry.createdAt,
+    };
+  } else {
+    entries.unshift(entry);
+  }
+
+  saveWaitlistEntries(entries);
 }
 
 function formatSignupDate(isoDate) {
@@ -251,13 +313,14 @@ function renderWaitlist() {
   });
 }
 
-waitlistForm?.addEventListener("submit", (event) => {
+waitlistForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const name = waitlistName.value.trim();
   const email = waitlistEmail.value.trim().toLowerCase();
   const location = waitlistLocation.value.trim();
   const role = waitlistRole.value;
   const need = waitlistNeed.value.trim();
+  const submitButton = waitlistForm.querySelector("[type='submit']");
 
   if (!waitlistForm.checkValidity()) {
     waitlistFeedback.textContent = "Add your name, a valid email, and consent to join the waitlist.";
@@ -265,29 +328,41 @@ waitlistForm?.addEventListener("submit", (event) => {
     return;
   }
 
-  const entries = loadWaitlistEntries();
-  const isDuplicate = entries.some((entry) => entry.email === email);
-
-  if (isDuplicate) {
-    waitlistFeedback.textContent = "This email is already on the waitlist.";
-    waitlistFeedback.className = "form-feedback is-error";
-    return;
-  }
-
-  entries.unshift({
+  const entry = {
     name,
     email,
     location,
     role,
     need,
     createdAt: new Date().toISOString(),
-  });
+  };
 
-  saveWaitlistEntries(entries);
-  renderWaitlist();
-  waitlistFeedback.textContent = "You are on the prototype waitlist. In the real app, early access updates would go to this email.";
-  waitlistFeedback.className = "form-feedback is-success";
-  waitlistForm.reset();
+  submitButton.disabled = true;
+  waitlistFeedback.textContent = isSupabaseConfigured ? "Submitting to Supabase..." : "Saving locally. Supabase is not configured.";
+  waitlistFeedback.className = "form-feedback";
+
+  try {
+    const result = await sendWaitlistEntryToSupabase(entry);
+
+    if (result.duplicate) {
+      waitlistFeedback.textContent = "This email is already on the Supabase waitlist.";
+      waitlistFeedback.className = "form-feedback is-error";
+      return;
+    }
+
+    upsertLocalWaitlistEntry(entry);
+    renderWaitlist();
+    waitlistFeedback.textContent = result.skipped
+      ? "Saved locally only. Add Supabase config to send entries to the database."
+      : "You are on the Supabase waitlist.";
+    waitlistFeedback.className = "form-feedback is-success";
+    waitlistForm.reset();
+  } catch (error) {
+    waitlistFeedback.textContent = `Supabase signup failed: ${error.message}`;
+    waitlistFeedback.className = "form-feedback is-error";
+  } finally {
+    submitButton.disabled = false;
+  }
 });
 
 clearWaitlist?.addEventListener("click", () => {
@@ -295,6 +370,44 @@ clearWaitlist?.addEventListener("click", () => {
   renderWaitlist();
   waitlistFeedback.textContent = "Demo waitlist entries cleared.";
   waitlistFeedback.className = "form-feedback";
+});
+
+syncWaitlist?.addEventListener("click", async () => {
+  if (!isSupabaseConfigured) {
+    waitlistFeedback.textContent = "Supabase is not configured for this prototype.";
+    waitlistFeedback.className = "form-feedback is-error";
+    return;
+  }
+
+  const entries = loadWaitlistEntries();
+  if (entries.length === 0) {
+    waitlistFeedback.textContent = "There are no local waitlist entries to sync.";
+    waitlistFeedback.className = "form-feedback";
+    return;
+  }
+
+  syncWaitlist.disabled = true;
+  waitlistFeedback.textContent = "Syncing local entries to Supabase...";
+  waitlistFeedback.className = "form-feedback";
+
+  try {
+    let synced = 0;
+    let duplicates = 0;
+
+    for (const entry of entries) {
+      const result = await sendWaitlistEntryToSupabase(entry);
+      if (result.saved) synced += 1;
+      if (result.duplicate) duplicates += 1;
+    }
+
+    waitlistFeedback.textContent = `Sync complete. ${synced} added, ${duplicates} already existed.`;
+    waitlistFeedback.className = "form-feedback is-success";
+  } catch (error) {
+    waitlistFeedback.textContent = `Sync failed: ${error.message}`;
+    waitlistFeedback.className = "form-feedback is-error";
+  } finally {
+    syncWaitlist.disabled = false;
+  }
 });
 
 renderWaitlist();

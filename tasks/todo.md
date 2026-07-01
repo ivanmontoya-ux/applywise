@@ -13,3 +13,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Set up the project memory protocol files.
 - [x] Create the initial Supabase database schema migration for ApplyWise.
 - [x] Add Supabase connection environment examples and frontend REST helper.
+- [x] Wire the static UI prototype waitlist form to Supabase.
