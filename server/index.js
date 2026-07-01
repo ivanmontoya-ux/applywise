@@ -9,6 +9,7 @@ import { initDb, getDb } from './db/database.js'
 import jobsRouter from './routes/jobs.js'
 import trackerRouter from './routes/tracker.js'
 import aiRouter from './routes/ai.js'
+import waitlistRouter from './routes/waitlist.js'
 import { fetchAdzunaJobs, resolveAdzunaUrls } from './services/adzuna.js'
 
 dotenv.config()
@@ -59,6 +60,7 @@ initialFetch()
 app.use('/api/jobs', jobsRouter)
 app.use('/api/tracker', trackerRouter)
 app.use('/api/ai', aiRouter)
+app.use('/api/waitlist', waitlistRouter)
 
 if (existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath))

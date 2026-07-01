@@ -9,6 +9,7 @@ import {
   FileText,
   Home,
   MessageSquareText,
+  UserPlus,
 } from 'lucide-react'
 
 const EXPANDED_W = '220px'
@@ -135,6 +136,7 @@ export default function Sidebar() {
         <NavItem to="/documents" icon={FileText} label="Documents" collapsed={collapsed} />
         <NavItem to="/coach" icon={MessageSquareText} label="Coach" collapsed={collapsed} />
         <NavItem to="/reminders" icon={Bell} label="Reminders" collapsed={collapsed} />
+        <NavItem to="/waitlist" icon={UserPlus} label="Waitlist" collapsed={collapsed} />
       </nav>
 
       {/* Footer */}

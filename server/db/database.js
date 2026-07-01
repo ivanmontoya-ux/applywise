@@ -44,6 +44,18 @@ export function initDb() {
       notes TEXT,
       is_manual INTEGER DEFAULT 0
     );
+
+    CREATE TABLE IF NOT EXISTS waitlist_signups (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      full_name TEXT,
+      location TEXT,
+      target_role TEXT,
+      strongest_need TEXT,
+      source TEXT DEFAULT 'web_app',
+      consent INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
   `)
 
   // Migrations — add new columns without destroying existing data
@@ -57,6 +69,12 @@ export function initDb() {
   migrate('tracker', 'deadline_type',  'TEXT')
   migrate('tracker', 'deadline_date',  'TEXT')
   migrate('jobs', 'experience_level', 'TEXT')
+  migrate('waitlist_signups', 'full_name', 'TEXT')
+  migrate('waitlist_signups', 'location', 'TEXT')
+  migrate('waitlist_signups', 'target_role', 'TEXT')
+  migrate('waitlist_signups', 'strongest_need', 'TEXT')
+  migrate('waitlist_signups', 'source', "TEXT DEFAULT 'web_app'")
+  migrate('waitlist_signups', 'consent', 'INTEGER DEFAULT 1')
 
   db.prepare("UPDATE tracker SET status = 'Interview' WHERE status IN ('Phone Screen', 'Final Round')").run()
   db.prepare("UPDATE tracker SET status = 'Withdrawn' WHERE status IN ('Declined', 'Archived')").run()
