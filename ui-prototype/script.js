@@ -164,28 +164,137 @@ document.querySelectorAll(".complete-reminder").forEach((button) => {
 });
 
 const waitlistForm = document.getElementById("waitlist-form");
+const waitlistName = document.getElementById("waitlist-name");
 const waitlistEmail = document.getElementById("waitlist-email");
+const waitlistLocation = document.getElementById("waitlist-location");
+const waitlistRole = document.getElementById("waitlist-role");
+const waitlistNeed = document.getElementById("waitlist-need");
 const waitlistFeedback = document.getElementById("waitlist-feedback");
-const submittedEmails = new Set();
+const waitlistCount = document.getElementById("waitlist-count");
+const waitlistPrimaryRole = document.getElementById("waitlist-primary-role");
+const waitlistLatestDate = document.getElementById("waitlist-latest-date");
+const waitlistSignups = document.getElementById("waitlist-signups");
+const clearWaitlist = document.getElementById("clear-waitlist");
+const waitlistStorageKey = "applywise-waitlist-demo";
+
+function loadWaitlistEntries() {
+  try {
+    return JSON.parse(localStorage.getItem(waitlistStorageKey)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveWaitlistEntries(entries) {
+  localStorage.setItem(waitlistStorageKey, JSON.stringify(entries));
+}
+
+function formatSignupDate(isoDate) {
+  return new Intl.DateTimeFormat("en", {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(isoDate));
+}
+
+function getPrimaryRole(entries) {
+  if (entries.length === 0) {
+    return "None";
+  }
+
+  const roleCounts = entries.reduce((counts, entry) => {
+    counts[entry.role] = (counts[entry.role] || 0) + 1;
+    return counts;
+  }, {});
+
+  return Object.entries(roleCounts).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function renderWaitlist() {
+  if (!waitlistSignups) {
+    return;
+  }
+
+  const entries = loadWaitlistEntries();
+  waitlistCount.textContent = String(entries.length);
+  waitlistPrimaryRole.textContent = getPrimaryRole(entries);
+  waitlistLatestDate.textContent = entries[0] ? formatSignupDate(entries[0].createdAt) : "No entries";
+
+  waitlistSignups.replaceChildren();
+
+  if (entries.length === 0) {
+    const emptyState = document.createElement("p");
+    emptyState.className = "waitlist-empty";
+    emptyState.textContent = "No waitlist entries yet. Add one from the form above.";
+    waitlistSignups.append(emptyState);
+    return;
+  }
+
+  entries.slice(0, 5).forEach((entry) => {
+    const row = document.createElement("article");
+    row.className = "waitlist-row";
+
+    const content = document.createElement("div");
+    const title = document.createElement("h3");
+    title.textContent = entry.name;
+    const details = document.createElement("p");
+    const location = entry.location || "Location not added";
+    const need = entry.need ? ` - ${entry.need}` : "";
+    details.textContent = `${entry.email} - ${location} - ${entry.role}${need}`;
+    content.append(title, details);
+
+    const badge = document.createElement("span");
+    badge.className = "status-badge";
+    badge.textContent = formatSignupDate(entry.createdAt);
+
+    row.append(content, badge);
+    waitlistSignups.append(row);
+  });
+}
 
 waitlistForm?.addEventListener("submit", (event) => {
   event.preventDefault();
+  const name = waitlistName.value.trim();
   const email = waitlistEmail.value.trim().toLowerCase();
+  const location = waitlistLocation.value.trim();
+  const role = waitlistRole.value;
+  const need = waitlistNeed.value.trim();
 
-  if (!waitlistEmail.checkValidity()) {
-    waitlistFeedback.textContent = "Enter a valid email to join the waitlist.";
+  if (!waitlistForm.checkValidity()) {
+    waitlistFeedback.textContent = "Add your name, a valid email, and consent to join the waitlist.";
     waitlistFeedback.className = "form-feedback is-error";
     return;
   }
 
-  if (submittedEmails.has(email)) {
+  const entries = loadWaitlistEntries();
+  const isDuplicate = entries.some((entry) => entry.email === email);
+
+  if (isDuplicate) {
     waitlistFeedback.textContent = "This email is already on the waitlist.";
     waitlistFeedback.className = "form-feedback is-error";
     return;
   }
 
-  submittedEmails.add(email);
-  waitlistFeedback.textContent = "You are on the waitlist. We will send early access updates to this email.";
+  entries.unshift({
+    name,
+    email,
+    location,
+    role,
+    need,
+    createdAt: new Date().toISOString(),
+  });
+
+  saveWaitlistEntries(entries);
+  renderWaitlist();
+  waitlistFeedback.textContent = "You are on the prototype waitlist. In the real app, early access updates would go to this email.";
   waitlistFeedback.className = "form-feedback is-success";
   waitlistForm.reset();
 });
+
+clearWaitlist?.addEventListener("click", () => {
+  saveWaitlistEntries([]);
+  renderWaitlist();
+  waitlistFeedback.textContent = "Demo waitlist entries cleared.";
+  waitlistFeedback.className = "form-feedback";
+});
+
+renderWaitlist();
