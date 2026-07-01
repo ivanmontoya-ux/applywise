@@ -8,6 +8,81 @@ const DB_PATH = path.join(__dirname, 'jobs.db')
 
 let db
 
+function createPersonalInformationTable() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS personal_information (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL UNIQUE,
+      candidate_name TEXT,
+      headline TEXT,
+      summary TEXT,
+      contact_json TEXT DEFAULT '{}',
+      education_json TEXT DEFAULT '[]',
+      experience_json TEXT DEFAULT '[]',
+      projects_json TEXT DEFAULT '[]',
+      skills_json TEXT DEFAULT '{}',
+      certifications_json TEXT DEFAULT '[]',
+      evidence_points_json TEXT DEFAULT '[]',
+      missing_fields_json TEXT DEFAULT '[]',
+      extraction_notes_json TEXT DEFAULT '[]',
+      source TEXT DEFAULT 'cv_extraction',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+  `)
+}
+
+function ensurePersonalInformationSchema() {
+  const row = db.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'personal_information'").get()
+  if (!row?.sql || !row.sql.includes('CHECK (id = 1)')) return
+
+  db.exec(`
+    ALTER TABLE personal_information RENAME TO personal_information_legacy;
+  `)
+  createPersonalInformationTable()
+  db.exec(`
+    INSERT INTO personal_information (
+      user_id,
+      candidate_name,
+      headline,
+      summary,
+      contact_json,
+      education_json,
+      experience_json,
+      projects_json,
+      skills_json,
+      certifications_json,
+      evidence_points_json,
+      missing_fields_json,
+      extraction_notes_json,
+      source,
+      created_at,
+      updated_at
+    )
+    SELECT
+      'legacy',
+      candidate_name,
+      headline,
+      summary,
+      contact_json,
+      education_json,
+      experience_json,
+      projects_json,
+      skills_json,
+      certifications_json,
+      evidence_points_json,
+      missing_fields_json,
+      extraction_notes_json,
+      source,
+      created_at,
+      updated_at
+    FROM personal_information_legacy
+    WHERE id = 1;
+
+    DROP TABLE personal_information_legacy;
+  `)
+}
+
 export function initDb() {
   db = new Database(DB_PATH)
 
@@ -27,11 +102,13 @@ export function initDb() {
       date_posted TEXT,
       source TEXT DEFAULT 'adzuna',
       created_at TEXT DEFAULT (datetime('now')),
-      expires_at TEXT
+      expires_at TEXT,
+      created_by TEXT
     );
 
     CREATE TABLE IF NOT EXISTS tracker (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL DEFAULT 'legacy',
       job_id TEXT,
       title TEXT NOT NULL,
       company TEXT NOT NULL,
@@ -58,7 +135,8 @@ export function initDb() {
     );
 
     CREATE TABLE IF NOT EXISTS personal_information (
-      id INTEGER PRIMARY KEY CHECK (id = 1),
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL UNIQUE,
       candidate_name TEXT,
       headline TEXT,
       summary TEXT,
@@ -81,10 +159,13 @@ export function initDb() {
   const migrate = (table, col, type) => {
     try { db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`) } catch (_) {}
   }
+  ensurePersonalInformationSchema()
   migrate('jobs',    'deadline_type',  'TEXT')
   migrate('jobs',    'deadline_date',  'TEXT')
   migrate('jobs',    'grand_category', 'TEXT')
   migrate('jobs',    'sub_type',       'TEXT')
+  migrate('jobs',    'created_by',      'TEXT')
+  migrate('tracker', 'user_id',         "TEXT NOT NULL DEFAULT 'legacy'")
   migrate('tracker', 'deadline_type',  'TEXT')
   migrate('tracker', 'deadline_date',  'TEXT')
   migrate('jobs', 'experience_level', 'TEXT')
@@ -94,6 +175,7 @@ export function initDb() {
   migrate('waitlist_signups', 'strongest_need', 'TEXT')
   migrate('waitlist_signups', 'source', "TEXT DEFAULT 'web_app'")
   migrate('waitlist_signups', 'consent', 'INTEGER DEFAULT 1')
+  migrate('personal_information', 'user_id', 'TEXT')
   migrate('personal_information', 'candidate_name', 'TEXT')
   migrate('personal_information', 'headline', 'TEXT')
   migrate('personal_information', 'summary', 'TEXT')
@@ -108,6 +190,14 @@ export function initDb() {
   migrate('personal_information', 'extraction_notes_json', "TEXT DEFAULT '[]'")
   migrate('personal_information', 'source', "TEXT DEFAULT 'cv_extraction'")
   migrate('personal_information', 'updated_at', 'TEXT')
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS jobs_created_by_idx ON jobs(created_by);
+    CREATE INDEX IF NOT EXISTS tracker_user_status_idx ON tracker(user_id, status, date_saved DESC);
+    CREATE INDEX IF NOT EXISTS tracker_user_job_idx ON tracker(user_id, job_id);
+    CREATE INDEX IF NOT EXISTS tracker_user_url_idx ON tracker(user_id, url);
+    CREATE UNIQUE INDEX IF NOT EXISTS personal_information_user_unique_idx ON personal_information(user_id);
+  `)
 
   db.prepare("UPDATE tracker SET status = 'Interview' WHERE status IN ('Phone Screen', 'Final Round')").run()
   db.prepare("UPDATE tracker SET status = 'Withdrawn' WHERE status IN ('Declined', 'Archived')").run()

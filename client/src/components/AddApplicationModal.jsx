@@ -31,7 +31,12 @@ export default function AddApplicationModal({ onClose, onSaved }) {
       await addApplication(form)
       onSaved?.()
       onClose()
-    } catch {
+    } catch (err) {
+      setErrors({
+        form: err?.response?.status === 401
+          ? 'Log in or sign up to save applications.'
+          : 'Could not save this application yet.',
+      })
       setSaving(false)
     }
   }
@@ -125,6 +130,19 @@ export default function AddApplicationModal({ onClose, onSaved }) {
               onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
             />
           </div>
+
+          {errors.form && (
+            <div style={{
+              padding: '10px 12px',
+              borderRadius: 'var(--radius-md)',
+              background: '#fff7ed',
+              color: '#9a3412',
+              fontSize: '13px',
+              lineHeight: '1.45',
+            }}>
+              {errors.form}
+            </div>
+          )}
 
           {/* Buttons */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>

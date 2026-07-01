@@ -1,6 +1,29 @@
 import axios from 'axios'
+import { clearAuthSession, getAccessToken } from './supabase'
 
 const api = axios.create({ baseURL: '/api' })
+
+api.interceptors.request.use(async config => {
+  const token = await getAccessToken()
+  if (token) {
+    config.headers = config.headers || {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error?.response?.status === 401) {
+      clearAuthSession()
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('applywise-auth-expired'))
+      }
+    }
+    return Promise.reject(error)
+  },
+)
 
 export async function fetchJobs(filters = {}) {
   const params = {}

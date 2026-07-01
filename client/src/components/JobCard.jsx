@@ -195,7 +195,11 @@ export default function JobCard({ job, onSave }) {
       setSaved(true)
       onSave?.(result)
     } catch (err) {
-      console.error('Save failed', err)
+      if (err?.response?.status === 401) {
+        onSave?.({ authRequired: true })
+      } else {
+        onSave?.({ error: true })
+      }
     } finally {
       setSaving(false)
     }

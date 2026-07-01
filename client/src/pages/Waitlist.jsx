@@ -289,12 +289,13 @@ export default function Waitlist() {
     <div style={pageStyle}>
       <div style={shellStyle}>
         <nav style={navStyle}>
-          <Link to="/home" style={logoStyle}>
+          <Link to="/waitlist" style={logoStyle}>
             <Briefcase size={20} strokeWidth={2.5} color="var(--color-applied-teal)" />
             ApplyWise
           </Link>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <Link to="/home" style={secondaryLinkStyle}>Open app preview</Link>
+            <Link to="/login" style={secondaryLinkStyle}>Login</Link>
+            <Link to="/signup" style={primaryButtonStyle}>Sign Up</Link>
           </div>
         </nav>
 

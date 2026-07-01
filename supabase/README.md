@@ -24,11 +24,12 @@ For server-side work, add the same URL and a server-safe key to `server/.env`:
 
 ```env
 SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 SUPABASE_ANON_KEY=your_supabase_anon_public_key
 SUPABASE_SERVICE_ROLE_KEY=server_only_service_role_key_do_not_put_in_client
 ```
 
-Never put `SUPABASE_SERVICE_ROLE_KEY` in `client/.env` or any frontend file.
+The server auth middleware can use either `SUPABASE_PUBLISHABLE_KEY` or `SUPABASE_ANON_KEY` to validate Supabase sessions. Never put `SUPABASE_SERVICE_ROLE_KEY` in `client/.env` or any frontend file.
 
 ## What It Creates
 

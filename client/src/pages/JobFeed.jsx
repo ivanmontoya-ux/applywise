@@ -341,8 +341,10 @@ export default function JobFeed() {
     try {
       await refreshJobs()
       await loadJobs()
-    } catch {
-      setError('Refresh failed. Check your Adzuna API key in server/.env')
+    } catch (err) {
+      setError(err?.response?.status === 401
+        ? 'Log in or sign up to refresh the shared job list.'
+        : 'Refresh failed. Check your Adzuna API key in server/.env')
     } finally {
       setRefreshing(false)
     }
@@ -474,7 +476,15 @@ export default function JobFeed() {
             <JobCard
               key={job.id}
               job={job}
-              onSave={result => setToast(result?.existing ? 'This application already exists in Tracker.' : 'Job saved to Tracker.')}
+              onSave={result => {
+                if (result?.authRequired) {
+                  setToast('Log in or sign up to save jobs.')
+                } else if (result?.error) {
+                  setToast('Could not save this job yet.')
+                } else {
+                  setToast(result?.existing ? 'This application already exists in Tracker.' : 'Job saved to Tracker.')
+                }
+              }}
             />
           ))}
         </div>

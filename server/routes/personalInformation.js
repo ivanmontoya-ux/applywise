@@ -1,5 +1,6 @@
 import express from 'express'
 import { getDb } from '../db/database.js'
+import { requireAuth } from '../middleware/auth.js'
 
 const router = express.Router()
 
@@ -87,22 +88,30 @@ function rowToProfile(row) {
 }
 
 router.get('/', (_req, res) => {
+  if (!_req.user?.id) {
+    return res.json({
+      exists: false,
+      profile: null,
+    })
+  }
+
   const db = getDb()
-  const row = db.prepare('SELECT * FROM personal_information WHERE id = 1').get()
+  const row = db.prepare('SELECT * FROM personal_information WHERE user_id = ?').get(_req.user.id)
   res.json({
     exists: Boolean(row),
     profile: rowToProfile(row),
   })
 })
 
-router.put('/', (req, res) => {
+router.put('/', requireAuth, (req, res) => {
   const db = getDb()
+  const userId = req.user.id
   const profile = normalizeProfile(req.body.profile || req.body)
   const source = clean(req.body.source, 80) || 'cv_extraction'
 
   db.prepare(`
     INSERT INTO personal_information (
-      id,
+      user_id,
       candidate_name,
       headline,
       summary,
@@ -116,8 +125,8 @@ router.put('/', (req, res) => {
       missing_fields_json,
       extraction_notes_json,
       source
-    ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(id) DO UPDATE SET
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(user_id) DO UPDATE SET
       candidate_name = excluded.candidate_name,
       headline = excluded.headline,
       summary = excluded.summary,
@@ -133,6 +142,7 @@ router.put('/', (req, res) => {
       source = excluded.source,
       updated_at = datetime('now')
   `).run(
+    userId,
     profile.candidate_name || null,
     profile.headline || null,
     profile.summary || null,
@@ -148,16 +158,16 @@ router.put('/', (req, res) => {
     source,
   )
 
-  const row = db.prepare('SELECT * FROM personal_information WHERE id = 1').get()
+  const row = db.prepare('SELECT * FROM personal_information WHERE user_id = ?').get(userId)
   res.json({
     saved: true,
     profile: rowToProfile(row),
   })
 })
 
-router.delete('/', (_req, res) => {
+router.delete('/', requireAuth, (_req, res) => {
   const db = getDb()
-  db.prepare('DELETE FROM personal_information WHERE id = 1').run()
+  db.prepare('DELETE FROM personal_information WHERE user_id = ?').run(_req.user.id)
   res.json({ success: true })
 })
 

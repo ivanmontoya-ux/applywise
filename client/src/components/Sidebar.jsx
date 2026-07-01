@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
   Bell,
   Briefcase,
@@ -8,10 +8,12 @@ import {
   ClipboardList,
   FileText,
   Home,
+  LogOut,
   MessageSquareText,
   UserRound,
   UserPlus,
 } from 'lucide-react'
+import { useAuth } from '../auth/AuthContext'
 
 const EXPANDED_W = '220px'
 const COLLAPSED_W = '64px'
@@ -61,6 +63,8 @@ function NavItem({ to, icon: Icon, label, collapsed }) {
 }
 
 export default function Sidebar() {
+  const auth = useAuth()
+  const navigate = useNavigate()
   const [collapsed, setCollapsed] = useState(() => {
     try { return localStorage.getItem('sidebar-collapsed') === 'true' } catch { return false }
   })
@@ -71,6 +75,11 @@ export default function Sidebar() {
       try { localStorage.setItem('sidebar-collapsed', String(next)) } catch {}
       return next
     })
+  }
+
+  async function handleLogout() {
+    await auth.logout()
+    navigate('/login', { replace: true })
   }
 
   return (
@@ -143,7 +152,7 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div style={{
-        padding: collapsed ? '14px 0' : '14px 20px',
+        padding: collapsed ? '12px 8px' : '14px 12px',
         borderTop: '1px solid var(--color-border)',
         fontSize: '12px',
         color: 'var(--color-text-muted)',
@@ -152,7 +161,34 @@ export default function Sidebar() {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
       }}>
-        {collapsed ? 'v1' : 'Private beta'}
+        {auth.session ? (
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Log out"
+            style={{
+              width: '100%',
+              minHeight: 34,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              gap: collapsed ? 0 : '8px',
+              padding: collapsed ? 0 : '0 8px',
+              border: '1px solid transparent',
+              borderRadius: '8px',
+              background: 'transparent',
+              color: 'var(--color-text-secondary)',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: '700',
+            }}
+          >
+            <LogOut size={15} strokeWidth={2.2} style={{ flexShrink: 0 }} />
+            {!collapsed && <span>Log out</span>}
+          </button>
+        ) : (
+          collapsed ? 'v1' : 'Private beta'
+        )}
       </div>
     </aside>
   )

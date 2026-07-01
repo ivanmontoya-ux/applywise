@@ -1,5 +1,6 @@
 import express from 'express'
 import { getDb } from '../db/database.js'
+import { requireAuth } from '../middleware/auth.js'
 import { fetchAdzunaJobs, resolveAdzunaUrls } from '../services/adzuna.js'
 
 const router = express.Router()
@@ -12,8 +13,12 @@ router.get('/', (req, res) => {
     const db = getDb()
     const { locations, sectors, days, q } = req.query
 
-    let query = 'SELECT * FROM jobs WHERE 1=1'
+    let query = 'SELECT * FROM jobs WHERE created_by IS NULL'
     const params = []
+    if (req.user?.id) {
+      query = 'SELECT * FROM jobs WHERE (created_by IS NULL OR created_by = ?)'
+      params.push(req.user.id)
+    }
 
     if (locations) {
       const locs = locations.split(',').map(l => l.trim()).filter(Boolean)
@@ -57,7 +62,7 @@ router.get('/', (req, res) => {
 })
 
 // POST /api/jobs/refresh — fetch fresh jobs from Adzuna
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', requireAuth, async (req, res) => {
   if (!process.env.ADZUNA_APP_ID || !process.env.ADZUNA_APP_KEY) {
     return res.status(400).json({
       error: 'Adzuna API keys not configured. Add ADZUNA_APP_ID and ADZUNA_APP_KEY to server/.env',
@@ -66,7 +71,7 @@ router.post('/refresh', async (req, res) => {
 
   try {
     const db = getDb()
-    db.prepare("DELETE FROM jobs WHERE source = 'seed'").run()
+    db.prepare("DELETE FROM jobs WHERE source = 'seed' AND (created_by IS NULL OR created_by = ?)").run(req.user.id)
 
     const { upserted, errors } = await fetchAdzunaJobs()
     // Respond immediately; resolve redirect URLs in background

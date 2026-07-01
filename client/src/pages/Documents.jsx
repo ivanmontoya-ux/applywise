@@ -14,6 +14,7 @@ import {
   Upload,
   UserRound,
 } from 'lucide-react'
+import { useAuth } from '../auth/AuthContext'
 import { extractCvProfile, fetchAiStatus, fetchTracker, reviewCv, savePersonalInformation } from '../lib/api'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
@@ -627,6 +628,7 @@ function ReviewResults({ review }) {
 }
 
 export default function Documents() {
+  const auth = useAuth()
   const [applications, setApplications] = useState([])
   const [selectedApplicationId, setSelectedApplicationId] = useState('')
   const [aiStatus, setAiStatus] = useState(null)
@@ -757,12 +759,16 @@ export default function Documents() {
         cv_file: cvFile,
       })
       setProfile(result)
-      try {
-        const saved = await savePersonalInformation(result, 'cv_extraction')
-        setProfile(saved.profile || result)
-        setSaveNotice('Saved under Personal Information.')
-      } catch {
-        setSaveNotice('CV information was extracted, but it could not be saved yet.')
+      if (!auth.session) {
+        setSaveNotice('Log in or sign up to save this under Personal Information.')
+      } else {
+        try {
+          const saved = await savePersonalInformation(result, 'cv_extraction')
+          setProfile(saved.profile || result)
+          setSaveNotice('Saved under Personal Information.')
+        } catch {
+          setSaveNotice('CV information was extracted, but it could not be saved yet.')
+        }
       }
     } catch (err) {
       setError(err?.response?.data?.error || 'Gemini could not extract CV information yet.')
@@ -772,6 +778,7 @@ export default function Documents() {
   }
 
   const connected = aiStatus?.gemini_configured
+  const profileSaved = saveNotice === 'Saved under Personal Information.'
 
   return (
     <div style={pageStyle}>
@@ -925,18 +932,18 @@ export default function Documents() {
               gap: '10px',
               padding: '11px 12px',
               borderRadius: 'var(--radius-md)',
-              background: saveNotice.includes('could not') ? '#fff7ed' : '#f0fdf4',
-              color: saveNotice.includes('could not') ? '#9a3412' : '#15803d',
+              background: profileSaved ? '#f0fdf4' : '#fff7ed',
+              color: profileSaved ? '#15803d' : '#9a3412',
               fontSize: '13px',
               lineHeight: '1.45',
             }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                {saveNotice.includes('could not')
-                  ? <AlertCircle size={16} strokeWidth={2.4} style={{ flexShrink: 0 }} />
-                  : <CheckCircle2 size={16} strokeWidth={2.4} style={{ flexShrink: 0 }} />}
+                {profileSaved
+                  ? <CheckCircle2 size={16} strokeWidth={2.4} style={{ flexShrink: 0 }} />
+                  : <AlertCircle size={16} strokeWidth={2.4} style={{ flexShrink: 0 }} />}
                 {saveNotice}
               </span>
-              {!saveNotice.includes('could not') && (
+              {profileSaved && (
                 <Link to="/personal-information" style={{ fontWeight: '800', color: 'inherit', textDecoration: 'none', whiteSpace: 'nowrap' }}>
                   View
                 </Link>

@@ -11,6 +11,7 @@ import trackerRouter from './routes/tracker.js'
 import aiRouter from './routes/ai.js'
 import waitlistRouter from './routes/waitlist.js'
 import personalInformationRouter from './routes/personalInformation.js'
+import { optionalAuth } from './middleware/auth.js'
 import { fetchAdzunaJobs, resolveAdzunaUrls } from './services/adzuna.js'
 
 dotenv.config()
@@ -58,11 +59,11 @@ async function initialFetch() {
 
 initialFetch()
 
-app.use('/api/jobs', jobsRouter)
-app.use('/api/tracker', trackerRouter)
-app.use('/api/ai', aiRouter)
 app.use('/api/waitlist', waitlistRouter)
-app.use('/api/personal-information', personalInformationRouter)
+app.use('/api/jobs', optionalAuth, jobsRouter)
+app.use('/api/tracker', optionalAuth, trackerRouter)
+app.use('/api/ai', optionalAuth, aiRouter)
+app.use('/api/personal-information', optionalAuth, personalInformationRouter)
 
 if (existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath))
