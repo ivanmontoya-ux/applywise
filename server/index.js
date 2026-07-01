@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import { initDb, getDb } from './db/database.js'
 import jobsRouter from './routes/jobs.js'
 import trackerRouter from './routes/tracker.js'
+import aiRouter from './routes/ai.js'
 import { fetchAdzunaJobs, resolveAdzunaUrls } from './services/adzuna.js'
 
 dotenv.config()
@@ -19,7 +20,7 @@ const PORT = process.env.PORT || 3001
 const HOST = process.env.HOST || '127.0.0.1'
 
 app.use(cors({ origin: 'http://localhost:5173' }))
-app.use(express.json())
+app.use(express.json({ limit: '8mb' }))
 
 initDb()
 
@@ -57,6 +58,7 @@ initialFetch()
 
 app.use('/api/jobs', jobsRouter)
 app.use('/api/tracker', trackerRouter)
+app.use('/api/ai', aiRouter)
 
 if (existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath))

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import JobFeed from './pages/JobFeed'
 import Tracker from './pages/Tracker'
+import Documents from './pages/Documents'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
             <Route path="/" element={<Navigate to="/feed" replace />} />
             <Route path="/feed" element={<JobFeed />} />
             <Route path="/tracker" element={<Tracker />} />
+            <Route path="/documents" element={<Documents />} />
           </Routes>
         </main>
       </div>

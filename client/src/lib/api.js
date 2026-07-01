@@ -51,3 +51,13 @@ export async function addApplication(application) {
   const { data } = await api.post('/tracker', { ...application, is_manual: 1 })
   return data
 }
+
+export async function fetchAiStatus() {
+  const { data } = await api.get('/ai/status')
+  return data
+}
+
+export async function reviewCv(payload) {
+  const { data } = await api.post('/ai/cv-review', payload)
+  return data
+}

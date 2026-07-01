@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Briefcase, ClipboardList, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Briefcase, ClipboardList, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 
 const EXPANDED_W = '220px'
 const COLLAPSED_W = '64px'
@@ -115,6 +115,7 @@ export default function Sidebar() {
       }}>
         <NavItem to="/feed" icon={Briefcase} label="Job Feed" collapsed={collapsed} />
         <NavItem to="/tracker" icon={ClipboardList} label="Tracker" collapsed={collapsed} />
+        <NavItem to="/documents" icon={FileText} label="Documents" collapsed={collapsed} />
       </nav>
 
       {/* Footer */}
