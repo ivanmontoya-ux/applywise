@@ -56,6 +56,25 @@ export function initDb() {
       consent INTEGER DEFAULT 1,
       created_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS personal_information (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      candidate_name TEXT,
+      headline TEXT,
+      summary TEXT,
+      contact_json TEXT DEFAULT '{}',
+      education_json TEXT DEFAULT '[]',
+      experience_json TEXT DEFAULT '[]',
+      projects_json TEXT DEFAULT '[]',
+      skills_json TEXT DEFAULT '{}',
+      certifications_json TEXT DEFAULT '[]',
+      evidence_points_json TEXT DEFAULT '[]',
+      missing_fields_json TEXT DEFAULT '[]',
+      extraction_notes_json TEXT DEFAULT '[]',
+      source TEXT DEFAULT 'cv_extraction',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
   `)
 
   // Migrations — add new columns without destroying existing data
@@ -75,6 +94,20 @@ export function initDb() {
   migrate('waitlist_signups', 'strongest_need', 'TEXT')
   migrate('waitlist_signups', 'source', "TEXT DEFAULT 'web_app'")
   migrate('waitlist_signups', 'consent', 'INTEGER DEFAULT 1')
+  migrate('personal_information', 'candidate_name', 'TEXT')
+  migrate('personal_information', 'headline', 'TEXT')
+  migrate('personal_information', 'summary', 'TEXT')
+  migrate('personal_information', 'contact_json', "TEXT DEFAULT '{}'")
+  migrate('personal_information', 'education_json', "TEXT DEFAULT '[]'")
+  migrate('personal_information', 'experience_json', "TEXT DEFAULT '[]'")
+  migrate('personal_information', 'projects_json', "TEXT DEFAULT '[]'")
+  migrate('personal_information', 'skills_json', "TEXT DEFAULT '{}'")
+  migrate('personal_information', 'certifications_json', "TEXT DEFAULT '[]'")
+  migrate('personal_information', 'evidence_points_json', "TEXT DEFAULT '[]'")
+  migrate('personal_information', 'missing_fields_json', "TEXT DEFAULT '[]'")
+  migrate('personal_information', 'extraction_notes_json', "TEXT DEFAULT '[]'")
+  migrate('personal_information', 'source', "TEXT DEFAULT 'cv_extraction'")
+  migrate('personal_information', 'updated_at', 'TEXT')
 
   db.prepare("UPDATE tracker SET status = 'Interview' WHERE status IN ('Phone Screen', 'Final Round')").run()
   db.prepare("UPDATE tracker SET status = 'Withdrawn' WHERE status IN ('Declined', 'Archived')").run()

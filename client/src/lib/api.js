@@ -67,6 +67,21 @@ export async function extractCvProfile(payload) {
   return data
 }
 
+export async function fetchPersonalInformation() {
+  const { data } = await api.get('/personal-information')
+  return data
+}
+
+export async function savePersonalInformation(profile, source = 'cv_extraction') {
+  const { data } = await api.put('/personal-information', { profile, source })
+  return data
+}
+
+export async function deletePersonalInformation() {
+  const { data } = await api.delete('/personal-information')
+  return data
+}
+
 export async function joinWaitlist(signup) {
   const { data } = await api.post('/waitlist', signup)
   return data

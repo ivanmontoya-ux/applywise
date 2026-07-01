@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   AlertCircle,
   Briefcase,
@@ -13,7 +14,7 @@ import {
   Upload,
   UserRound,
 } from 'lucide-react'
-import { extractCvProfile, fetchAiStatus, fetchTracker, reviewCv } from '../lib/api'
+import { extractCvProfile, fetchAiStatus, fetchTracker, reviewCv, savePersonalInformation } from '../lib/api'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
@@ -638,6 +639,7 @@ export default function Documents() {
   const [loading, setLoading] = useState(false)
   const [loadingContext, setLoadingContext] = useState(true)
   const [error, setError] = useState('')
+  const [saveNotice, setSaveNotice] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -671,6 +673,7 @@ export default function Documents() {
   async function handleFileChange(event) {
     const file = event.target.files?.[0]
     setError('')
+    setSaveNotice('')
     setReview(null)
     setProfile(null)
     if (!file) return
@@ -704,6 +707,7 @@ export default function Documents() {
   async function handleSubmit(event) {
     event.preventDefault()
     setError('')
+    setSaveNotice('')
     setReview(null)
     setProfile(null)
 
@@ -737,6 +741,7 @@ export default function Documents() {
 
   async function handleExtractProfile() {
     setError('')
+    setSaveNotice('')
     setReview(null)
     setProfile(null)
 
@@ -752,6 +757,13 @@ export default function Documents() {
         cv_file: cvFile,
       })
       setProfile(result)
+      try {
+        const saved = await savePersonalInformation(result, 'cv_extraction')
+        setProfile(saved.profile || result)
+        setSaveNotice('Saved under Personal Information.')
+      } catch {
+        setSaveNotice('CV information was extracted, but it could not be saved yet.')
+      }
     } catch (err) {
       setError(err?.response?.data?.error || 'Gemini could not extract CV information yet.')
     } finally {
@@ -853,6 +865,7 @@ export default function Documents() {
                 setCvText(event.target.value)
                 setReview(null)
                 setProfile(null)
+                setSaveNotice('')
               }}
               rows={10}
               placeholder="Paste your approved base CV text here, or upload a PDF or Word CV above."
@@ -904,6 +917,33 @@ export default function Documents() {
             </div>
           )}
 
+          {saveNotice && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px',
+              padding: '11px 12px',
+              borderRadius: 'var(--radius-md)',
+              background: saveNotice.includes('could not') ? '#fff7ed' : '#f0fdf4',
+              color: saveNotice.includes('could not') ? '#9a3412' : '#15803d',
+              fontSize: '13px',
+              lineHeight: '1.45',
+            }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                {saveNotice.includes('could not')
+                  ? <AlertCircle size={16} strokeWidth={2.4} style={{ flexShrink: 0 }} />
+                  : <CheckCircle2 size={16} strokeWidth={2.4} style={{ flexShrink: 0 }} />}
+                {saveNotice}
+              </span>
+              {!saveNotice.includes('could not') && (
+                <Link to="/personal-information" style={{ fontWeight: '800', color: 'inherit', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                  View
+                </Link>
+              )}
+            </div>
+          )}
+
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
             <button
               type="button"
@@ -937,6 +977,7 @@ export default function Documents() {
                 setProfile(null)
                 setReview(null)
                 setError('')
+                setSaveNotice('')
                 setCvText('')
                 setCvFile(null)
                 setJobDescription('')

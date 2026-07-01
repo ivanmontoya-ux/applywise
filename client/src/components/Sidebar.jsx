@@ -9,6 +9,7 @@ import {
   FileText,
   Home,
   MessageSquareText,
+  UserRound,
   UserPlus,
 } from 'lucide-react'
 
@@ -134,6 +135,7 @@ export default function Sidebar() {
         <NavItem to="/jobs" icon={Briefcase} label="Jobs" collapsed={collapsed} />
         <NavItem to="/tracker" icon={ClipboardList} label="Tracker" collapsed={collapsed} />
         <NavItem to="/documents" icon={FileText} label="Documents" collapsed={collapsed} />
+        <NavItem to="/personal-information" icon={UserRound} label="Personal Information" collapsed={collapsed} />
         <NavItem to="/coach" icon={MessageSquareText} label="Coach" collapsed={collapsed} />
         <NavItem to="/reminders" icon={Bell} label="Reminders" collapsed={collapsed} />
         <NavItem to="/waitlist" icon={UserPlus} label="Waitlist" collapsed={collapsed} />

@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import JobFeed from './pages/JobFeed'
 import Tracker from './pages/Tracker'
 import Documents from './pages/Documents'
+import PersonalInformation from './pages/PersonalInformation'
 import Coach from './pages/Coach'
 import Reminders from './pages/Reminders'
 import Waitlist from './pages/Waitlist'
@@ -24,6 +25,7 @@ function AppLayout() {
           <Route path="/jobs" element={<JobFeed />} />
           <Route path="/tracker" element={<Tracker />} />
           <Route path="/documents" element={<Documents />} />
+          <Route path="/personal-information" element={<PersonalInformation />} />
           <Route path="/coach" element={<Coach />} />
           <Route path="/reminders" element={<Reminders />} />
           <Route path="/waitlist" element={<Waitlist />} />

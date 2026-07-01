@@ -18,3 +18,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Adapt the React app shell, Home, Jobs, Tracker, Documents, Coach, and Reminders toward `DESIGN.md` and `Final_PRD.md`.
 - [x] Add React waitlist landing page with backend storage, duplicate handling, and Supabase sync.
 - [x] Add Gemini-backed CV profile extraction from uploaded or pasted CVs.
+- [x] Save extracted CV profile data under Personal Information for reuse across the app.
