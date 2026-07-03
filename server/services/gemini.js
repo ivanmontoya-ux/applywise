@@ -2,6 +2,7 @@ const GEMINI_INTERACTIONS_URL = 'https://generativelanguage.googleapis.com/v1bet
 const DEFAULT_MODEL = 'gemini-3.5-flash'
 const MAX_CV_TEXT_CHARS = 45000
 const MAX_JOB_TEXT_CHARS = 18000
+const MAX_RECOMMENDATION_JOBS = 60
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
 const DOCUMENT_MIME_TYPES = new Set([
@@ -282,6 +283,42 @@ const coverLetterSchema = {
   ],
 }
 
+const jobRecommendationSchema = {
+  type: 'object',
+  properties: {
+    recommendations: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          job_id: { type: 'string' },
+          fit_score: {
+            type: 'integer',
+            minimum: 0,
+            maximum: 100,
+          },
+          fit_label: {
+            type: 'string',
+            enum: ['strong_fit', 'potential_fit', 'stretch'],
+          },
+          reason: { type: 'string' },
+          matching_evidence: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+          concerns: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+          next_step: { type: 'string' },
+        },
+        required: ['job_id', 'fit_score', 'fit_label', 'reason', 'matching_evidence', 'concerns', 'next_step'],
+      },
+    },
+  },
+  required: ['recommendations'],
+}
+
 function cleanText(value, maxLength) {
   if (typeof value !== 'string') return ''
   return value.replace(/\r\n/g, '\n').trim().slice(0, maxLength)
@@ -388,6 +425,45 @@ function buildCoverLetterPrompt({ cvText, jobTitle, company, jobDescription, app
     '',
     'CV text pasted by user:',
     cvText || 'The CV was uploaded as a document. Read the attached document content.',
+  ].join('\n')
+}
+
+function compactJobForRecommendation(job = {}) {
+  return {
+    id: toText(job.id),
+    title: cleanText(job.title, 180),
+    company: cleanText(job.company, 180),
+    location: cleanText(job.location, 160),
+    sector: cleanText(job.sector, 160),
+    experience_level: cleanText(job.experience_level, 120),
+    description: cleanText(job.description, 700),
+  }
+}
+
+function buildJobRecommendationPrompt({ personalInfo, jobs }) {
+  const compactJobs = asArray(jobs)
+    .map(compactJobForRecommendation)
+    .filter(job => job.id && job.title)
+    .slice(0, MAX_RECOMMENDATION_JOBS)
+
+  return [
+    'Recommend the best-fit jobs for this graduate or early-career candidate from the provided job list.',
+    '',
+    'Rules:',
+    '- Recommend only jobs from the provided job list.',
+    '- Use the exact job_id values from the job list.',
+    '- Base reasoning only on saved personal information and the job title, sector, location, and description.',
+    '- Do not invent candidate experience, skills, locations, languages, grades, or work authorization.',
+    '- Prefer realistic early-career fit over prestige.',
+    '- If a job is a stretch, explain the missing evidence clearly.',
+    '- Return 3 to 5 recommendations.',
+    '- Keep reasons short and practical.',
+    '',
+    'Saved personal information:',
+    JSON.stringify(personalInfo || {}, null, 2).slice(0, 18000),
+    '',
+    'Available jobs:',
+    JSON.stringify(compactJobs, null, 2),
   ].join('\n')
 }
 
@@ -572,6 +648,25 @@ function normalizeCoverLetter(letter = {}) {
     personalization_notes: textArray(letter.personalization_notes, 8),
     missing_inputs: textArray(letter.missing_inputs, 8),
     editing_checklist: textArray(letter.editing_checklist, 8),
+  }
+}
+
+function normalizeJobRecommendations(result = {}, allowedJobIds = new Set()) {
+  return {
+    recommendations: asArray(result.recommendations)
+      .map(item => ({
+        job_id: toText(item?.job_id),
+        fit_score: clampScore(item?.fit_score),
+        fit_label: ['strong_fit', 'potential_fit', 'stretch'].includes(item?.fit_label)
+          ? item.fit_label
+          : 'potential_fit',
+        reason: toText(item?.reason),
+        matching_evidence: textArray(item?.matching_evidence, 4),
+        concerns: textArray(item?.concerns, 3),
+        next_step: toText(item?.next_step),
+      }))
+      .filter(item => item.job_id && allowedJobIds.has(item.job_id))
+      .slice(0, 5),
   }
 }
 
@@ -778,6 +873,77 @@ export async function generateCoverLetterWithGemini(payload = {}) {
 
   return {
     ...normalizeCoverLetter(letter),
+    model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
+    interaction_id: data?.id || null,
+  }
+}
+
+export async function recommendJobsWithGemini(payload = {}) {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    const err = new Error('Gemini API key is not configured on the server.')
+    err.status = 503
+    throw err
+  }
+
+  let personalInfo = payload.personal_information || payload.profile || null
+  if (typeof personalInfo === 'string') {
+    try {
+      personalInfo = JSON.parse(personalInfo)
+    } catch {
+      const err = new Error('Saved personal information could not be read.')
+      err.status = 400
+      throw err
+    }
+  }
+
+  const jobs = asArray(payload.jobs)
+    .map(compactJobForRecommendation)
+    .filter(job => job.id && job.title)
+    .slice(0, MAX_RECOMMENDATION_JOBS)
+
+  if (!personalInfo || typeof personalInfo !== 'object') {
+    const err = new Error('Extract and save Personal Information before requesting job recommendations.')
+    err.status = 400
+    throw err
+  }
+
+  if (jobs.length === 0) {
+    const err = new Error('No jobs were available to recommend from.')
+    err.status = 400
+    throw err
+  }
+
+  const response = await fetch(GEMINI_INTERACTIONS_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
+    body: JSON.stringify({
+      model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
+      system_instruction: 'You are ApplyWise, a private job-fit recommender for graduates. Recommend roles from the provided list using only confirmed candidate information. Never fabricate fit evidence.',
+      input: [{
+        type: 'text',
+        text: buildJobRecommendationPrompt({ personalInfo, jobs }),
+      }],
+      generation_config: {
+        temperature: 0.2,
+        thinking_level: 'low',
+      },
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema: jobRecommendationSchema,
+      },
+    }),
+  })
+
+  const { parsed, data } = await readGeminiJsonResponse(response, 'Gemini returned no job recommendations.')
+  const allowedJobIds = new Set(jobs.map(job => job.id))
+
+  return {
+    ...normalizeJobRecommendations(parsed, allowedJobIds),
     model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
     interaction_id: data?.id || null,
   }

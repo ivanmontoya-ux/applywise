@@ -95,6 +95,11 @@ export async function generateCoverLetter(payload) {
   return data
 }
 
+export async function recommendJobs(payload) {
+  const { data } = await api.post('/ai/job-recommendations', payload)
+  return data
+}
+
 export async function fetchPersonalInformation() {
   const { data } = await api.get('/personal-information')
   return data

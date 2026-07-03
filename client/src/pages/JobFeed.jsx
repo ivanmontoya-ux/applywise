@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { RefreshCw, Search, ChevronDown, X, Plus } from 'lucide-react'
-import { fetchJobs, refreshJobs } from '../lib/api'
+import { RefreshCw, Search, ChevronDown, X, Plus, Sparkles } from 'lucide-react'
+import { fetchJobs, fetchPersonalInformation, recommendJobs, refreshJobs } from '../lib/api'
 import { classifyJob } from '../lib/classifier'
 import JobCard from '../components/JobCard'
 
@@ -87,6 +87,18 @@ const searchWrapperStyle = {
 }
 const searchInputStyle   = { border: 'none', outline: 'none', background: 'transparent', fontSize: '13px', color: 'var(--color-text-primary)', width: '100%' }
 const gridStyle          = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }
+
+function fitLabel(value) {
+  if (value === 'strong_fit') return 'Strong fit'
+  if (value === 'stretch') return 'Stretch'
+  return 'Potential fit'
+}
+
+function fitStyle(value) {
+  if (value === 'strong_fit') return { bg: '#f0fdf4', color: 'var(--color-success)', border: '#bbf7d0' }
+  if (value === 'stretch') return { bg: '#fff7ed', color: 'var(--color-warning)', border: '#fed7aa' }
+  return { bg: '#edf7f7', color: 'var(--color-applied-teal)', border: '#b9dada' }
+}
 
 // ── MultiSelect dropdown ─────────────────────────────────────────────────────
 
@@ -289,6 +301,89 @@ function Toast({ message, onDismiss }) {
   )
 }
 
+function RecommendedJobsBand({ recommendations, loading, error }) {
+  if (!loading && !error && recommendations.length === 0) return null
+
+  return (
+    <section style={{
+      ...filterBarStyle,
+      alignItems: 'stretch',
+      flexDirection: 'column',
+      gap: '14px',
+      marginTop: '-8px',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+          <span style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Sparkles size={17} strokeWidth={2.4} />
+          </span>
+          <div>
+            <h2 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '2px' }}>Recommended for your CV</h2>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>Based on the Personal Information extracted from your CV.</p>
+          </div>
+        </div>
+        {loading && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', color: 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700' }}>
+            <RefreshCw size={14} strokeWidth={2.4} />
+            Matching jobs...
+          </span>
+        )}
+      </div>
+
+      {error ? (
+        <div style={{ padding: '10px 12px', borderRadius: 'var(--radius-md)', background: '#fff7ed', color: '#9a3412', fontSize: '13px', lineHeight: '1.45' }}>
+          {error}
+        </div>
+      ) : recommendations.length > 0 ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
+          {recommendations.map(({ job, recommendation }) => {
+            const style = fitStyle(recommendation.fit_label)
+            return (
+              <article key={job.id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start' }}>
+                  <div>
+                    <h3 style={{ fontSize: '14px', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '3px', lineHeight: '1.35' }}>{job.title}</h3>
+                    <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: '700' }}>{job.company}</p>
+                  </div>
+                  <span style={{ minWidth: 72, textAlign: 'center', border: `1px solid ${style.border}`, background: style.bg, color: style.color, borderRadius: '6px', padding: '6px 8px', fontSize: '11px', fontWeight: '800' }}>
+                    {recommendation.fit_score}/100
+                  </span>
+                </div>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>{recommendation.reason}</p>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ border: `1px solid ${style.border}`, background: style.bg, color: style.color, borderRadius: '999px', padding: '4px 8px', fontSize: '11px', fontWeight: '800' }}>
+                    {fitLabel(recommendation.fit_label)}
+                  </span>
+                  {job.location && (
+                    <span style={{ border: '1px solid var(--color-border)', background: '#ffffff', color: 'var(--color-text-secondary)', borderRadius: '999px', padding: '4px 8px', fontSize: '11px', fontWeight: '700' }}>
+                      {job.location}
+                    </span>
+                  )}
+                  {job.sector && (
+                    <span style={{ border: '1px solid var(--color-border)', background: '#ffffff', color: 'var(--color-text-secondary)', borderRadius: '999px', padding: '4px 8px', fontSize: '11px', fontWeight: '700' }}>
+                      {job.sector}
+                    </span>
+                  )}
+                </div>
+                {recommendation.matching_evidence?.length ? (
+                  <ul style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    {recommendation.matching_evidence.slice(0, 2).map((item, index) => (
+                      <li key={index} style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{item}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {recommendation.next_step && (
+                  <p style={{ fontSize: '12px', color: 'var(--color-text-primary)', lineHeight: '1.45', fontWeight: '700' }}>{recommendation.next_step}</p>
+                )}
+              </article>
+            )
+          })}
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function JobFeed() {
@@ -303,7 +398,11 @@ export default function JobFeed() {
   const [loading,           setLoading]            = useState(true)
   const [error,             setError]              = useState(null)
   const [toast,             setToast]              = useState(null)
+  const [recommendations,   setRecommendations]    = useState([])
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false)
+  const [recommendationError, setRecommendationError] = useState('')
   const debounceTimer = useRef(null)
+  const recommendationsRequest = useRef(0)
 
   // Debounce keyword
   useEffect(() => {
@@ -319,6 +418,10 @@ export default function JobFeed() {
   const loadJobs = useCallback(async () => {
     setLoading(true)
     setError(null)
+    recommendationsRequest.current += 1
+    setRecommendations([])
+    setRecommendationError('')
+    setRecommendationsLoading(false)
     try {
       const data = await fetchJobs({
         locations: [...selectedLocations],
@@ -328,6 +431,11 @@ export default function JobFeed() {
       })
       setJobs(data)
     } catch (err) {
+      recommendationsRequest.current += 1
+      setJobs([])
+      setRecommendations([])
+      setRecommendationError('')
+      setRecommendationsLoading(false)
       setError('Could not load jobs. Make sure the server is running.')
     } finally {
       setLoading(false)
@@ -365,6 +473,67 @@ export default function JobFeed() {
       return selectedSubTypes.has(st)
     })
   }, [jobs, selectedSubTypes])
+
+  const loadRecommendations = useCallback(async candidateJobs => {
+    const requestId = recommendationsRequest.current + 1
+    recommendationsRequest.current = requestId
+
+    setRecommendations([])
+    setRecommendationError('')
+    setRecommendationsLoading(false)
+
+    const jobData = Array.isArray(candidateJobs) ? candidateJobs.filter(Boolean) : []
+    if (jobData.length === 0) return
+
+    let profile = null
+    try {
+      const personalData = await fetchPersonalInformation()
+      profile = personalData?.profile || null
+    } catch {
+      return
+    }
+
+    if (recommendationsRequest.current !== requestId || !profile) return
+
+    setRecommendationsLoading(true)
+    try {
+      const result = await recommendJobs({
+        personal_information: profile,
+        jobs: jobData.slice(0, 60),
+      })
+      if (recommendationsRequest.current !== requestId) return
+      setRecommendations(Array.isArray(result?.recommendations) ? result.recommendations : [])
+    } catch (err) {
+      if (recommendationsRequest.current !== requestId) return
+      const status = err?.response?.status
+      if (status === 400) {
+        setRecommendationError('')
+      } else if (status === 503) {
+        setRecommendationError('AI job recommendations are unavailable until Gemini is configured.')
+      } else {
+        setRecommendationError('AI job recommendations could not be loaded yet.')
+      }
+    } finally {
+      if (recommendationsRequest.current === requestId) {
+        setRecommendationsLoading(false)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (loading || error) return
+    loadRecommendations(displayedJobs)
+  }, [displayedJobs, error, loading, loadRecommendations])
+
+  const recommendedJobs = useMemo(() => {
+    const jobsById = new Map(jobs.map(job => [String(job.id), job]))
+    return recommendations
+      .map(recommendation => {
+        const job = jobsById.get(String(recommendation.job_id))
+        return job ? { job, recommendation } : null
+      })
+      .filter(Boolean)
+  }, [jobs, recommendations])
 
   return (
     <div style={pageStyle}>
@@ -453,6 +622,12 @@ export default function JobFeed() {
           />
         </div>
       </div>
+
+      <RecommendedJobsBand
+        recommendations={recommendedJobs}
+        loading={recommendationsLoading}
+        error={recommendationError}
+      />
 
       {/* Error Banner */}
       {error && (

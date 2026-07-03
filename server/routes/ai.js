@@ -1,5 +1,5 @@
 import express from 'express'
-import { extractCvProfileWithGemini, generateCoverLetterWithGemini, isGeminiConfigured, reviewCvWithGemini } from '../services/gemini.js'
+import { extractCvProfileWithGemini, generateCoverLetterWithGemini, isGeminiConfigured, recommendJobsWithGemini, reviewCvWithGemini } from '../services/gemini.js'
 
 const router = express.Router()
 
@@ -42,6 +42,18 @@ router.post('/cover-letter', async (req, res) => {
     const status = error.status && Number.isInteger(error.status) ? error.status : 500
     res.status(status).json({
       error: error.message || 'Cover letter generation failed.',
+    })
+  }
+})
+
+router.post('/job-recommendations', async (req, res) => {
+  try {
+    const recommendations = await recommendJobsWithGemini(req.body)
+    res.json(recommendations)
+  } catch (error) {
+    const status = error.status && Number.isInteger(error.status) ? error.status : 500
+    res.status(status).json({
+      error: error.message || 'Job recommendations failed.',
     })
   }
 })
