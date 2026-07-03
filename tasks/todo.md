@@ -26,3 +26,5 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Expand Adzuna job API searches for broader general business roles and locations.
 - [x] Save generated CV recommendations and cover letters to specific applications with Word doc export.
 - [x] Add AI job recommendations above Jobs based on saved Personal Information.
+- [x] Generate validation, PRD, architecture, and data plan documents.
+- [x] Adapt professor submission docs with friends-and-family validation and reflection.

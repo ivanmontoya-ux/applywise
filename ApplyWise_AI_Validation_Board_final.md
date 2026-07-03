@@ -4,6 +4,23 @@ Project: ApplyWise
 Group members: Theresa, Gayathri, Ivan, Ophelie, Elisa, Angelo, Jacob 
 Date: June 30, 2026
 
+## July 3, 2026 Validation Update
+
+After the first validation board was drafted, the team also shared the ApplyWise concept and prototype informally with friends and family. The reaction was positive: everyone shown the tool liked it and understood why it could help graduates organize applications, CV information, cover letters, reminders, and AI recommendations in one private workspace.
+
+This feedback supports the clarity of the concept, but it is not enough by itself to prove product-market fit. Friends and family are a convenience sample and may be biased toward positive feedback. The next validation step should focus on target graduates and behavior: whether they add real or anonymized applications, save CV-derived Personal Information, trust AI suggestions, and return to update the tracker.
+
+What this validation taught us:
+
+- The product should be explained as a practical job-search command center, not only an AI CV tool.
+- The job feed should include general business roles, not only finance.
+- Users should be able to explore the app before signing up.
+- Private storage should remain account-gated.
+- CV extraction should create reusable Personal Information.
+- AI outputs should be saved to the specific application.
+- AI recommendations should include reasons and evidence.
+- A Netlify deployment is important for easier professor review and user testing.
+
 ## One-Line Validation Goal
 
 Prove whether recent graduates will enter real applications and CV evidence into ApplyWise, trust the AI support, and return because it improves their job-search workflow.

@@ -27,6 +27,25 @@ A non-AI tracker can store applications and reminders, but it cannot reliably tu
 - `Final_PRD.md`: professor-facing product requirements document.
 - `DESIGN.md`: visual language, components, microcopy, layout rules, and antipatterns.
 - `ARCHITECTURE.md`: standalone architecture sketch showing frontend, backend, database, storage, AI, and automation.
+- `PRD.md`: updated app plan reflecting validation learnings and current implementation.
+- `DATA_PLAN.md`: what data ApplyWise needs, where it lives, and who can read or write it.
+- `evidence/validation/validation-board.md`: assumptions tested, how they were tested, what the team learned, and next validation tests.
+- `evidence/validation/user-evidence.md`: informal friends-and-family validation, prototype signals, and evidence gaps.
+
+### Validation Update For Submission
+
+The team conducted informal validation among friends and family by showing the ApplyWise concept and prototype. The response was positive: everyone shown the tool liked it and understood why a private workspace for jobs, applications, CV information, cover letters, reminders, and AI recommendations would be useful for graduates.
+
+This validation is useful early evidence because it showed that the concept is easy to understand and that the value proposition is clear. However, it should be treated as informal qualitative validation, not proof of product-market fit. Friends and family are a convenience sample and may be biased toward positive feedback. The next validation step should test behavior with qualified graduates: whether they add real or anonymized applications, save CV-derived Personal Information, trust the AI output, and return to update the tracker.
+
+The main product lessons from validation were:
+
+- ApplyWise should not be only finance-focused; the job feed should include general business, consulting, marketing, operations, product, HR, supply chain, data, and finance roles.
+- Users should be able to explore the app before signing up, while saving private information should require an account.
+- CV extraction becomes more useful when the extracted profile is saved as reusable Personal Information.
+- AI outputs should be saved inside the specific application, otherwise they recreate the scattered workflow ApplyWise is trying to solve.
+- AI job recommendations need reasons and evidence, not only a match score.
+- The frontend should be deployed on Netlify for easier professor review and user validation because localhost testing is confusing for non-technical testers.
 
 ## 0. Confirmed Decisions And Remaining Assumptions
 
