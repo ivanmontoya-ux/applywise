@@ -124,3 +124,38 @@ export async function fetchWaitlistStats() {
   const { data } = await api.get('/waitlist/stats')
   return data
 }
+
+export async function fetchGmailStatus() {
+  const { data } = await api.get('/integrations/gmail/status')
+  return data
+}
+
+export async function startGmailConnect() {
+  const { data } = await api.get('/integrations/gmail/connect')
+  return data
+}
+
+export async function syncGmail() {
+  const { data } = await api.post('/integrations/gmail/sync')
+  return data
+}
+
+export async function fetchGmailSuggestions(status = 'pending') {
+  const { data } = await api.get('/integrations/gmail/suggestions', { params: { status } })
+  return data
+}
+
+export async function approveGmailSuggestion(id) {
+  const { data } = await api.post(`/integrations/gmail/suggestions/${id}/approve`)
+  return data
+}
+
+export async function rejectGmailSuggestion(id) {
+  const { data } = await api.post(`/integrations/gmail/suggestions/${id}/reject`)
+  return data
+}
+
+export async function disconnectGmail() {
+  const { data } = await api.delete('/integrations/gmail/disconnect')
+  return data
+}

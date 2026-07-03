@@ -11,6 +11,7 @@ import trackerRouter from './routes/tracker.js'
 import aiRouter from './routes/ai.js'
 import waitlistRouter from './routes/waitlist.js'
 import personalInformationRouter from './routes/personalInformation.js'
+import gmailRouter from './routes/gmail.js'
 import { optionalAuth } from './middleware/auth.js'
 import { fetchAdzunaJobs, resolveAdzunaUrls } from './services/adzuna.js'
 
@@ -64,6 +65,7 @@ app.use('/api/jobs', optionalAuth, jobsRouter)
 app.use('/api/tracker', optionalAuth, trackerRouter)
 app.use('/api/ai', optionalAuth, aiRouter)
 app.use('/api/personal-information', optionalAuth, personalInformationRouter)
+app.use('/api/integrations/gmail', optionalAuth, gmailRouter)
 
 if (existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath))

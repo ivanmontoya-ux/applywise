@@ -9,6 +9,7 @@ import {
   FileText,
   Home,
   LogOut,
+  Mail,
   MessageSquareText,
   UserRound,
   UserPlus,
@@ -147,6 +148,7 @@ export default function Sidebar() {
         <NavItem to="/personal-information" icon={UserRound} label="Personal Information" collapsed={collapsed} />
         <NavItem to="/coach" icon={MessageSquareText} label="Coach" collapsed={collapsed} />
         <NavItem to="/reminders" icon={Bell} label="Reminders" collapsed={collapsed} />
+        <NavItem to="/email" icon={Mail} label="Email" collapsed={collapsed} />
         <NavItem to="/waitlist" icon={UserPlus} label="Waitlist" collapsed={collapsed} />
       </nav>
 

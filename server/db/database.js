@@ -29,6 +29,53 @@ function createPersonalInformationTable() {
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS gmail_connections (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL UNIQUE,
+      gmail_email TEXT,
+      refresh_token_encrypted TEXT,
+      scope TEXT,
+      token_type TEXT,
+      last_history_id TEXT,
+      connected_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      disconnected_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS email_import_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      gmail_message_id TEXT NOT NULL,
+      thread_id TEXT,
+      from_email TEXT,
+      subject TEXT,
+      received_at TEXT,
+      snippet TEXT,
+      detected_type TEXT,
+      company TEXT,
+      job_title TEXT,
+      raw_preview TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(user_id, gmail_message_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS email_action_suggestions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      application_id INTEGER,
+      email_import_event_id INTEGER NOT NULL,
+      suggested_action TEXT NOT NULL,
+      suggested_status TEXT,
+      suggested_title TEXT,
+      suggested_body TEXT,
+      suggested_reminder_date TEXT,
+      confidence REAL DEFAULT 0,
+      status TEXT DEFAULT 'pending',
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY(email_import_event_id) REFERENCES email_import_events(id)
+    );
   `)
 }
 
@@ -159,6 +206,8 @@ export function initDb() {
     );
   `)
 
+  createPersonalInformationTable()
+
   // Migrations — add new columns without destroying existing data
   const migrate = (table, col, type) => {
     try { db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`) } catch (_) {}
@@ -198,6 +247,15 @@ export function initDb() {
   migrate('personal_information', 'extraction_notes_json', "TEXT DEFAULT '[]'")
   migrate('personal_information', 'source', "TEXT DEFAULT 'cv_extraction'")
   migrate('personal_information', 'updated_at', 'TEXT')
+  migrate('gmail_connections', 'gmail_email', 'TEXT')
+  migrate('gmail_connections', 'refresh_token_encrypted', 'TEXT')
+  migrate('gmail_connections', 'scope', 'TEXT')
+  migrate('gmail_connections', 'token_type', 'TEXT')
+  migrate('gmail_connections', 'last_history_id', 'TEXT')
+  migrate('gmail_connections', 'updated_at', 'TEXT')
+  migrate('gmail_connections', 'disconnected_at', 'TEXT')
+  migrate('email_import_events', 'raw_preview', 'TEXT')
+  migrate('email_action_suggestions', 'suggested_reminder_date', 'TEXT')
 
   db.exec(`
     CREATE INDEX IF NOT EXISTS jobs_created_by_idx ON jobs(created_by);
@@ -205,6 +263,10 @@ export function initDb() {
     CREATE INDEX IF NOT EXISTS tracker_user_job_idx ON tracker(user_id, job_id);
     CREATE INDEX IF NOT EXISTS tracker_user_url_idx ON tracker(user_id, url);
     CREATE UNIQUE INDEX IF NOT EXISTS personal_information_user_unique_idx ON personal_information(user_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS gmail_connections_user_unique_idx ON gmail_connections(user_id);
+    CREATE INDEX IF NOT EXISTS email_import_events_user_type_idx ON email_import_events(user_id, detected_type, received_at DESC);
+    CREATE UNIQUE INDEX IF NOT EXISTS email_import_events_user_message_idx ON email_import_events(user_id, gmail_message_id);
+    CREATE INDEX IF NOT EXISTS email_action_suggestions_user_status_idx ON email_action_suggestions(user_id, status, created_at DESC);
   `)
 
   db.prepare("UPDATE tracker SET status = 'Interview' WHERE status IN ('Phone Screen', 'Final Round')").run()
