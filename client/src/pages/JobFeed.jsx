@@ -8,7 +8,7 @@ import JobCard from '../components/JobCard'
 // ── Filter data ──────────────────────────────────────────────────────────────
 
 const LOCATION_GROUPS = [
-  { title: null, items: ['Madrid', 'London', 'Milan', 'New York', 'Amsterdam', 'Paris', 'Dublin', 'Berlin', 'Munich', 'Stockholm', 'Copenhagen'] },
+  { title: null, items: ['Madrid', 'Barcelona', 'London', 'Manchester', 'Milan', 'New York', 'Amsterdam', 'Paris', 'Dublin', 'Berlin', 'Munich', 'Stockholm', 'Copenhagen'] },
 ]
 
 const SECTOR_GROUPS = [

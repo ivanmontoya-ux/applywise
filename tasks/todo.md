@@ -23,3 +23,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Switch build-phase access to demo mode with visible features and account-required storage.
 - [x] Add Gemini-backed role-specific cover letter generator in Documents.
 - [x] Broaden the job feed beyond finance with general business roles and sectors.
+- [x] Expand Adzuna job API searches for broader general business roles and locations.

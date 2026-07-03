@@ -112,7 +112,7 @@ const CLASSIFY_RULES = [
   },
   {
     grandCategory: 'Business Role', subType: 'Coordinator',
-    kws: ['coordinator'],
+    kws: ['coordinator', 'coordination'],
   },
   {
     grandCategory: 'Business Role', subType: 'Executive',
@@ -181,18 +181,19 @@ export function inferSector(title = '', description = '') {
   if (text.includes('broker') || text.includes('brokerage') || text.includes('market mak')) return 'Brokerage & Market Making'
   if (text.includes('financial advisory') || text.includes('financial advis')) return 'Financial Advisory'
 
-  if (text.includes('strategy') || text.includes('strategic')) return 'Strategy & Consulting'
+  if (text.includes('strategy') || text.includes('strategic') || text.includes('transformation') || text.includes('change analyst')) return 'Strategy & Consulting'
   if (text.includes('consultant') || text.includes('consulting') || text.includes('advisory')) return 'Strategy & Consulting'
   if (text.includes('business analyst') || text.includes('business analysis') || text.includes('business analist')) return 'Business Analysis'
-  if (text.includes('data analyst') || text.includes('analytics') || text.includes('insights')) return 'Data & Analytics'
-  if (text.includes('human resources') || text.includes('hr ') || text.includes('talent acquisition') || text.includes('people operations')) return 'Human Resources'
-  if (text.includes('operations') || text.includes('operational excellence') || text.includes('process improvement')) return 'Operations'
+  if (text.includes('data analyst') || text.includes('analytics') || text.includes('insights') || text.includes('market research')) return 'Data & Analytics'
+  if (text.includes('human resources') || text.includes('hr ') || text.includes('talent acquisition') || text.includes('people operations') || text.includes('talent coordinator')) return 'Human Resources'
+  if (text.includes('revenue operations') || text.includes('sales operations') || text.includes('business operations') || text.includes('operations') || text.includes('operational excellence') || text.includes('process improvement')) return 'Operations'
   if (text.includes('project') || text.includes('programme') || text.includes('program coordinator')) return 'Project Management'
   if (text.includes('product')) return 'Product Management'
-  if (text.includes('marketing') || text.includes('brand') || text.includes('growth marketing') || text.includes('crm')) return 'Marketing'
-  if (text.includes('sales') || text.includes('account executive') || text.includes('business development') || text.includes('commercial')) return 'Sales & Business Development'
+  if (text.includes('marketing') || text.includes('brand') || text.includes('growth marketing') || text.includes('crm') || text.includes('ecommerce')) return 'Marketing'
+  if (text.includes('sales') || text.includes('account executive') || text.includes('account coordinator') || text.includes('business development') || text.includes('commercial') || text.includes('category analyst')) return 'Sales & Business Development'
   if (text.includes('supply chain') || text.includes('logistics') || text.includes('procurement')) return 'Supply Chain'
-  if (text.includes('customer success') || text.includes('client success')) return 'Customer Success'
+  if (text.includes('customer success') || text.includes('client success') || text.includes('customer experience')) return 'Customer Success'
+  if (text.includes('sustainability')) return 'Business & Strategy'
 
   return 'Business & Strategy'
 }
