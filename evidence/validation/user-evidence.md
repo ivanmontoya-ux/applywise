@@ -4,9 +4,9 @@ Date: 2026-07-03
 
 ## Evidence Status
 
-This file separates recorded evidence from assumptions. The team has informal validation from friends and family, prototype/build feedback, and local product signals. No completed formal target-user interview transcripts, survey exports, or expert-review transcripts are currently stored in this repository.
+This file separates recorded evidence from assumptions. The team has informal validation from friends and family, internal prototype interviews/tests with all 7 group members, an informal survey with another group from class, prototype/build feedback, and local product signals. No completed formal target-user interview transcripts, exported survey dataset, or expert-review transcripts are currently stored in this repository.
 
-For professor submission, the key point is that early qualitative reaction was positive, but the next validation step should still test behavior with qualified graduate users.
+For professor submission, the key point is that early qualitative reaction was positive across several informal validation sources. Friends and family liked the tool, all group members tested the application and proposed improvements, and another class group saw the need for the feature. The next validation step should still test behavior with a larger qualified graduate user group.
 
 ## Recorded Evidence
 
@@ -62,6 +62,74 @@ How it changed the product:
 - We made Personal Information reusable across AI features.
 - We saved cover letters and CV recommendations to the specific application instead of leaving them as copy-only outputs.
 
+### Internal Group Interviews And Prototype Tests
+
+Source: internal interviews and hands-on prototype testing by the ApplyWise project group.
+
+Participants:
+
+- 7 group members tested the application.
+- Each member tried the product from the perspective of a graduate job seeker and reviewed the main workflows.
+
+Tested workflows:
+
+1. Opening the app and understanding the purpose.
+2. Browsing the Jobs page.
+3. Reviewing the job filters and role categories.
+4. Saving or adding job applications.
+5. Checking the Tracker workflow.
+6. Uploading or extracting CV information.
+7. Reviewing the Personal Information page.
+8. Testing AI-supported CV recommendations, cover letters, and job recommendations.
+
+What we learned:
+
+- The application concept was clear to all group members.
+- The team agreed that the strongest value is the complete workflow, not one isolated feature.
+- The Jobs page needed broader business roles, not only finance-related jobs.
+- The app should be usable before login so testers and future users can understand the feature set quickly.
+- Private storage must still require an account because CV data and applications are sensitive.
+- Extracted CV information should be saved once and reused across the app.
+- Generated cover letters and CV recommendations should be saved inside the specific application.
+- AI job recommendations should be shown above the job list after the user has uploaded and saved CV-derived Personal Information.
+
+Improvements made based on group testing:
+
+- Added general business-related job searches and sector filters.
+- Added demo-mode access with Login and Sign Up buttons in the top-right corner.
+- Added CV extraction into saved Personal Information.
+- Added AI job recommendations based on saved Personal Information and the current job list.
+- Added saving of generated cover letters and CV recommendations to the selected application.
+- Added cover letter document export.
+- Updated the documentation, architecture, and data plan for a Netlify frontend and authenticated user-scoped storage.
+
+Interpretation:
+
+- This is stronger than idea-only feedback because the team tested the working application and produced concrete product changes.
+- It is still internal validation, so the next step should be external testing with target graduates.
+
+### Informal Class-Group Survey
+
+Source: informal survey and feedback discussion with another group from class.
+
+Summary:
+
+- The team shared the ApplyWise concept and feature direction with another class group.
+- Everyone in that group saw the need for the feature.
+- The strongest need they recognized was reducing the chaos of tracking many applications, CV changes, cover letters, and deadlines across separate tools.
+
+What this supports:
+
+- The problem is understandable to students and early-career job seekers.
+- The feature set addresses a real workflow pain, not only a technical idea.
+- There is interest in a tool that combines job tracking with AI-supported application preparation.
+
+Limitations:
+
+- This was an informal class survey, not a statistically representative survey.
+- The sample size and exact responses should be recorded in a future survey sheet if the project continues.
+- The next survey should ask for quantified answers on number of applications, tools used, willingness to upload CV data, and likelihood of using ApplyWise weekly.
+
 ### Landing-Page Signals
 
 Source: local SQLite development database.
@@ -96,9 +164,9 @@ Interpretation:
 
 ## Evidence Not Yet Collected
 
-### Interviews
+### External Interviews
 
-Status: not yet recorded.
+Status: not yet recorded beyond internal group interviews.
 
 Recommended interview target:
 
@@ -116,9 +184,9 @@ Interview questions:
 6. What would make you distrust an AI recommendation?
 7. What would make ApplyWise more useful than your current spreadsheet or notes system?
 
-### Surveys
+### Formal Surveys
 
-Status: not yet recorded.
+Status: informal class-group survey completed; formal survey dataset not yet recorded.
 
 Recommended survey measures:
 
@@ -176,5 +244,7 @@ Review prompts:
 
 - Product-owner feedback is useful for shaping the prototype but should not be treated as target-user validation.
 - Friends and family feedback is useful early qualitative evidence, but it should be labelled as informal validation.
+- Internal group testing is useful because all 7 members used the app and translated feedback into improvements, but it is still not independent market validation.
+- The informal class-group survey supports the need for the feature, but it should be followed by a more structured survey with recorded responses.
 - Local database records prove technical flow, not user demand.
 - The next validation milestone should collect behavioral evidence from qualified graduates using a deployed version.

@@ -8,7 +8,9 @@ Date: June 30, 2026
 
 After the first validation board was drafted, the team also shared the ApplyWise concept and prototype informally with friends and family. The reaction was positive: everyone shown the tool liked it and understood why it could help graduates organize applications, CV information, cover letters, reminders, and AI recommendations in one private workspace.
 
-This feedback supports the clarity of the concept, but it is not enough by itself to prove product-market fit. Friends and family are a convenience sample and may be biased toward positive feedback. The next validation step should focus on target graduates and behavior: whether they add real or anonymized applications, save CV-derived Personal Information, trust AI suggestions, and return to update the tracker.
+The team also conducted internal interviews/tests: all 7 group members tried the application, reviewed the main workflows, and made recommendations for improvement. The team also ran an informal survey and feedback discussion with another group from class, where everybody saw the need for the feature.
+
+This feedback supports the clarity of the concept, but it is not enough by itself to prove product-market fit. Friends and family, group members, and classmates are useful early validation sources, but they are still convenience samples. The next validation step should focus on target graduates and behavior: whether they add real or anonymized applications, save CV-derived Personal Information, trust AI suggestions, and return to update the tracker.
 
 What this validation taught us:
 
@@ -20,6 +22,7 @@ What this validation taught us:
 - AI outputs should be saved to the specific application.
 - AI recommendations should include reasons and evidence.
 - A Netlify deployment is important for easier professor review and user testing.
+- Internal group testing should lead to visible product changes, not only discussion.
 
 ## One-Line Validation Goal
 

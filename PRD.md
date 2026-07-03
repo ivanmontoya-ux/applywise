@@ -4,7 +4,7 @@
 
 ApplyWise is a web app for graduates in Europe applying to skilled early-career roles. It helps them find relevant jobs, track every application, tailor CVs and cover letters with evidence-based AI, and keep deadlines and next actions visible. Validation so far taught us to keep the product broader than finance, let users explore before login, and require an account only when storing private information. The product promise is: find and track better job applications with less chaos.
 
-For professor submission, ApplyWise should be evaluated as a working MVP concept with a clear target user, validation evidence, data plan, architecture, and risk-aware AI scope. Informal validation among friends and family was positive: everyone shown the concept liked the tool and understood why it could help graduates organize applications.
+For professor submission, ApplyWise should be evaluated as a working MVP concept with a clear target user, validation evidence, data plan, architecture, and risk-aware AI scope. Informal validation among friends and family was positive: everyone shown the concept liked the tool and understood why it could help graduates organize applications. All 7 group members also tested the application and made recommendations for improvement. An informal survey and feedback discussion with another class group showed that everyone in that group saw the need for the feature.
 
 ## 2. Key Components
 
@@ -125,6 +125,8 @@ Acceptance threshold:
 
 The validation work taught us that ApplyWise should not be positioned as only another CV builder. The stronger value is the combined workflow: find jobs, save them, track each application, reuse CV-derived Personal Information, generate application-specific documents, and see the next best action.
 
+Validation sources included friends-and-family feedback, internal prototype interviews/tests with all 7 group members, and an informal survey with another group from class. The overall reaction was positive, and the class-group feedback confirmed that students recognize the need for a better way to manage applications, CV work, cover letters, recommendations, and deadlines.
+
 What changed after validation:
 
 - **Jobs became broader:** Early feedback showed that a finance-only job feed was too narrow, so the job source and filters now include general business roles as well.
@@ -134,6 +136,7 @@ What changed after validation:
 - **Recommendations became explainable:** AI job recommendations include a fit score, fit label, reason, evidence, and next step.
 - **Deployment became important:** Local testing showed that localhost is confusing for non-technical users, so the frontend should be deployed through Netlify for review and validation.
 - **Privacy stayed central:** Positive feedback does not remove the need for user-controlled saving, clear account boundaries, and user-scoped data access.
+- **Internal testing led to improvements:** Group testing was useful because every member tried the app and turned feedback into product changes.
 
 The strongest unresolved assumption is whether target graduates will enter real or anonymized CV and application data and return to update the tracker over time. The next validation round should focus on behavioral tests, not only positive comments.
 

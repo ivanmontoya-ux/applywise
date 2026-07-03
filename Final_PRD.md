@@ -36,7 +36,11 @@ A non-AI tracker can store applications and reminders, but it cannot reliably tu
 
 The team conducted informal validation among friends and family by showing the ApplyWise concept and prototype. The response was positive: everyone shown the tool liked it and understood why a private workspace for jobs, applications, CV information, cover letters, reminders, and AI recommendations would be useful for graduates.
 
-This validation is useful early evidence because it showed that the concept is easy to understand and that the value proposition is clear. However, it should be treated as informal qualitative validation, not proof of product-market fit. Friends and family are a convenience sample and may be biased toward positive feedback. The next validation step should test behavior with qualified graduates: whether they add real or anonymized applications, save CV-derived Personal Information, trust the AI output, and return to update the tracker.
+The team also conducted internal prototype interviews/tests: all 7 group members tried the application and reviewed the core workflows. This produced concrete recommendations and improvements, including broader job categories, demo-mode access before signup, reusable Personal Information, application-specific AI outputs, and cover letter export.
+
+In addition, the team ran an informal survey and feedback discussion with another group from class. Everyone in that group saw the need for the feature, especially because graduate job applications often involve many separate tools for jobs, CV versions, cover letters, deadlines, and follow-ups.
+
+This validation is useful early evidence because it showed that the concept is easy to understand and that the value proposition is clear. However, it should be treated as informal qualitative validation, not proof of product-market fit. Friends and family, internal group members, and classmates are accessible early samples. The next validation step should test behavior with qualified graduates: whether they add real or anonymized applications, save CV-derived Personal Information, trust the AI output, and return to update the tracker.
 
 The main product lessons from validation were:
 
@@ -46,6 +50,7 @@ The main product lessons from validation were:
 - AI outputs should be saved inside the specific application, otherwise they recreate the scattered workflow ApplyWise is trying to solve.
 - AI job recommendations need reasons and evidence, not only a match score.
 - The frontend should be deployed on Netlify for easier professor review and user validation because localhost testing is confusing for non-technical testers.
+- Internal testing is most useful when it leads to visible product changes, not only agreement that the idea is good.
 
 ## 0. Confirmed Decisions And Remaining Assumptions
 

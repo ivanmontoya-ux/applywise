@@ -28,3 +28,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Add AI job recommendations above Jobs based on saved Personal Information.
 - [x] Generate validation, PRD, architecture, and data plan documents.
 - [x] Adapt professor submission docs with friends-and-family validation and reflection.
+- [x] Add internal group testing and informal class survey evidence to submission docs.
