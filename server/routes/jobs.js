@@ -1,4 +1,5 @@
 import express from 'express'
+import { getDb } from '../db/database.js'
 import { requireAuth } from '../middleware/auth.js'
 import { fetchAdzunaJobs, resolveAdzunaUrls } from '../services/adzuna.js'
 
