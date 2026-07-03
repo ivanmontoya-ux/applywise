@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { getDb } from '../db/database.js'
-import { isExcluded, classifyJob, inferExperienceLevel } from './classifier.js'
+import { isExcluded, classifyJob, inferExperienceLevel, inferSector } from './classifier.js'
 
 // Note: Adzuna uses 'es' for Spain — 'gb' would search UK only.
 const SEARCHES = [
@@ -11,9 +11,34 @@ const SEARCHES = [
   { country: 'nl', where: 'amsterdam', label: 'Amsterdam, Netherlands' },
 ]
 
-const FINANCE_QUERIES = [
+const JOB_QUERIES = [
+  'graduate business analyst',
+  'junior business analyst',
+  'graduate consultant',
+  'junior consultant',
+  'strategy analyst',
+  'business strategy graduate',
+  'commercial graduate',
+  'management trainee',
+  'operations graduate',
+  'operations analyst',
+  'project coordinator',
+  'product analyst',
+  'associate product manager',
+  'marketing graduate',
+  'marketing coordinator',
+  'growth analyst',
+  'sales graduate',
+  'business development representative',
+  'account executive graduate',
+  'customer success associate',
+  'supply chain graduate',
+  'procurement analyst',
+  'human resources graduate',
+  'talent acquisition coordinator',
+  'data analyst graduate',
   'graduate finance',
-  'analyst',
+  'graduate analyst',
   'investment banking',
   'asset management',
   'wealth management',
@@ -29,31 +54,8 @@ const FINANCE_QUERIES = [
   'treasury analyst',
   'compliance analyst',
   'fintech analyst',
-  'broker',
+  'junior broker',
 ]
-
-function inferSector(title = '') {
-  const t = title.toLowerCase()
-  if (t.includes('m&a') || t.includes('merger') || t.includes('acquisition'))              return 'M&A'
-  if (t.includes('investment bank') || t.includes('ib analyst') || t.includes('capital markets')) return 'Investment Banking'
-  if (t.includes('private equity') || t.includes('buyout'))                                return 'Private Equity'
-  if (t.includes('venture capital') || t.includes(' vc '))                                 return 'Venture Capital'
-  if (t.includes('quant') || t.includes('quantitative'))                                   return 'Quantitative Analysis'
-  if (t.includes('sales') && (t.includes('trading') || t.includes('trader')))             return 'Sales & Trading'
-  if (t.includes('equity research') || t.includes('research analyst'))                    return 'Equity Research'
-  if (t.includes('asset manag') || t.includes('fund manag') || t.includes('portfolio'))   return 'Asset Management'
-  if (t.includes('wealth') || t.includes('private client') || t.includes('private wealth')) return 'Wealth Management'
-  if (t.includes('private bank'))                                                           return 'Private Banking'
-  if (t.includes('commercial bank') || t.includes('corporate bank') || t.includes('retail bank')) return 'Commercial Banking'
-  if (t.includes('risk') && t.includes('analyst'))                                         return 'Risk Management'
-  if (t.includes('compliance') || t.includes('regulatory') || t.includes('kyc') || t.includes('aml')) return 'Compliance & Regulatory'
-  if (t.includes('treasury'))                                                               return 'Treasury'
-  if (t.includes('fintech') || t.includes('financial technology') || t.includes('payments')) return 'Financial Technology (FinTech)'
-  if (t.includes('corporate finance') || t.includes('corp fin'))                           return 'Corporate Finance'
-  if (t.includes('broker') || t.includes('brokerage') || t.includes('market mak'))        return 'Brokerage & Market Making'
-  if (t.includes('advisory') || t.includes('financial advis'))                             return 'Financial Advisory'
-  return 'Investment Banking'
-}
 
 function currencyFor(country) {
   if (country === 'gb') return 'GBP'
@@ -219,7 +221,7 @@ export async function fetchAdzunaJobs() {
   const errors = []
 
   for (const { country, where, label } of SEARCHES) {
-    for (const what of FINANCE_QUERIES) {
+    for (const what of JOB_QUERIES) {
       try {
         const { data } = await axios.get(
           `https://api.adzuna.com/v1/api/jobs/${country}/search/1`,
@@ -271,7 +273,7 @@ export async function fetchAdzunaJobs() {
             titleStr,
             job.company?.display_name || '',
             label,
-            inferSector(titleStr),
+            inferSector(titleStr, descStr),
             job.salary_min  || null,
             job.salary_max  || null,
             currencyFor(country),

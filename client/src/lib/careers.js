@@ -1,4 +1,4 @@
-// Known careers portals for major finance employers.
+// Known careers portals for major finance, consulting, tech, and business employers.
 // searchUrl: portal search with {query} replaced by encoded job title.
 // careersUrl: base careers page used as fallback.
 const CAREERS_MAP = [
@@ -265,6 +265,57 @@ const CAREERS_MAP = [
 
   { keys: ['roland berger'],
     careersUrl: 'https://www.rolandberger.com/en/Career/' },
+
+  { keys: ['accenture'],
+    searchUrl: 'https://www.accenture.com/us-en/careers/jobsearch?jk={query}',
+    careersUrl: 'https://www.accenture.com/careers' },
+
+  // ── Tier 2: General Business, Tech & Consumer ─────────────────────────────
+  { keys: ['amazon'],
+    searchUrl: 'https://www.amazon.jobs/en/search?base_query={query}',
+    careersUrl: 'https://www.amazon.jobs/' },
+
+  { keys: ['loreal', "l'oreal"],
+    searchUrl: 'https://careers.loreal.com/en_US/jobs/SearchJobs/?q={query}',
+    careersUrl: 'https://careers.loreal.com/' },
+
+  { keys: ['booking.com', 'booking holdings'],
+    searchUrl: 'https://careers.booking.com/jobs?query={query}',
+    careersUrl: 'https://careers.booking.com/' },
+
+  { keys: ['salesforce'],
+    searchUrl: 'https://careers.salesforce.com/en/jobs/?search={query}',
+    careersUrl: 'https://www.salesforce.com/company/careers/' },
+
+  { keys: ['procter and gamble', 'procter & gamble', 'p&g'],
+    searchUrl: 'https://www.pgcareers.com/search-jobs?k={query}',
+    careersUrl: 'https://www.pgcareers.com/' },
+
+  { keys: ['spotify'],
+    careersUrl: 'https://www.lifeatspotify.com/jobs' },
+
+  { keys: ['siemens'],
+    searchUrl: 'https://jobs.siemens.com/careers?query={query}',
+    careersUrl: 'https://jobs.siemens.com/' },
+
+  { keys: ['heineken'],
+    careersUrl: 'https://careers.theheinekencompany.com/' },
+
+  { keys: ['hubspot'],
+    searchUrl: 'https://www.hubspot.com/careers/jobs?hubs_content-cta=careers-search&search={query}',
+    careersUrl: 'https://www.hubspot.com/careers' },
+
+  { keys: ['nestle', 'nestlé'],
+    searchUrl: 'https://www.nestle.com/jobs/search-jobs?keyword={query}',
+    careersUrl: 'https://www.nestle.com/jobs' },
+
+  { keys: ['maersk'],
+    searchUrl: 'https://www.maersk.com/careers/vacancies?searchText={query}',
+    careersUrl: 'https://www.maersk.com/careers' },
+
+  { keys: ['zalando'],
+    searchUrl: 'https://jobs.zalando.com/en/jobs/?q={query}',
+    careersUrl: 'https://jobs.zalando.com/' },
 
   // ── Tier 2: FinTech ────────────────────────────────────────────────────────
   { keys: ['revolut'],

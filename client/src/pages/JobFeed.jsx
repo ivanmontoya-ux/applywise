@@ -8,14 +8,16 @@ import JobCard from '../components/JobCard'
 // ── Filter data ──────────────────────────────────────────────────────────────
 
 const LOCATION_GROUPS = [
-  { title: null, items: ['Madrid', 'London', 'Milan', 'New York', 'Amsterdam'] },
+  { title: null, items: ['Madrid', 'London', 'Milan', 'New York', 'Amsterdam', 'Paris', 'Dublin', 'Berlin', 'Munich', 'Stockholm', 'Copenhagen'] },
 ]
 
 const SECTOR_GROUPS = [
+  { title: 'Business',         items: ['Business & Strategy', 'Business Analysis', 'Strategy & Consulting', 'Operations', 'Project Management', 'Product Management'] },
+  { title: 'Commercial',       items: ['Marketing', 'Sales & Business Development', 'Customer Success', 'Supply Chain', 'Human Resources', 'Data & Analytics'] },
   { title: 'Banking',          items: ['Investment Banking', 'Commercial Banking', 'Private Banking', 'Corporate Finance'] },
   { title: 'Markets',          items: ['Sales & Trading', 'Brokerage & Market Making', 'Equity Research', 'Quantitative Analysis'] },
   { title: 'Investments',      items: ['Asset Management', 'Wealth Management', 'Private Equity', 'Venture Capital'] },
-  { title: 'Advisory & Other', items: ['M&A', 'Financial Advisory', 'Risk Management', 'Treasury', 'Compliance & Regulatory', 'Financial Technology (FinTech)'] },
+  { title: 'Finance & Risk',   items: ['M&A', 'Financial Advisory', 'Risk Management', 'Treasury', 'Compliance & Regulatory', 'Financial Technology (FinTech)'] },
 ]
 
 const JOB_TYPE_GROUPS = [
@@ -23,8 +25,8 @@ const JOB_TYPE_GROUPS = [
   { title: 'Internship',       items: ['Internship', 'Placement', 'Work Experience'] },
   { title: 'Analyst Role',     items: ['Analyst', 'Research', 'Quantitative'] },
   { title: 'Associate',        items: ['Associate', 'Assistant'] },
+  { title: 'Business Role',    items: ['Consultant', 'Specialist', 'Officer', 'Coordinator', 'Executive', 'Product', 'Operations'] },
   { title: 'Entry-Level',      items: ['General'] },
-  { title: 'Other',            items: ['Consultant', 'Specialist', 'Officer', 'Coordinator'] },
 ]
 
 // ── Styles ───────────────────────────────────────────────────────────────────
@@ -353,13 +355,12 @@ export default function JobFeed() {
   // Client-side sub-type filter (no extra API round-trip for type changes)
   const displayedJobs = useMemo(() => {
     return jobs.filter(job => {
-      const { grandCategory: gc, subType: st } = job.grand_category
-        ? { grandCategory: job.grand_category, subType: job.sub_type }
+      const { subType: st } = job.grand_category
+        ? { subType: job.sub_type }
         : classifyJob(job.title)
 
       if (selectedSubTypes.size === 0) {
-        // Default: hide "Other" category
-        return gc !== 'Other'
+        return true
       }
       return selectedSubTypes.has(st)
     })

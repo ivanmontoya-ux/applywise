@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { classifyJob, inferExperienceLevel } from '../services/classifier.js'
+import { classifyJob, inferExperienceLevel, inferSector, isExcluded } from '../services/classifier.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DB_PATH = path.join(__dirname, 'jobs.db')
@@ -203,15 +203,19 @@ export function initDb() {
   db.prepare("UPDATE tracker SET status = 'Withdrawn' WHERE status IN ('Declined', 'Archived')").run()
   db.prepare("UPDATE tracker SET status = 'Saved' WHERE status IS NULL OR status = ''").run()
 
-  // Back-fill classification for any jobs that predate this migration
-  const unclassified = db.prepare('SELECT id, title FROM jobs WHERE grand_category IS NULL').all()
-  if (unclassified.length > 0) {
+  // Back-fill and refresh classification for jobs that predate current categories.
+  const jobsForClassification = db.prepare('SELECT id, title, grand_category, sub_type FROM jobs WHERE created_by IS NULL').all()
+  if (jobsForClassification.length > 0) {
     const update = db.prepare('UPDATE jobs SET grand_category = ?, sub_type = ? WHERE id = ?')
-    for (const { id, title } of unclassified) {
+    let changed = 0
+    for (const { id, title, grand_category, sub_type } of jobsForClassification) {
       const { grandCategory, subType } = classifyJob(title)
-      update.run(grandCategory, subType, id)
+      if (grandCategory !== grand_category || subType !== sub_type) {
+        update.run(grandCategory, subType, id)
+        changed++
+      }
     }
-    console.log(`Classified ${unclassified.length} existing jobs`)
+    if (changed > 0) console.log(`Classified ${changed} existing jobs`)
   }
 
   const unleveled = db.prepare("SELECT id, title, description FROM jobs WHERE experience_level IS NULL").all()
@@ -222,6 +226,33 @@ export function initDb() {
       if (level) setLevel.run(level, id)
     }
     console.log(`Set experience level for ${unleveled.length} existing jobs`)
+  }
+
+  const jobsForSector = db.prepare('SELECT id, title, description, sector FROM jobs WHERE created_by IS NULL').all()
+  if (jobsForSector.length > 0) {
+    const updateSector = db.prepare('UPDATE jobs SET sector = ? WHERE id = ?')
+    let changed = 0
+    for (const { id, title, description, sector } of jobsForSector) {
+      const inferred = inferSector(title, description || '')
+      if (inferred && inferred !== sector) {
+        updateSector.run(inferred, id)
+        changed++
+      }
+    }
+    if (changed > 0) console.log(`Reclassified ${changed} job sectors`)
+  }
+
+  const adzunaJobs = db.prepare("SELECT id, title, description FROM jobs WHERE source = 'adzuna' AND created_by IS NULL").all()
+  if (adzunaJobs.length > 0) {
+    const deleteJob = db.prepare('DELETE FROM jobs WHERE id = ?')
+    let removed = 0
+    for (const { id, title, description } of adzunaJobs) {
+      if (isExcluded(title, description || '')) {
+        deleteJob.run(id)
+        removed++
+      }
+    }
+    if (removed > 0) console.log(`Removed ${removed} off-target Adzuna jobs`)
   }
 
   console.log('Database initialized')

@@ -1,5 +1,4 @@
 import express from 'express'
-import { getDb } from '../db/database.js'
 import { requireAuth } from '../middleware/auth.js'
 import { fetchAdzunaJobs, resolveAdzunaUrls } from '../services/adzuna.js'
 
@@ -70,9 +69,6 @@ router.post('/refresh', requireAuth, async (req, res) => {
   }
 
   try {
-    const db = getDb()
-    db.prepare("DELETE FROM jobs WHERE source = 'seed' AND (created_by IS NULL OR created_by = ?)").run(req.user.id)
-
     const { upserted, errors } = await fetchAdzunaJobs()
     // Respond immediately; resolve redirect URLs in background
     res.json({ success: true, upserted, searchErrors: errors.length })

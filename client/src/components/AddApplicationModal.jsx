@@ -2,7 +2,32 @@ import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { addApplication } from '../lib/api'
 
-const SECTORS = ['Investment Banking', 'Asset Management', 'Wealth Management', 'M&A', 'Private Equity', 'Venture Capital', 'Commercial Banking', 'Private Banking']
+const SECTORS = [
+  'Business & Strategy',
+  'Business Analysis',
+  'Strategy & Consulting',
+  'Operations',
+  'Project Management',
+  'Product Management',
+  'Marketing',
+  'Sales & Business Development',
+  'Customer Success',
+  'Supply Chain',
+  'Human Resources',
+  'Data & Analytics',
+  'Investment Banking',
+  'Asset Management',
+  'Wealth Management',
+  'M&A',
+  'Private Equity',
+  'Venture Capital',
+  'Commercial Banking',
+  'Private Banking',
+  'Corporate Finance',
+  'Risk Management',
+  'Compliance & Regulatory',
+  'Financial Technology (FinTech)',
+]
 
 export default function AddApplicationModal({ onClose, onSaved }) {
   const [form, setForm] = useState({ title: '', company: '', location: '', url: '', sector: '', notes: '' })
@@ -78,12 +103,12 @@ export default function AddApplicationModal({ onClose, onSaved }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
               <label style={labelStyle}>Job Title *</label>
-              <input style={inputStyle(errors.title)} value={form.title} onChange={e => set('title', e.target.value)} placeholder="Analyst, Associate…" onFocus={e => e.target.style.borderColor = 'var(--color-applied-teal)'} onBlur={e => e.target.style.borderColor = errors.title ? 'var(--color-danger)' : 'var(--color-border)'} />
+              <input style={inputStyle(errors.title)} value={form.title} onChange={e => set('title', e.target.value)} placeholder="Analyst, Consultant, Coordinator..." onFocus={e => e.target.style.borderColor = 'var(--color-applied-teal)'} onBlur={e => e.target.style.borderColor = errors.title ? 'var(--color-danger)' : 'var(--color-border)'} />
               {errors.title && <p style={{ fontSize: '11px', color: 'var(--color-danger)', margin: '3px 0 0' }}>{errors.title}</p>}
             </div>
             <div>
               <label style={labelStyle}>Company *</label>
-              <input style={inputStyle(errors.company)} value={form.company} onChange={e => set('company', e.target.value)} placeholder="Goldman Sachs…" onFocus={e => e.target.style.borderColor = 'var(--color-applied-teal)'} onBlur={e => e.target.style.borderColor = errors.company ? 'var(--color-danger)' : 'var(--color-border)'} />
+              <input style={inputStyle(errors.company)} value={form.company} onChange={e => set('company', e.target.value)} placeholder="Deloitte, Unilever, Goldman Sachs..." onFocus={e => e.target.style.borderColor = 'var(--color-applied-teal)'} onBlur={e => e.target.style.borderColor = errors.company ? 'var(--color-danger)' : 'var(--color-border)'} />
               {errors.company && <p style={{ fontSize: '11px', color: 'var(--color-danger)', margin: '3px 0 0' }}>{errors.company}</p>}
             </div>
           </div>

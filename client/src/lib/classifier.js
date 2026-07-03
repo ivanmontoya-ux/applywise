@@ -15,10 +15,13 @@ const CLASSIFY_RULES = [
   { grandCategory: 'Analyst Role',     subType: 'Analyst',    kws: ['analyst'] },
   { grandCategory: 'Associate',        subType: 'Associate',  kws: ['associate'] },
   { grandCategory: 'Associate',        subType: 'Assistant',  kws: ['assistant'] },
-  { grandCategory: 'Other',            subType: 'Consultant', kws: ['consultant', 'consulting'] },
-  { grandCategory: 'Other',            subType: 'Specialist', kws: ['specialist'] },
-  { grandCategory: 'Other',            subType: 'Officer',    kws: ['officer'] },
-  { grandCategory: 'Other',            subType: 'Coordinator', kws: ['coordinator'] },
+  { grandCategory: 'Business Role',    subType: 'Consultant', kws: ['consultant', 'consulting'] },
+  { grandCategory: 'Business Role',    subType: 'Specialist', kws: ['specialist'] },
+  { grandCategory: 'Business Role',    subType: 'Officer',    kws: ['officer'] },
+  { grandCategory: 'Business Role',    subType: 'Coordinator', kws: ['coordinator'] },
+  { grandCategory: 'Business Role',    subType: 'Executive',  kws: ['executive'] },
+  { grandCategory: 'Business Role',    subType: 'Product',    kws: ['product'] },
+  { grandCategory: 'Business Role',    subType: 'Operations', kws: ['operations', 'operation'] },
 ]
 
 export function classifyJob(title = '') {
