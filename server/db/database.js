@@ -119,7 +119,11 @@ export function initDb() {
       date_applied TEXT,
       status TEXT DEFAULT 'Saved',
       notes TEXT,
-      is_manual INTEGER DEFAULT 0
+      is_manual INTEGER DEFAULT 0,
+      document_readiness TEXT DEFAULT 'Missing',
+      cv_review_json TEXT,
+      cover_letter_json TEXT,
+      documents_updated_at TEXT
     );
 
     CREATE TABLE IF NOT EXISTS waitlist_signups (
@@ -168,6 +172,10 @@ export function initDb() {
   migrate('tracker', 'user_id',         "TEXT NOT NULL DEFAULT 'legacy'")
   migrate('tracker', 'deadline_type',  'TEXT')
   migrate('tracker', 'deadline_date',  'TEXT')
+  migrate('tracker', 'document_readiness', "TEXT DEFAULT 'Missing'")
+  migrate('tracker', 'cv_review_json', 'TEXT')
+  migrate('tracker', 'cover_letter_json', 'TEXT')
+  migrate('tracker', 'documents_updated_at', 'TEXT')
   migrate('jobs', 'experience_level', 'TEXT')
   migrate('waitlist_signups', 'full_name', 'TEXT')
   migrate('waitlist_signups', 'location', 'TEXT')

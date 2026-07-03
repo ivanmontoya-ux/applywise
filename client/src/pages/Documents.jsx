@@ -4,6 +4,7 @@ import {
   AlertCircle,
   Briefcase,
   CheckCircle2,
+  Download,
   FileText,
   GraduationCap,
   Lightbulb,
@@ -11,12 +12,14 @@ import {
   Mail,
   PenLine,
   RefreshCw,
+  Save,
   ShieldCheck,
   Upload,
   UserRound,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
-import { extractCvProfile, fetchAiStatus, fetchPersonalInformation, fetchTracker, generateCoverLetter, reviewCv, savePersonalInformation } from '../lib/api'
+import { extractCvProfile, fetchAiStatus, fetchPersonalInformation, fetchTracker, generateCoverLetter, reviewCv, savePersonalInformation, updateApplication } from '../lib/api'
+import { downloadCoverLetterDoc } from '../lib/documentExport'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
@@ -75,6 +78,33 @@ const secondaryButtonStyle = {
   fontSize: '13px',
   fontWeight: '500',
   cursor: 'pointer',
+}
+
+function applicationLabel(application) {
+  if (!application) return 'selected application'
+  return [application.title, application.company].filter(Boolean).join(' at ') || 'selected application'
+}
+
+function readinessForSavedMaterial(application, materialType) {
+  const hasReview = materialType === 'review' || Boolean(application?.cv_review)
+  const hasLetter = materialType === 'cover_letter' || Boolean(application?.cover_letter)
+  if (hasReview && hasLetter) return 'Complete'
+  if (hasLetter) return 'Cover letter ready'
+  if (hasReview) return 'CV reviewed'
+  return 'Missing'
+}
+
+function SaveHint({ canSave, auth, selectedApplication }) {
+  if (canSave) return null
+  return (
+    <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: '1.45', maxWidth: 220 }}>
+      {!auth.session
+        ? 'Log in or sign up to save this to an application.'
+        : selectedApplication
+          ? 'Generate a result before saving it.'
+          : 'Select an application before saving.'}
+    </p>
+  )
 }
 
 function bytesToSize(bytes) {
@@ -523,7 +553,7 @@ function CvProfileResults({ profile }) {
   )
 }
 
-function ReviewResults({ review }) {
+function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplication }) {
   const rec = recommendationColor(review.recommendation)
 
   return (
@@ -541,17 +571,34 @@ function ReviewResults({ review }) {
               {review.summary}
             </p>
           </div>
-          <div style={{
-            minWidth: 118,
-            border: `1px solid ${rec.border}`,
-            background: rec.bg,
-            color: rec.color,
-            borderRadius: 'var(--radius-md)',
-            padding: '12px',
-            textAlign: 'center',
-          }}>
-            <div style={{ fontSize: '24px', fontWeight: '800', lineHeight: '1' }}>{review.fit_score}</div>
-            <div style={{ fontSize: '11px', fontWeight: '700', marginTop: '4px' }}>{recommendationLabel(review.recommendation)}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'flex-end', flexShrink: 0 }}>
+            <div style={{
+              minWidth: 118,
+              border: `1px solid ${rec.border}`,
+              background: rec.bg,
+              color: rec.color,
+              borderRadius: 'var(--radius-md)',
+              padding: '12px',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '24px', fontWeight: '800', lineHeight: '1' }}>{review.fit_score}</div>
+              <div style={{ fontSize: '11px', fontWeight: '700', marginTop: '4px' }}>{recommendationLabel(review.recommendation)}</div>
+            </div>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={!canSave || saving}
+              style={{
+                ...secondaryButtonStyle,
+                opacity: !canSave || saving ? 0.6 : 1,
+                cursor: !canSave || saving ? 'default' : 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {saving ? <RefreshCw size={14} strokeWidth={2.5} /> : <Save size={14} strokeWidth={2.5} />}
+              {saving ? 'Saving...' : 'Save to application'}
+            </button>
+            <SaveHint canSave={canSave} auth={auth} selectedApplication={selectedApplication} />
           </div>
         </div>
         <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
@@ -628,7 +675,7 @@ function ReviewResults({ review }) {
   )
 }
 
-function CoverLetterResults({ letter }) {
+function CoverLetterResults({ letter, onSave, saving, canSave, auth, selectedApplication, onCreateDoc }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <section style={{ ...panelStyle, padding: '24px' }}>
@@ -644,13 +691,46 @@ function CoverLetterResults({ letter }) {
               {letter.opening_strategy || 'Drafted from the CV and application context provided.'}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => navigator.clipboard?.writeText(letter.cover_letter || '')}
-            style={{ ...secondaryButtonStyle, flexShrink: 0 }}
-          >
-            Copy draft
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '9px', flexShrink: 0 }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard?.writeText(letter.cover_letter || '')}
+                style={{ ...secondaryButtonStyle, flexShrink: 0 }}
+              >
+                Copy draft
+              </button>
+              <button
+                type="button"
+                onClick={onCreateDoc}
+                disabled={!letter.cover_letter}
+                style={{
+                  ...secondaryButtonStyle,
+                  opacity: letter.cover_letter ? 1 : 0.6,
+                  cursor: letter.cover_letter ? 'pointer' : 'default',
+                  flexShrink: 0,
+                }}
+              >
+                <Download size={14} strokeWidth={2.5} />
+                Create Word doc
+              </button>
+              <button
+                type="button"
+                onClick={onSave}
+                disabled={!canSave || saving}
+                style={{
+                  ...primaryButtonStyle,
+                  opacity: !canSave || saving ? 0.6 : 1,
+                  cursor: !canSave || saving ? 'default' : 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                {saving ? <RefreshCw size={14} strokeWidth={2.5} /> : <Save size={14} strokeWidth={2.5} />}
+                {saving ? 'Saving...' : 'Save to application'}
+              </button>
+            </div>
+            <SaveHint canSave={canSave} auth={auth} selectedApplication={selectedApplication} />
+          </div>
         </div>
         <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
           This is a draft. Check names, role details, and claims before sending.
@@ -718,6 +798,7 @@ export default function Documents() {
   const [loadingContext, setLoadingContext] = useState(true)
   const [error, setError] = useState('')
   const [saveNotice, setSaveNotice] = useState('')
+  const [savingMaterial, setSavingMaterial] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -749,6 +830,86 @@ export default function Documents() {
     () => applications.find(app => String(app.id) === selectedApplicationId) || null,
     [applications, selectedApplicationId],
   )
+
+  function showSavedReview(application = selectedApplication) {
+    if (!application?.cv_review) return
+    setProfile(null)
+    setCoverLetter(null)
+    setReview(application.cv_review)
+    setError('')
+    setSaveNotice(`Showing saved CV recommendations for ${applicationLabel(application)}.`)
+  }
+
+  function showSavedCoverLetter(application = selectedApplication) {
+    if (!application?.cover_letter) return
+    setProfile(null)
+    setReview(null)
+    setCoverLetter(application.cover_letter)
+    setError('')
+    setSaveNotice(`Showing saved cover letter for ${applicationLabel(application)}.`)
+  }
+
+  function handleApplicationChange(applicationId) {
+    setSelectedApplicationId(applicationId)
+    const application = applications.find(app => String(app.id) === applicationId)
+    setProfile(null)
+    setError('')
+    setSaveNotice('')
+
+    if (application?.cv_review) {
+      setReview(application.cv_review)
+      setCoverLetter(null)
+    } else if (application?.cover_letter) {
+      setReview(null)
+      setCoverLetter(application.cover_letter)
+    } else {
+      setReview(null)
+      setCoverLetter(null)
+    }
+  }
+
+  async function saveMaterialToApplication(materialType) {
+    setError('')
+    setSaveNotice('')
+
+    if (!auth.session) {
+      setSaveNotice('Log in or sign up to save this to an application.')
+      return
+    }
+    if (!selectedApplication) {
+      setError('Select an application before saving this material.')
+      return
+    }
+
+    const isReview = materialType === 'review'
+    const material = isReview ? review : coverLetter
+    if (!material) {
+      setError(isReview ? 'Generate CV recommendations before saving.' : 'Generate a cover letter before saving.')
+      return
+    }
+
+    setSavingMaterial(materialType)
+    try {
+      const savedAt = new Date().toISOString()
+      const payload = {
+        document_readiness: readinessForSavedMaterial(selectedApplication, materialType),
+        [isReview ? 'cv_review' : 'cover_letter']: {
+          ...material,
+          saved_at: savedAt,
+          saved_from: isReview ? 'gemini_cv_review' : 'gemini_cover_letter',
+        },
+      }
+      const updated = await updateApplication(selectedApplication.id, payload)
+      setApplications(prev => prev.map(app => (
+        String(app.id) === String(updated.id) ? updated : app
+      )))
+      setSaveNotice(`${isReview ? 'CV recommendations' : 'Cover letter'} saved to ${applicationLabel(updated)}.`)
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Could not save this material to the application yet.')
+    } finally {
+      setSavingMaterial('')
+    }
+  }
 
   async function handleFileChange(event) {
     const file = event.target.files?.[0]
@@ -885,6 +1046,7 @@ export default function Documents() {
         company: selectedApplication?.company || '',
         application_notes: selectedApplication?.notes || '',
         job_description: jobDescription,
+        personal_information: personalInfo ? JSON.stringify(personalInfo) : '',
       })
       setCoverLetter(result)
     } catch (err) {
@@ -894,8 +1056,15 @@ export default function Documents() {
     }
   }
 
+  function handleCreateCoverLetterDoc() {
+    if (!coverLetter?.cover_letter) return
+    downloadCoverLetterDoc(coverLetter, selectedApplication || {})
+  }
+
   const connected = aiStatus?.gemini_configured
   const profileSaved = saveNotice === 'Saved under Personal Information.'
+  const canSaveReview = Boolean(auth.session && selectedApplication && review)
+  const canSaveCoverLetter = Boolean(auth.session && selectedApplication && coverLetter)
 
   return (
     <div style={pageStyle}>
@@ -927,7 +1096,7 @@ export default function Documents() {
             <label style={labelStyle}>Application context</label>
             <select
               value={selectedApplicationId}
-              onChange={event => setSelectedApplicationId(event.target.value)}
+              onChange={event => handleApplicationChange(event.target.value)}
               disabled={loadingContext || applications.length === 0}
               style={inputStyle}
             >
@@ -1026,6 +1195,28 @@ export default function Documents() {
                 {selectedApplication.title} at {selectedApplication.company}
               </strong>
               {[selectedApplication.location, selectedApplication.sector, selectedApplication.status].filter(Boolean).join(' - ')}
+              {(selectedApplication.cv_review || selectedApplication.cover_letter) && (
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+                  {selectedApplication.cv_review && (
+                    <button
+                      type="button"
+                      onClick={() => showSavedReview(selectedApplication)}
+                      style={{ ...secondaryButtonStyle, minHeight: 34, padding: '7px 10px', fontSize: '12px' }}
+                    >
+                      Show saved CV review
+                    </button>
+                  )}
+                  {selectedApplication.cover_letter && (
+                    <button
+                      type="button"
+                      onClick={() => showSavedCoverLetter(selectedApplication)}
+                      style={{ ...secondaryButtonStyle, minHeight: 34, padding: '7px 10px', fontSize: '12px' }}
+                    >
+                      Show saved cover letter
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -1143,9 +1334,28 @@ export default function Documents() {
         {profile
           ? <CvProfileResults profile={profile} />
           : review
-            ? <ReviewResults review={review} />
+            ? (
+              <ReviewResults
+                review={review}
+                onSave={() => saveMaterialToApplication('review')}
+                saving={savingMaterial === 'review'}
+                canSave={canSaveReview}
+                auth={auth}
+                selectedApplication={selectedApplication}
+              />
+            )
             : coverLetter
-              ? <CoverLetterResults letter={coverLetter} />
+              ? (
+                <CoverLetterResults
+                  letter={coverLetter}
+                  onSave={() => saveMaterialToApplication('cover_letter')}
+                  saving={savingMaterial === 'cover_letter'}
+                  canSave={canSaveCoverLetter}
+                  auth={auth}
+                  selectedApplication={selectedApplication}
+                  onCreateDoc={handleCreateCoverLetterDoc}
+                />
+              )
               : <EmptyReview />}
       </div>
     </div>

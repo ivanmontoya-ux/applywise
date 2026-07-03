@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Bell, Calendar, ExternalLink, FileText, MapPin, Pencil, RefreshCcw, Trash2 } from 'lucide-react'
+import { Bell, Calendar, Download, ExternalLink, FileText, MapPin, Pencil, RefreshCcw, Trash2 } from 'lucide-react'
 import { updateApplication, deleteApplication } from '../lib/api'
+import { downloadCoverLetterDoc } from '../lib/documentExport'
 import {
   APPLICATION_STATUSES,
   formatApplicationDate,
@@ -19,6 +20,8 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
   const currentStatusColor = getStatusStyle(application.status)
   const documentReadiness = getDocumentReadiness(application)
   const nextAction = getNextAction(application)
+  const hasCvReview = Boolean(application.cv_review)
+  const hasCoverLetter = Boolean(application.cover_letter)
 
   async function handleStatusChange(status) {
     if (status === application.status || updatingStatus) return
@@ -216,9 +219,30 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff' }}>
           <FileText size={14} strokeWidth={2.4} style={{ color: documentReadiness === 'Complete' ? 'var(--color-success)' : 'var(--color-warning)', flexShrink: 0 }} />
-          <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
-            Documents: <strong style={{ color: 'var(--color-text-primary)', fontWeight: '800' }}>{documentReadiness}</strong>
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', minWidth: 0 }}>
+            <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+              Documents: <strong style={{ color: 'var(--color-text-primary)', fontWeight: '800' }}>{documentReadiness}</strong>
+            </span>
+            {(hasCvReview || hasCoverLetter) && (
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                {hasCvReview && (
+                  <span style={{ minHeight: 24, display: 'inline-flex', alignItems: 'center', padding: '0 8px', borderRadius: '6px', background: '#edf7f7', color: 'var(--color-applied-teal)', fontSize: '11px', fontWeight: '800' }}>
+                    CV review saved
+                  </span>
+                )}
+                {hasCoverLetter && (
+                  <button
+                    type="button"
+                    onClick={() => downloadCoverLetterDoc(application.cover_letter, application)}
+                    style={{ minHeight: 24, display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '0 8px', borderRadius: '6px', border: '1px solid #b9dada', background: '#ffffff', color: 'var(--color-applied-teal)', fontSize: '11px', fontWeight: '800', cursor: 'pointer' }}
+                  >
+                    <Download size={11} strokeWidth={2.5} />
+                    Cover letter doc
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

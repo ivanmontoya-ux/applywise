@@ -24,3 +24,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Add Gemini-backed role-specific cover letter generator in Documents.
 - [x] Broaden the job feed beyond finance with general business roles and sectors.
 - [x] Expand Adzuna job API searches for broader general business roles and locations.
+- [x] Save generated CV recommendations and cover letters to specific applications with Word doc export.

@@ -43,6 +43,9 @@ export function formatApplicationDate(dateStr) {
 
 export function getDocumentReadiness(application) {
   if (application?.document_readiness) return application.document_readiness
+  if (application?.cv_review && application?.cover_letter) return 'Complete'
+  if (application?.cover_letter) return 'Cover letter ready'
+  if (application?.cv_review) return 'CV reviewed'
   return 'Missing'
 }
 
