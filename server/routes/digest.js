@@ -49,6 +49,7 @@ router.post('/send-test', requireAuth, async (req, res) => {
     const result = await sendDigestNow(db, req.user, recipient)
     res.json({
       sent: true,
+      recipient_email: recipient,
       provider_message_id: result.provider_message_id,
       subject: result.digest.subject,
     })

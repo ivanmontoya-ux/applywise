@@ -453,6 +453,12 @@ function DigestAutomationPanel({ auth, preferences, preview, onSave, onSendTest,
     : draft.frequency === 'every_2_days'
       ? 'every 2 days'
       : 'once a week'
+  const savedEnabled = Boolean(preferences?.enabled)
+  const hasUnsavedChanges = Boolean(preferences) && (
+    savedEnabled !== draft.enabled ||
+    (preferences.frequency || 'weekly') !== draft.frequency ||
+    (preferences.recipient_email || auth.user?.email || '') !== draft.recipient_email
+  )
 
   return (
     <Panel title="Email Overview Automation" eyebrow="Digest" icon={Mail}>
@@ -502,11 +508,15 @@ function DigestAutomationPanel({ auth, preferences, preview, onSave, onSendTest,
 
           <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '12px', background: '#fbfdff' }}>
             <p style={{ fontSize: '13px', color: 'var(--color-text-primary)', fontWeight: '800', marginBottom: '6px' }}>
-              {draft.enabled ? `Scheduled ${frequencyLabel}` : 'Digest is off'}
+              {draft.enabled ? `${savedEnabled && !hasUnsavedChanges ? 'Scheduled' : 'Ready to schedule'} ${frequencyLabel}` : 'Digest is off'}
             </p>
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>
               {preferences?.last_sent_at ? `Last sent: ${formatApplicationDate(preferences.last_sent_at)}. ` : ''}
-              {preferences?.next_send_at && draft.enabled ? `Next send: ${formatApplicationDate(preferences.next_send_at)}.` : 'No email will be sent while this is off.'}
+              {draft.enabled
+                ? (savedEnabled && !hasUnsavedChanges && preferences?.next_send_at
+                    ? `Next send: ${formatApplicationDate(preferences.next_send_at)}.`
+                    : 'Click Save automation to store this schedule.')
+                : 'No email will be sent while this is off.'}
             </p>
             {preferences && !preferences.mailer_configured && (
               <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--color-warning)', lineHeight: '1.45' }}>
@@ -681,8 +691,9 @@ export default function Coach() {
     setDigestNotice('')
     setDigestError('')
     try {
-      await sendDigestTest(recipientEmail)
-      setDigestNotice('Test overview email sent.')
+      const result = await sendDigestTest(recipientEmail)
+      const providerId = result.provider_message_id ? ` Resend ID: ${result.provider_message_id}.` : ''
+      setDigestNotice(`Test email accepted by Resend for ${result.recipient_email || recipientEmail}. Check inbox and spam for "${result.subject || 'ApplyWise overview'}".${providerId}`)
     } catch (err) {
       setDigestError(err?.response?.data?.error || 'Could not send a test email yet.')
     } finally {
