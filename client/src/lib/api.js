@@ -169,3 +169,23 @@ export async function deleteImportedGmailEmail(id) {
   const { data } = await api.delete(`/integrations/gmail/events/${id}`)
   return data
 }
+
+export async function fetchDigestPreferences() {
+  const { data } = await api.get('/digest/preferences')
+  return data
+}
+
+export async function saveDigestPreferences(preferences) {
+  const { data } = await api.put('/digest/preferences', preferences)
+  return data
+}
+
+export async function fetchDigestPreview() {
+  const { data } = await api.get('/digest/preview')
+  return data
+}
+
+export async function sendDigestTest(recipientEmail) {
+  const { data } = await api.post('/digest/send-test', { recipient_email: recipientEmail })
+  return data
+}

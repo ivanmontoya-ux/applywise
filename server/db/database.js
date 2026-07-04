@@ -90,6 +90,29 @@ function createPersonalInformationTable() {
       updated_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY(email_import_event_id) REFERENCES email_import_events(id)
     );
+
+    CREATE TABLE IF NOT EXISTS digest_preferences (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL UNIQUE,
+      recipient_email TEXT,
+      enabled INTEGER DEFAULT 0,
+      frequency TEXT DEFAULT 'weekly',
+      last_sent_at TEXT,
+      next_send_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS digest_email_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      recipient_email TEXT,
+      subject TEXT,
+      status TEXT,
+      error_message TEXT,
+      provider_message_id TEXT,
+      sent_at TEXT DEFAULT (datetime('now'))
+    );
   `)
 }
 
@@ -284,6 +307,13 @@ export function initDb() {
   migrate('email_action_suggestions', 'suggested_role', 'TEXT')
   migrate('email_action_suggestions', 'suggested_action_required', 'TEXT')
   migrate('email_action_suggestions', 'suggested_reminder_date', 'TEXT')
+  migrate('digest_preferences', 'recipient_email', 'TEXT')
+  migrate('digest_preferences', 'enabled', 'INTEGER DEFAULT 0')
+  migrate('digest_preferences', 'frequency', "TEXT DEFAULT 'weekly'")
+  migrate('digest_preferences', 'last_sent_at', 'TEXT')
+  migrate('digest_preferences', 'next_send_at', 'TEXT')
+  migrate('digest_preferences', 'updated_at', 'TEXT')
+  migrate('digest_email_logs', 'provider_message_id', 'TEXT')
 
   db.exec(`
     CREATE INDEX IF NOT EXISTS jobs_created_by_idx ON jobs(created_by);
@@ -297,6 +327,9 @@ export function initDb() {
     CREATE INDEX IF NOT EXISTS email_import_events_user_direction_idx ON email_import_events(user_id, direction, received_at DESC);
     CREATE INDEX IF NOT EXISTS email_import_events_user_match_idx ON email_import_events(user_id, matched_application_id);
     CREATE INDEX IF NOT EXISTS email_action_suggestions_user_status_idx ON email_action_suggestions(user_id, status, created_at DESC);
+    CREATE UNIQUE INDEX IF NOT EXISTS digest_preferences_user_unique_idx ON digest_preferences(user_id);
+    CREATE INDEX IF NOT EXISTS digest_preferences_due_idx ON digest_preferences(enabled, next_send_at);
+    CREATE INDEX IF NOT EXISTS digest_email_logs_user_sent_idx ON digest_email_logs(user_id, sent_at DESC);
   `)
 
   db.prepare("UPDATE tracker SET status = 'Interview' WHERE status IN ('Phone Screen', 'Final Round')").run()

@@ -12,8 +12,10 @@ import aiRouter from './routes/ai.js'
 import waitlistRouter from './routes/waitlist.js'
 import personalInformationRouter from './routes/personalInformation.js'
 import gmailRouter from './routes/gmail.js'
+import digestRouter from './routes/digest.js'
 import { optionalAuth } from './middleware/auth.js'
 import { fetchAdzunaJobs, resolveAdzunaUrls } from './services/adzuna.js'
+import { runDueDigestJobs } from './services/digest.js'
 
 dotenv.config()
 
@@ -66,6 +68,7 @@ app.use('/api/tracker', optionalAuth, trackerRouter)
 app.use('/api/ai', optionalAuth, aiRouter)
 app.use('/api/personal-information', optionalAuth, personalInformationRouter)
 app.use('/api/integrations/gmail', optionalAuth, gmailRouter)
+app.use('/api/digest', optionalAuth, digestRouter)
 
 if (existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath))
@@ -85,6 +88,15 @@ cron.schedule('0 6 * * *', async () => {
     resolveAdzunaUrls().catch(err => console.error('[resolve] Error:', err.message))
   } catch (err) {
     console.error('[cron] Refresh failed:', err.message)
+  }
+})
+
+cron.schedule('0 * * * *', async () => {
+  try {
+    const result = await runDueDigestJobs(getDb())
+    if (result.sent > 0) console.log(`[digest] Sent ${result.sent} overview digest email(s)`)
+  } catch (err) {
+    console.error('[digest] Scheduled digest failed:', err.message)
   }
 })
 

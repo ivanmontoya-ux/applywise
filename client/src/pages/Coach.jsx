@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   FileText,
   ListChecks,
+  Mail,
   MessageSquareText,
   Send,
   ShieldCheck,
@@ -14,7 +15,15 @@ import {
   UserRound,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
-import { fetchGmailSuggestions, fetchPersonalInformation, fetchTracker } from '../lib/api'
+import {
+  fetchDigestPreferences,
+  fetchDigestPreview,
+  fetchGmailSuggestions,
+  fetchPersonalInformation,
+  fetchTracker,
+  saveDigestPreferences,
+  sendDigestTest,
+} from '../lib/api'
 import {
   APPLICATION_STATUSES,
   formatApplicationDate,
@@ -424,14 +433,134 @@ function HistoryPanel({ history, onClear }) {
   )
 }
 
+function DigestAutomationPanel({ auth, preferences, preview, onSave, onSendTest, busy, notice, error }) {
+  const [draft, setDraft] = useState(() => ({
+    enabled: Boolean(preferences?.enabled),
+    frequency: preferences?.frequency || 'weekly',
+    recipient_email: preferences?.recipient_email || auth.user?.email || '',
+  }))
+
+  useEffect(() => {
+    setDraft({
+      enabled: Boolean(preferences?.enabled),
+      frequency: preferences?.frequency || 'weekly',
+      recipient_email: preferences?.recipient_email || auth.user?.email || '',
+    })
+  }, [preferences, auth.user?.email])
+
+  const frequencyLabel = draft.frequency === 'daily'
+    ? 'once a day'
+    : draft.frequency === 'every_2_days'
+      ? 'every 2 days'
+      : 'once a week'
+
+  return (
+    <Panel title="Email Overview Automation" eyebrow="Digest" icon={Mail}>
+      {!auth.session ? (
+        <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55' }}>Log in to receive private application overview emails.</p>
+      ) : (
+        <div style={{ display: 'grid', gap: '14px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '12px', background: '#fbfdff' }}>
+            <span>
+              <span style={{ display: 'block', fontSize: '14px', fontWeight: '800', color: 'var(--color-text-primary)' }}>Send me overview emails</span>
+              <span style={{ display: 'block', fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>
+                Includes applications, statuses, reminders, deadlines, follow-ups, and Gmail suggestions.
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              checked={draft.enabled}
+              onChange={event => setDraft(prev => ({ ...prev, enabled: event.target.checked }))}
+              style={{ width: 18, height: 18, accentColor: 'var(--color-applied-teal)' }}
+            />
+          </label>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '12px' }}>
+            <label>
+              <span style={{ ...labelStyle, display: 'block', marginBottom: '6px' }}>Frequency</span>
+              <select
+                value={draft.frequency}
+                onChange={event => setDraft(prev => ({ ...prev, frequency: event.target.value }))}
+                style={{ width: '100%', minHeight: 40, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0 10px', background: '#ffffff' }}
+              >
+                <option value="daily">Once a day</option>
+                <option value="every_2_days">Every 2 days</option>
+                <option value="weekly">Once a week</option>
+              </select>
+            </label>
+            <label>
+              <span style={{ ...labelStyle, display: 'block', marginBottom: '6px' }}>Recipient email</span>
+              <input
+                type="email"
+                value={draft.recipient_email}
+                onChange={event => setDraft(prev => ({ ...prev, recipient_email: event.target.value }))}
+                style={{ width: '100%', minHeight: 40, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '0 10px', background: '#ffffff' }}
+                placeholder="you@example.com"
+              />
+            </label>
+          </div>
+
+          <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '12px', background: '#fbfdff' }}>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-primary)', fontWeight: '800', marginBottom: '6px' }}>
+              {draft.enabled ? `Scheduled ${frequencyLabel}` : 'Digest is off'}
+            </p>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>
+              {preferences?.last_sent_at ? `Last sent: ${formatApplicationDate(preferences.last_sent_at)}. ` : ''}
+              {preferences?.next_send_at && draft.enabled ? `Next send: ${formatApplicationDate(preferences.next_send_at)}.` : 'No email will be sent while this is off.'}
+            </p>
+            {preferences && !preferences.mailer_configured && (
+              <p style={{ marginTop: '8px', fontSize: '13px', color: 'var(--color-warning)', lineHeight: '1.45' }}>
+                Email provider is not configured yet. Add RESEND_API_KEY and DIGEST_FROM_EMAIL to server/.env before real emails can be sent.
+              </p>
+            )}
+          </div>
+
+          {preview?.summary && (
+            <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '12px', background: '#ffffff' }}>
+              <p style={{ ...labelStyle, marginBottom: '8px' }}>Current email preview</p>
+              <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px' }}>{preview.subject}</h3>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45', marginBottom: '8px' }}>
+                Next best action: {preview.summary.next_best_action?.title}
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '8px' }}>
+                <div><p style={labelStyle}>Active</p><p style={{ fontSize: '18px', fontWeight: '900' }}>{preview.summary.active_applications}</p></div>
+                <div><p style={labelStyle}>Total</p><p style={{ fontSize: '18px', fontWeight: '900' }}>{preview.summary.total_applications}</p></div>
+                <div><p style={labelStyle}>Reminders</p><p style={{ fontSize: '18px', fontWeight: '900' }}>{preview.summary.reminders?.length || 0}</p></div>
+              </div>
+            </div>
+          )}
+
+          {notice && <p style={{ fontSize: '13px', color: 'var(--color-success)', fontWeight: '800' }}>{notice}</p>}
+          {error && <p style={{ fontSize: '13px', color: 'var(--color-danger)', fontWeight: '800' }}>{error}</p>}
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+            <button type="button" disabled={busy} onClick={() => onSave(draft)} style={{ ...secondaryButtonStyle, opacity: busy ? 0.65 : 1 }}>
+              Save automation
+            </button>
+            <button type="button" disabled={busy || !draft.recipient_email} onClick={() => onSendTest(draft.recipient_email)} style={{ ...secondaryButtonStyle, opacity: busy || !draft.recipient_email ? 0.65 : 1 }}>
+              <Send size={14} strokeWidth={2.4} />
+              Send test email
+            </button>
+          </div>
+        </div>
+      )}
+    </Panel>
+  )
+}
+
 export default function Coach() {
   const auth = useAuth()
   const [applications, setApplications] = useState([])
   const [profile, setProfile] = useState(null)
   const [emailSuggestions, setEmailSuggestions] = useState([])
+  const [digestPreferences, setDigestPreferences] = useState(null)
+  const [digestPreview, setDigestPreview] = useState(null)
   const [selectedApplicationId, setSelectedApplicationId] = useState('')
   const [practiceAnswer, setPracticeAnswer] = useState('')
   const [history, setHistory] = useState([])
+  const [digestBusy, setDigestBusy] = useState(false)
+  const [digestNotice, setDigestNotice] = useState('')
+  const [digestError, setDigestError] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -452,11 +581,21 @@ export default function Coach() {
         const trackerPromise = fetchTracker('All')
         const profilePromise = fetchPersonalInformation().catch(() => ({ profile: null }))
         const emailPromise = auth.session ? fetchGmailSuggestions('all').catch(() => []) : Promise.resolve([])
-        const [trackerData, personalData, emailData] = await Promise.all([trackerPromise, profilePromise, emailPromise])
+        const digestPreferencePromise = auth.session ? fetchDigestPreferences().catch(() => null) : Promise.resolve(null)
+        const digestPreviewPromise = auth.session ? fetchDigestPreview().catch(() => null) : Promise.resolve(null)
+        const [trackerData, personalData, emailData, digestPreferenceData, digestPreviewData] = await Promise.all([
+          trackerPromise,
+          profilePromise,
+          emailPromise,
+          digestPreferencePromise,
+          digestPreviewPromise,
+        ])
         if (cancelled) return
         setApplications(Array.isArray(trackerData) ? trackerData : [])
         setProfile(personalData?.profile || null)
         setEmailSuggestions(Array.isArray(emailData) ? emailData : [])
+        setDigestPreferences(digestPreferenceData)
+        setDigestPreview(digestPreviewData)
         if (trackerData?.[0]?.id) setSelectedApplicationId(String(trackerData[0].id))
       } catch {
         if (!cancelled) setError('Could not load Coach. Make sure the local server is running.')
@@ -518,6 +657,37 @@ export default function Coach() {
   function clearHistory() {
     try { localStorage.removeItem('applywise-coach-history') } catch {}
     setHistory([])
+  }
+
+  async function handleDigestSave(nextPreferences) {
+    setDigestBusy(true)
+    setDigestNotice('')
+    setDigestError('')
+    try {
+      const saved = await saveDigestPreferences(nextPreferences)
+      setDigestPreferences(saved)
+      const preview = await fetchDigestPreview().catch(() => null)
+      setDigestPreview(preview)
+      setDigestNotice(saved.enabled ? 'Overview email automation saved.' : 'Overview emails turned off.')
+    } catch (err) {
+      setDigestError(err?.response?.data?.error || 'Could not save overview email settings.')
+    } finally {
+      setDigestBusy(false)
+    }
+  }
+
+  async function handleDigestTest(recipientEmail) {
+    setDigestBusy(true)
+    setDigestNotice('')
+    setDigestError('')
+    try {
+      await sendDigestTest(recipientEmail)
+      setDigestNotice('Test overview email sent.')
+    } catch (err) {
+      setDigestError(err?.response?.data?.error || 'Could not send a test email yet.')
+    } finally {
+      setDigestBusy(false)
+    }
   }
 
   return (
@@ -693,6 +863,17 @@ export default function Coach() {
               </div>
             </Panel>
           </div>
+
+          <DigestAutomationPanel
+            auth={auth}
+            preferences={digestPreferences}
+            preview={digestPreview}
+            onSave={handleDigestSave}
+            onSendTest={handleDigestTest}
+            busy={digestBusy}
+            notice={digestNotice}
+            error={digestError}
+          />
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '18px', alignItems: 'start' }}>
             <Panel title="Profile Context" eyebrow="Personal data" icon={UserRound}>
