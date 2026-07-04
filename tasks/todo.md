@@ -33,3 +33,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Improve Gmail tracking with Inbox and Sent detection, stronger filtering, edit controls, and deleteable email records.
 - [x] Tighten Gmail application matching so uncertain emails create manual-application suggestions instead of auto-linking.
 - [x] Add a clear create-application-from-email button for Gmail suggestions without a certain tracker match.
+- [x] Replace static Coach page with data-driven coaching dashboard for next actions, readiness, interviews, follow-ups, weekly progress, and rejection learning.
