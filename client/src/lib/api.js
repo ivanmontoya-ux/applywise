@@ -145,8 +145,13 @@ export async function fetchGmailSuggestions(status = 'pending') {
   return data
 }
 
-export async function approveGmailSuggestion(id) {
-  const { data } = await api.post(`/integrations/gmail/suggestions/${id}/approve`)
+export async function updateGmailSuggestion(id, patch) {
+  const { data } = await api.patch(`/integrations/gmail/suggestions/${id}`, patch)
+  return data
+}
+
+export async function approveGmailSuggestion(id, payload = {}) {
+  const { data } = await api.post(`/integrations/gmail/suggestions/${id}/approve`, payload)
   return data
 }
 
@@ -157,5 +162,10 @@ export async function rejectGmailSuggestion(id) {
 
 export async function disconnectGmail() {
   const { data } = await api.delete('/integrations/gmail/disconnect')
+  return data
+}
+
+export async function deleteImportedGmailEmail(id) {
+  const { data } = await api.delete(`/integrations/gmail/events/${id}`)
   return data
 }

@@ -30,3 +30,5 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Adapt professor submission docs with friends-and-family validation and reflection.
 - [x] Add internal group testing and informal class survey evidence to submission docs.
 - [x] Add Gmail read-only import for application emails with user-approved tracker suggestions.
+- [x] Improve Gmail tracking with Inbox and Sent detection, stronger filtering, edit controls, and deleteable email records.
+- [x] Tighten Gmail application matching so uncertain emails create manual-application suggestions instead of auto-linking.

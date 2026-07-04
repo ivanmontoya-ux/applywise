@@ -48,6 +48,10 @@ function createPersonalInformationTable() {
       user_id TEXT NOT NULL,
       gmail_message_id TEXT NOT NULL,
       thread_id TEXT,
+      direction TEXT DEFAULT 'inbound',
+      sender_name TEXT,
+      sender_email TEXT,
+      recipient_emails TEXT DEFAULT '[]',
       from_email TEXT,
       subject TEXT,
       received_at TEXT,
@@ -55,6 +59,13 @@ function createPersonalInformationTable() {
       detected_type TEXT,
       company TEXT,
       job_title TEXT,
+      application_status TEXT,
+      action_required TEXT,
+      deadline_or_event_date TEXT,
+      gmail_url TEXT,
+      confidence REAL DEFAULT 0,
+      detection_reasons_json TEXT DEFAULT '[]',
+      matched_application_id INTEGER,
       raw_preview TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       UNIQUE(user_id, gmail_message_id)
@@ -67,6 +78,9 @@ function createPersonalInformationTable() {
       email_import_event_id INTEGER NOT NULL,
       suggested_action TEXT NOT NULL,
       suggested_status TEXT,
+      suggested_company TEXT,
+      suggested_role TEXT,
+      suggested_action_required TEXT,
       suggested_title TEXT,
       suggested_body TEXT,
       suggested_reminder_date TEXT,
@@ -254,7 +268,21 @@ export function initDb() {
   migrate('gmail_connections', 'last_history_id', 'TEXT')
   migrate('gmail_connections', 'updated_at', 'TEXT')
   migrate('gmail_connections', 'disconnected_at', 'TEXT')
+  migrate('email_import_events', 'direction', "TEXT DEFAULT 'inbound'")
+  migrate('email_import_events', 'sender_name', 'TEXT')
+  migrate('email_import_events', 'sender_email', 'TEXT')
+  migrate('email_import_events', 'recipient_emails', "TEXT DEFAULT '[]'")
   migrate('email_import_events', 'raw_preview', 'TEXT')
+  migrate('email_import_events', 'application_status', 'TEXT')
+  migrate('email_import_events', 'action_required', 'TEXT')
+  migrate('email_import_events', 'deadline_or_event_date', 'TEXT')
+  migrate('email_import_events', 'gmail_url', 'TEXT')
+  migrate('email_import_events', 'confidence', 'REAL DEFAULT 0')
+  migrate('email_import_events', 'detection_reasons_json', "TEXT DEFAULT '[]'")
+  migrate('email_import_events', 'matched_application_id', 'INTEGER')
+  migrate('email_action_suggestions', 'suggested_company', 'TEXT')
+  migrate('email_action_suggestions', 'suggested_role', 'TEXT')
+  migrate('email_action_suggestions', 'suggested_action_required', 'TEXT')
   migrate('email_action_suggestions', 'suggested_reminder_date', 'TEXT')
 
   db.exec(`
@@ -266,6 +294,8 @@ export function initDb() {
     CREATE UNIQUE INDEX IF NOT EXISTS gmail_connections_user_unique_idx ON gmail_connections(user_id);
     CREATE INDEX IF NOT EXISTS email_import_events_user_type_idx ON email_import_events(user_id, detected_type, received_at DESC);
     CREATE UNIQUE INDEX IF NOT EXISTS email_import_events_user_message_idx ON email_import_events(user_id, gmail_message_id);
+    CREATE INDEX IF NOT EXISTS email_import_events_user_direction_idx ON email_import_events(user_id, direction, received_at DESC);
+    CREATE INDEX IF NOT EXISTS email_import_events_user_match_idx ON email_import_events(user_id, matched_application_id);
     CREATE INDEX IF NOT EXISTS email_action_suggestions_user_status_idx ON email_action_suggestions(user_id, status, created_at DESC);
   `)
 
