@@ -859,9 +859,10 @@ function suggestionCopy({ detected, company, role, application, direction, deadl
 }
 
 function serializeSuggestion(row) {
+  const hasApplication = Boolean(row.app_title)
   return {
     id: row.id,
-    application_id: row.application_id,
+    application_id: hasApplication ? row.application_id : null,
     email_import_event_id: row.email_import_event_id,
     suggested_action: row.suggested_action,
     suggested_status: row.suggested_status,
@@ -894,7 +895,7 @@ function serializeSuggestion(row) {
       confidence: row.email_confidence ?? row.confidence,
       detection_reasons: parseJson(row.detection_reasons_json, []),
     },
-    application: row.app_title ? {
+    application: hasApplication ? {
       id: row.application_id,
       title: row.app_title,
       company: row.app_company,
@@ -1362,8 +1363,13 @@ router.post('/suggestions/:id/approve', requireAuth, (req, res) => {
 
   if (applicationId) {
     application = db.prepare('SELECT * FROM tracker WHERE id = ? AND user_id = ?').get(applicationId, req.user.id)
-    if (!application) return res.status(404).json({ error: 'Linked application not found.' })
-  } else if (createIfMissing && company && role) {
+    if (!application && req.body?.application_id !== undefined) {
+      return res.status(404).json({ error: 'Selected application was not found.' })
+    }
+    if (!application) applicationId = null
+  }
+
+  if (!application && createIfMissing && company && role) {
     const notes = buildTimelineNote({
       application: null,
       suggestion: { ...suggestion, suggested_action_required: actionRequired },

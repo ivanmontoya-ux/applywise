@@ -32,3 +32,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Add Gmail read-only import for application emails with user-approved tracker suggestions.
 - [x] Improve Gmail tracking with Inbox and Sent detection, stronger filtering, edit controls, and deleteable email records.
 - [x] Tighten Gmail application matching so uncertain emails create manual-application suggestions instead of auto-linking.
+- [x] Add a clear create-application-from-email button for Gmail suggestions without a certain tracker match.

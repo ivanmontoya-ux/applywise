@@ -214,7 +214,7 @@ function DirectionBadge({ direction }) {
 
 function SuggestionCard({ suggestion, applications, busy, onApprove, onReject, onSave, onDelete }) {
   const initialDraft = useMemo(() => ({
-    application_id: suggestion.application_id || '',
+    application_id: suggestion.application ? suggestion.application_id || '' : '',
     suggested_company: suggestion.suggested_company || suggestion.email?.company || '',
     suggested_role: suggestion.suggested_role || suggestion.email?.job_title || '',
     suggested_status: suggestion.suggested_status || '',
@@ -228,6 +228,7 @@ function SuggestionCard({ suggestion, applications, busy, onApprove, onReject, o
   }, [initialDraft])
 
   const hasLinkedApplication = Boolean(draft.application_id || suggestion.application)
+  const canCreateApplication = !hasLinkedApplication
   const statusColor = draft.suggested_status === 'Rejected'
     ? 'var(--color-danger)'
     : draft.suggested_status === 'Offer'
@@ -496,13 +497,13 @@ function SuggestionCard({ suggestion, applications, busy, onApprove, onReject, o
             onClick={() => onApprove(suggestion.id, {
               ...draft,
               application_id: draft.application_id || null,
-              create_if_missing: !draft.application_id,
+              create_if_missing: canCreateApplication,
             })}
             disabled={busy}
             style={{ ...primaryButtonStyle, opacity: busy ? 0.65 : 1 }}
           >
             <Check size={15} strokeWidth={2.5} />
-            {hasLinkedApplication ? 'Apply update' : 'Create application'}
+            {hasLinkedApplication ? 'Apply update' : 'Create application from email'}
           </button>
         </div>
       </div>
