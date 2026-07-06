@@ -54,7 +54,7 @@ const primaryButtonStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   padding: '0 16px',
   border: 'none',
   borderRadius: 'var(--radius-md)',
@@ -64,13 +64,15 @@ const primaryButtonStyle = {
   fontWeight: '800',
   cursor: 'pointer',
   textDecoration: 'none',
+  boxShadow: 'var(--shadow-primary)',
+  transition: 'background 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease',
 }
 const secondaryLinkStyle = {
   minHeight: 44,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   padding: '0 14px',
   borderRadius: 'var(--radius-md)',
   border: '1px solid var(--color-border)',
@@ -79,6 +81,7 @@ const secondaryLinkStyle = {
   fontSize: '14px',
   fontWeight: '700',
   textDecoration: 'none',
+  boxShadow: 'var(--shadow-sm)',
 }
 const inputStyle = {
   width: '100%',

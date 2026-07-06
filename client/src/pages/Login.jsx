@@ -45,7 +45,7 @@ const buttonStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   border: 'none',
   borderRadius: 'var(--radius-md)',
   background: 'var(--color-applied-teal)',
@@ -53,6 +53,8 @@ const buttonStyle = {
   fontSize: '14px',
   fontWeight: '800',
   cursor: 'pointer',
+  boxShadow: 'var(--shadow-primary)',
+  transition: 'background 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease',
 }
 
 export default function Login() {
@@ -100,7 +102,7 @@ export default function Login() {
         <BrandLogo as={Link} to="/waitlist" width={158} style={{ marginBottom: '28px' }} />
 
         <div style={{ marginBottom: '22px' }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: 0 }}>
+          <h1 style={{ fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: 0 }}>
             Log in
           </h1>
           <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55' }}>

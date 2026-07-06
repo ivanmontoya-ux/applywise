@@ -158,14 +158,14 @@ img, video {
 :root {
   /* Backgrounds */
   --color-bg: #ffffff;
-  --color-bg-page: #f8fafc;
+  --color-bg-page: #f5f7fa;
   --color-bg-sidebar: #ffffff;
-  --color-bg-secondary: #f4f4f5;
-  --color-bg-hover: #f1f5f9;
+  --color-bg-secondary: #f3f6f8;
+  --color-bg-hover: #eef4f5;
 
   /* Borders */
-  --color-border: #e4e4e7;
-  --color-border-strong: #d4d4d8;
+  --color-border: #e4e9ee;
+  --color-border-strong: #cfd8df;
 
   /* Text */
   --color-text-primary: #18181b;
@@ -177,6 +177,8 @@ img, video {
   --color-navy-light: #3f8589;
   --color-navy-hover: #24595d;
   --color-applied-teal: #2f6f73;
+  --color-applied-teal-soft: #edf7f7;
+  --color-applied-teal-muted: #5f8f92;
 
   /* Semantic */
   --color-accent: #2f6f73;
@@ -192,10 +194,11 @@ img, video {
   --radius-xl: 12px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.04);
-  --shadow-md: 0 8px 18px rgba(24, 24, 27, 0.06);
-  --shadow-card: 0 1px 2px rgba(24, 24, 27, 0.04);
-  --shadow-card-hover: 0 8px 22px rgba(24, 24, 27, 0.08);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 14px 34px rgba(15, 23, 42, 0.08);
+  --shadow-card: 0 10px 24px rgba(15, 23, 42, 0.055);
+  --shadow-card-hover: 0 18px 38px rgba(15, 23, 42, 0.10);
+  --shadow-primary: 0 10px 20px rgba(47, 111, 115, 0.20);
 
   /* Typography */
   --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;

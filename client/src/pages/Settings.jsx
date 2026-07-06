@@ -34,7 +34,7 @@ const secondaryButtonStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   padding: '0 12px',
   borderRadius: 'var(--radius-md)',
   border: '1px solid var(--color-border)',
@@ -43,6 +43,7 @@ const secondaryButtonStyle = {
   fontSize: '13px',
   fontWeight: '700',
   cursor: 'pointer',
+  boxShadow: 'var(--shadow-sm)',
 }
 const dangerButtonStyle = {
   ...secondaryButtonStyle,

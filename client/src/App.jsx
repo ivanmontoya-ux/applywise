@@ -58,6 +58,7 @@ function TopAuthBar({ isPublicPage }) {
               fontSize: '13px',
               fontWeight: '700',
               cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
             }}
           >
             Log out
@@ -80,6 +81,7 @@ function TopAuthBar({ isPublicPage }) {
             fontSize: '13px',
             fontWeight: '700',
             textDecoration: 'none',
+            boxShadow: 'var(--shadow-sm)',
           }}>
             Login
           </Link>
@@ -94,6 +96,7 @@ function TopAuthBar({ isPublicPage }) {
             fontSize: '13px',
             fontWeight: '800',
             textDecoration: 'none',
+            boxShadow: 'var(--shadow-primary)',
           }}>
             Sign Up
           </Link>

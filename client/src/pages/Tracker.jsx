@@ -12,10 +12,11 @@ const headerRowStyle = { display: 'flex', alignItems: 'flex-start', justifyConte
 const titleStyle = { fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: '0' }
 const subtitleStyle = { fontSize: '16px', color: 'var(--color-text-secondary)', fontWeight: '400' }
 const addBtnStyle = {
-  display: 'flex', alignItems: 'center', gap: '7px',
+  display: 'flex', alignItems: 'center', gap: '9px',
   minHeight: 44, padding: '0 16px', background: 'var(--color-applied-teal)', color: '#ffffff',
-  border: 'none', borderRadius: 'var(--radius-md)', fontSize: '14px', fontWeight: '700',
-  cursor: 'pointer', transition: 'background 0.12s ease', flexShrink: 0,
+  border: 'none', borderRadius: 'var(--radius-md)', fontSize: '14px', fontWeight: '800',
+  cursor: 'pointer', transition: 'background 0.12s ease, transform 0.14s ease, box-shadow 0.14s ease', flexShrink: 0,
+  boxShadow: 'var(--shadow-primary)',
 }
 const filterRowStyle = { display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '28px' }
 
@@ -70,8 +71,14 @@ export default function Tracker() {
         <button
           style={addBtnStyle}
           onClick={() => setShowModal(true)}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--color-navy-hover)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'var(--color-applied-teal)'}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'var(--color-navy-hover)'
+            e.currentTarget.style.transform = 'translateY(-1px)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'var(--color-applied-teal)'
+            e.currentTarget.style.transform = 'translateY(0)'
+          }}
         >
           <Plus size={15} strokeWidth={2.5} />
           Add Application

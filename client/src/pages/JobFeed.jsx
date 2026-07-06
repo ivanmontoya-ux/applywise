@@ -36,17 +36,18 @@ const headerRowStyle   = { display: 'flex', alignItems: 'flex-start', justifyCon
 const titleStyle       = { fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: '0' }
 const subtitleStyle    = { fontSize: '16px', color: 'var(--color-text-secondary)', fontWeight: '400' }
 const refreshBtnStyle  = {
-  display: 'flex', alignItems: 'center', gap: '7px',
+  display: 'flex', alignItems: 'center', gap: '9px',
   minHeight: 44, padding: '0 16px', background: 'var(--color-applied-teal)', color: '#ffffff',
-  border: 'none', borderRadius: 'var(--radius-md)', fontSize: '14px', fontWeight: '700',
-  cursor: 'pointer', transition: 'background 0.15s ease', flexShrink: 0,
+  border: 'none', borderRadius: 'var(--radius-md)', fontSize: '14px', fontWeight: '800',
+  cursor: 'pointer', transition: 'background 0.15s ease, transform 0.14s ease, box-shadow 0.14s ease', flexShrink: 0,
+  boxShadow: 'var(--shadow-primary)',
 }
 const secondaryLinkStyle = {
   minHeight: 44,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '7px',
+  gap: '9px',
   padding: '0 14px',
   borderRadius: 'var(--radius-md)',
   border: '1px solid var(--color-border)',
@@ -55,6 +56,7 @@ const secondaryLinkStyle = {
   fontSize: '14px',
   fontWeight: '700',
   textDecoration: 'none',
+  boxShadow: 'var(--shadow-sm)',
 }
 const filterBarStyle   = {
   display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
@@ -63,7 +65,7 @@ const filterBarStyle   = {
   border: '1px solid var(--color-border)',
   borderRadius: 'var(--radius-lg)',
   boxShadow: 'var(--shadow-card)',
-  position: 'relative', zIndex: 10,
+  position: 'relative', zIndex: 50,
 }
 const selectStyle      = {
   appearance: 'none', WebkitAppearance: 'none',
@@ -311,6 +313,7 @@ function RecommendedJobsBand({ recommendations, loading, error }) {
       flexDirection: 'column',
       gap: '14px',
       marginTop: '-8px',
+      zIndex: 1,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
@@ -565,8 +568,16 @@ export default function JobFeed() {
             style={refreshBtnStyle}
             onClick={handleRefresh}
             disabled={refreshing}
-            onMouseEnter={e => { if (!refreshing) e.currentTarget.style.background = 'var(--color-navy-hover)' }}
-            onMouseLeave={e => e.currentTarget.style.background = 'var(--color-applied-teal)'}
+            onMouseEnter={e => {
+              if (!refreshing) {
+                e.currentTarget.style.background = 'var(--color-navy-hover)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'var(--color-applied-teal)'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}
           >
             <RefreshCw size={14} strokeWidth={2.2} />
             {refreshing ? 'Refreshing...' : 'Refresh list'}

@@ -15,7 +15,7 @@ import {
 import { deletePersonalInformation, fetchPersonalInformation } from '../lib/api'
 
 const pageStyle = { padding: '36px 40px', maxWidth: '1180px' }
-const titleStyle = { fontSize: '22px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '4px', letterSpacing: '0' }
+const titleStyle = { fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: '0' }
 const subtitleStyle = { fontSize: '14px', color: 'var(--color-text-secondary)', fontWeight: '400', maxWidth: '680px' }
 const panelStyle = {
   background: '#ffffff',
@@ -28,29 +28,32 @@ const primaryLinkStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   padding: '0 14px',
   borderRadius: 'var(--radius-md)',
   background: 'var(--color-applied-teal)',
   color: '#ffffff',
   fontSize: '13px',
-  fontWeight: '700',
+  fontWeight: '800',
   textDecoration: 'none',
+  boxShadow: 'var(--shadow-primary)',
+  transition: 'background 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease',
 }
 const secondaryButtonStyle = {
   minHeight: 42,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   padding: '0 14px',
   borderRadius: 'var(--radius-md)',
   border: '1px solid var(--color-border)',
   background: '#ffffff',
   color: 'var(--color-text-secondary)',
   fontSize: '13px',
-  fontWeight: '600',
+  fontWeight: '700',
   cursor: 'pointer',
+  boxShadow: 'var(--shadow-sm)',
 }
 
 function Section({ icon: Icon, title, children }) {

@@ -25,7 +25,7 @@ import { downloadCoverLetterDoc } from '../lib/documentExport'
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
 const pageStyle = { padding: '36px 40px', maxWidth: '1180px' }
-const titleStyle = { fontSize: '22px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '4px', letterSpacing: '0' }
+const titleStyle = { fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: '0' }
 const subtitleStyle = { fontSize: '14px', color: 'var(--color-text-secondary)', fontWeight: '400' }
 const panelStyle = {
   background: '#ffffff',
@@ -56,29 +56,32 @@ const primaryButtonStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   padding: '10px 16px',
   border: 'none',
   borderRadius: 'var(--radius-md)',
   background: 'var(--color-applied-teal)',
   color: '#ffffff',
   fontSize: '13px',
-  fontWeight: '600',
+  fontWeight: '800',
   cursor: 'pointer',
+  boxShadow: 'var(--shadow-primary)',
+  transition: 'background 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease',
 }
 const secondaryButtonStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   padding: '10px 14px',
   border: '1px solid var(--color-border)',
   borderRadius: 'var(--radius-md)',
   background: '#ffffff',
   color: 'var(--color-text-secondary)',
   fontSize: '13px',
-  fontWeight: '500',
+  fontWeight: '700',
   cursor: 'pointer',
+  boxShadow: 'var(--shadow-sm)',
 }
 
 function applicationLabel(application) {

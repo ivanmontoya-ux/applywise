@@ -46,7 +46,7 @@ const primaryLinkStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   padding: '0 14px',
   borderRadius: 'var(--radius-md)',
   background: 'var(--color-applied-teal)',
@@ -54,13 +54,15 @@ const primaryLinkStyle = {
   fontSize: '13px',
   fontWeight: '800',
   textDecoration: 'none',
+  boxShadow: 'var(--shadow-primary)',
+  transition: 'background 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease',
 }
 const secondaryButtonStyle = {
   minHeight: 38,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '8px',
+  gap: '9px',
   padding: '0 12px',
   borderRadius: 'var(--radius-md)',
   border: '1px solid var(--color-border)',
@@ -69,6 +71,7 @@ const secondaryButtonStyle = {
   fontSize: '13px',
   fontWeight: '700',
   cursor: 'pointer',
+  boxShadow: 'var(--shadow-sm)',
 }
 const labelStyle = { fontSize: '12px', fontWeight: '800', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0' }
 
