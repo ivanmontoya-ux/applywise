@@ -11,10 +11,12 @@ import {
   LogOut,
   Mail,
   MessageSquareText,
+  Settings,
   UserRound,
   UserPlus,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
+import BrandLogo from './BrandLogo'
 
 const EXPANDED_W = '220px'
 const COLLAPSED_W = '64px'
@@ -106,12 +108,7 @@ export default function Sidebar() {
         minHeight: '61px',
       }}>
         {!collapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
-            <Briefcase size={20} strokeWidth={2.5} color="var(--color-applied-teal)" style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: '18px', fontWeight: '800', color: 'var(--color-text-primary)', letterSpacing: '0', whiteSpace: 'nowrap' }}>
-              ApplyWise
-            </span>
-          </div>
+          <BrandLogo width={150} style={{ minWidth: 0 }} />
         )}
         <button
           onClick={toggle}
@@ -149,6 +146,7 @@ export default function Sidebar() {
         <NavItem to="/coach" icon={MessageSquareText} label="Coach" collapsed={collapsed} />
         <NavItem to="/reminders" icon={Bell} label="Reminders" collapsed={collapsed} />
         <NavItem to="/email" icon={Mail} label="Email" collapsed={collapsed} />
+        <NavItem to="/settings" icon={Settings} label="Settings" collapsed={collapsed} />
         <NavItem to="/waitlist" icon={UserPlus} label="Waitlist" collapsed={collapsed} />
       </nav>
 

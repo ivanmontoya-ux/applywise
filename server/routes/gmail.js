@@ -1450,6 +1450,18 @@ router.post('/suggestions/:id/reject', requireAuth, (req, res) => {
   res.json({ success: true })
 })
 
+router.delete('/events', requireAuth, (req, res) => {
+  const db = getDb()
+  const count = db.prepare('SELECT COUNT(*) as total FROM email_import_events WHERE user_id = ?').get(req.user.id)?.total || 0
+
+  const deleteRecords = db.transaction(() => {
+    db.prepare('DELETE FROM email_action_suggestions WHERE user_id = ?').run(req.user.id)
+    db.prepare('DELETE FROM email_import_events WHERE user_id = ?').run(req.user.id)
+  })
+  deleteRecords()
+  res.json({ success: true, deleted: count })
+})
+
 router.delete('/events/:id', requireAuth, (req, res) => {
   const db = getDb()
   const event = db.prepare('SELECT id FROM email_import_events WHERE id = ? AND user_id = ?').get(req.params.id, req.user.id)

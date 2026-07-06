@@ -13,6 +13,7 @@ import waitlistRouter from './routes/waitlist.js'
 import personalInformationRouter from './routes/personalInformation.js'
 import gmailRouter from './routes/gmail.js'
 import digestRouter from './routes/digest.js'
+import configRouter from './routes/config.js'
 import { optionalAuth } from './middleware/auth.js'
 import { fetchAdzunaJobs, resolveAdzunaUrls } from './services/adzuna.js'
 import { runDueDigestJobs } from './services/digest.js'
@@ -69,6 +70,7 @@ app.use('/api/ai', optionalAuth, aiRouter)
 app.use('/api/personal-information', optionalAuth, personalInformationRouter)
 app.use('/api/integrations/gmail', optionalAuth, gmailRouter)
 app.use('/api/digest', optionalAuth, digestRouter)
+app.use('/api/config', configRouter)
 
 if (existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath))

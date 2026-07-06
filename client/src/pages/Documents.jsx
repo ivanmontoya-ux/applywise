@@ -18,6 +18,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
+import WorkflowGuide from '../components/WorkflowGuide'
 import { extractCvProfile, fetchAiStatus, fetchPersonalInformation, fetchTracker, generateCoverLetter, reviewCv, savePersonalInformation, updateApplication } from '../lib/api'
 import { downloadCoverLetterDoc } from '../lib/documentExport'
 
@@ -308,6 +309,52 @@ function DetailList({ items }) {
         </li>
       ))}
     </ul>
+  )
+}
+
+function ReviewPriority({ review }) {
+  const highImpact = [
+    ...(review.evidence_gaps || []).slice(0, 2).map(item => item.how_to_fix || item.cv_gap || item.requirement),
+    ...(review.bullet_rewrites || []).slice(0, 2).map(item => item.suggested_bullet),
+  ].filter(Boolean)
+  const niceToHave = (review.keyword_suggestions || [])
+    .slice(0, 4)
+    .map(item => [item.keyword, item.where_to_add].filter(Boolean).join(' - '))
+    .filter(Boolean)
+  const needsEvidence = [
+    ...(review.evidence_gaps || []).slice(0, 3).map(item => item.cv_gap),
+    ...(review.risks || []).slice(0, 2).map(item => item.safer_alternative || item.concern),
+  ].filter(Boolean)
+
+  return (
+    <section style={{ ...panelStyle, padding: '18px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '14px' }}>
+        <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <ListChecks size={16} strokeWidth={2.4} />
+        </span>
+        <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text-primary)', margin: 0 }}>Recommendation priorities</h2>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '10px' }}>
+        {[
+          ['High impact fixes', highImpact, '#fff7ed', 'var(--color-warning)'],
+          ['Nice to have', niceToHave, '#edf7f7', 'var(--color-applied-teal)'],
+          ['Needs evidence', needsEvidence, '#fff1f2', 'var(--color-danger)'],
+        ].map(([title, items, bg, color]) => (
+          <div key={title} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '12px', background: bg }}>
+            <p style={{ fontSize: '12px', fontWeight: '800', color, marginBottom: '8px' }}>{title}</p>
+            {items.length ? (
+              <ul style={{ display: 'grid', gap: '7px' }}>
+                {items.slice(0, 4).map((item, index) => (
+                  <li key={`${title}-${index}`} style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: '1.45' }}>No items returned.</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -606,6 +653,8 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
         </p>
       </section>
 
+      <ReviewPriority review={review} />
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
         <Section icon={CheckCircle2} title="Strong evidence">
           <PairList
@@ -675,7 +724,7 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
   )
 }
 
-function CoverLetterResults({ letter, onSave, saving, canSave, auth, selectedApplication, onCreateDoc }) {
+function CoverLetterResults({ letter, onSave, saving, canSave, auth, selectedApplication, onCreateDoc, onTextChange }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <section style={{ ...panelStyle, padding: '24px' }}>
@@ -738,18 +787,27 @@ function CoverLetterResults({ letter, onSave, saving, canSave, auth, selectedApp
       </section>
 
       <Section icon={FileText} title="Cover letter draft">
-        <div style={{
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-          padding: '18px',
-          background: '#fbfdff',
-          color: 'var(--color-text-primary)',
-          fontSize: '14px',
-          lineHeight: '1.7',
-          whiteSpace: 'pre-wrap',
-        }}>
-          {letter.cover_letter || 'No cover letter draft returned.'}
-        </div>
+        <textarea
+          value={letter.cover_letter || ''}
+          onChange={event => onTextChange(event.target.value)}
+          rows={16}
+          placeholder="No cover letter draft returned."
+          style={{
+            width: '100%',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)',
+            padding: '18px',
+            background: '#fbfdff',
+            color: 'var(--color-text-primary)',
+            fontSize: '14px',
+            lineHeight: '1.7',
+            resize: 'vertical',
+            outline: 'none',
+          }}
+        />
+        <p style={{ marginTop: '8px', fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: '1.45' }}>
+          Edit the draft here before saving it to the application or creating the Word document.
+        </p>
       </Section>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
@@ -1065,6 +1123,13 @@ export default function Documents() {
   const profileSaved = saveNotice === 'Saved under Personal Information.'
   const canSaveReview = Boolean(auth.session && selectedApplication && review)
   const canSaveCoverLetter = Boolean(auth.session && selectedApplication && coverLetter)
+  const documentWorkflowSteps = [
+    { id: 'upload', title: 'Upload or paste CV', copy: 'Start from the current CV the user actually wants to improve.', to: '/documents', done: Boolean(cvText.trim() || cvFile), icon: Upload },
+    { id: 'extract', title: 'Extract profile', copy: 'Save confirmed facts under Personal Information for reuse.', to: '/personal-information', done: Boolean(personalInfo || profileSaved), icon: UserRound },
+    { id: 'review', title: 'Review CV for role', copy: 'Use a selected application or pasted job description.', to: '/documents', done: Boolean(review), icon: ListChecks },
+    { id: 'letter', title: 'Generate cover letter', copy: 'Create an editable, job-specific draft and Word document.', to: '/documents', done: Boolean(coverLetter), icon: PenLine },
+    { id: 'save', title: 'Save to application', copy: 'Store the approved review or letter on the tracked job.', to: '/tracker', done: Boolean(selectedApplication?.cv_review || selectedApplication?.cover_letter), icon: Save },
+  ]
 
   return (
     <div style={pageStyle}>
@@ -1089,6 +1154,20 @@ export default function Documents() {
           {connected ? `Gemini ready (${aiStatus?.model || 'configured'})` : 'Gemini key missing'}
         </div>
       </div>
+
+      <div style={{ marginBottom: '18px' }}>
+        <WorkflowGuide
+          title="Document workflow"
+          copy="Use this order for stronger, reusable AI output. Save only reviewed information and approved drafts."
+          steps={documentWorkflowSteps}
+        />
+      </div>
+
+      {!loadingContext && !connected && (
+        <div style={{ marginBottom: '18px', padding: '12px 14px', border: '1px solid #fed7aa', borderRadius: 'var(--radius-md)', background: '#fff7ed', color: '#9a3412', fontSize: '13px', lineHeight: '1.5' }}>
+          Gemini is not configured on the server, so CV extraction, CV review, cover letters, and AI job recommendations are disabled. Add `GEMINI_API_KEY` to `server/.env`, restart the app, or open <Link to="/settings" style={{ color: 'inherit', fontWeight: '800' }}>Settings</Link> for the setup checklist.
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '18px', alignItems: 'start' }}>
         <form onSubmit={handleSubmit} style={{ ...panelStyle, padding: '22px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
@@ -1354,6 +1433,7 @@ export default function Documents() {
                   auth={auth}
                   selectedApplication={selectedApplication}
                   onCreateDoc={handleCreateCoverLetterDoc}
+                  onTextChange={value => setCoverLetter(prev => ({ ...(prev || {}), cover_letter: value }))}
                 />
               )
               : <EmptyReview />}

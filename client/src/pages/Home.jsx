@@ -9,7 +9,8 @@ import {
   FileText,
   ListChecks,
 } from 'lucide-react'
-import { fetchJobs, fetchTracker } from '../lib/api'
+import { fetchJobs, fetchPersonalInformation, fetchTracker } from '../lib/api'
+import WorkflowGuide from '../components/WorkflowGuide'
 import {
   APPLICATION_STATUSES,
   formatApplicationDate,
@@ -144,6 +145,7 @@ function sortByDeadline(applications) {
 export default function Home() {
   const [applications, setApplications] = useState([])
   const [jobs, setJobs] = useState([])
+  const [personalInfo, setPersonalInfo] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -154,13 +156,15 @@ export default function Home() {
       setLoading(true)
       setError('')
       try {
-        const [trackerData, jobsData] = await Promise.all([
+        const [trackerData, jobsData, personalData] = await Promise.all([
           fetchTracker('All'),
           fetchJobs({}),
+          fetchPersonalInformation().catch(() => ({ profile: null })),
         ])
         if (cancelled) return
         setApplications(trackerData)
         setJobs(jobsData.slice(0, 4))
+        setPersonalInfo(personalData?.profile || null)
       } catch {
         if (!cancelled) setError('Could not load Home. Make sure the local server is running.')
       } finally {
@@ -191,6 +195,20 @@ export default function Home() {
     })
     return next
   }, [applications])
+  const workflowSteps = useMemo(() => {
+    const hasProfile = Boolean(personalInfo?.candidate_name || personalInfo?.summary || personalInfo?.experience?.length || personalInfo?.skills)
+    const hasTrackedJob = applications.length > 0
+    const hasTailoredDocs = applications.some(app => app.cv_review || app.cover_letter)
+    const hasProgress = applications.some(app => app.status && app.status !== 'Saved')
+    const hasCoachContext = hasProfile && hasTrackedJob
+    return [
+      { id: 'profile', title: 'Extract CV profile', copy: 'Upload the current CV and save reusable Personal Information.', to: '/documents', done: hasProfile, icon: FileText },
+      { id: 'jobs', title: 'Review jobs', copy: 'Search roles and use AI recommendations once the CV profile exists.', to: '/jobs', done: hasTrackedJob, icon: Briefcase },
+      { id: 'tracker', title: 'Track application', copy: 'Save a role, add status, deadline, and next action.', to: '/tracker', done: hasProgress, icon: ListChecks },
+      { id: 'documents', title: 'Tailor documents', copy: 'Generate CV recommendations and cover letters per application.', to: '/documents', done: hasTailoredDocs, icon: FileText },
+      { id: 'coach', title: 'Use Coach', copy: 'Let Coach prioritize follow-ups, reminders, and interview prep.', to: '/coach', done: hasCoachContext, icon: CheckCircle2 },
+    ]
+  }, [applications, personalInfo])
 
   return (
     <div style={pageStyle}>
@@ -213,6 +231,14 @@ export default function Home() {
           {error}
         </div>
       )}
+
+      <div style={{ marginBottom: '18px' }}>
+        <WorkflowGuide
+          title="Build one complete application"
+          copy="Best path: extract your CV, find a role, save it, tailor materials, then let Coach manage next actions."
+          steps={workflowSteps}
+        />
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '18px', alignItems: 'start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>

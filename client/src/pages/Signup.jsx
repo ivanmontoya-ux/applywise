@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { AlertCircle, Briefcase, CheckCircle2, UserPlus } from 'lucide-react'
+import { AlertCircle, CheckCircle2, UserPlus } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
+import BrandLogo from '../components/BrandLogo'
 
 const pageStyle = {
   minHeight: '100dvh',
@@ -108,10 +109,7 @@ export default function Signup() {
   return (
     <main style={pageStyle}>
       <section style={panelStyle}>
-        <Link to="/waitlist" style={{ display: 'inline-flex', alignItems: 'center', gap: '9px', textDecoration: 'none', color: 'var(--color-text-primary)', fontWeight: '800', fontSize: '18px', marginBottom: '28px' }}>
-          <Briefcase size={20} strokeWidth={2.5} color="var(--color-applied-teal)" />
-          ApplyWise
-        </Link>
+        <BrandLogo as={Link} to="/waitlist" width={158} style={{ marginBottom: '28px' }} />
 
         <div style={{ marginBottom: '22px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: 0 }}>

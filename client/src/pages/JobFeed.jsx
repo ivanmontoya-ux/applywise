@@ -366,11 +366,24 @@ function RecommendedJobsBand({ recommendations, loading, error }) {
                   )}
                 </div>
                 {recommendation.matching_evidence?.length ? (
-                  <ul style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    {recommendation.matching_evidence.slice(0, 2).map((item, index) => (
-                      <li key={index} style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{item}</li>
-                    ))}
-                  </ul>
+                  <div>
+                    <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '6px' }}>Why it fits</p>
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      {recommendation.matching_evidence.slice(0, 2).map((item, index) => (
+                        <li key={index} style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {recommendation.concerns?.length ? (
+                  <div>
+                    <p style={{ fontSize: '11px', color: 'var(--color-warning)', fontWeight: '800', textTransform: 'uppercase', marginBottom: '6px' }}>Check before applying</p>
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                      {recommendation.concerns.slice(0, 2).map((item, index) => (
+                        <li key={index} style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
                 {recommendation.next_step && (
                   <p style={{ fontSize: '12px', color: 'var(--color-text-primary)', lineHeight: '1.45', fontWeight: '700' }}>{recommendation.next_step}</p>

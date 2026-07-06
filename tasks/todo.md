@@ -35,3 +35,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Add a clear create-application-from-email button for Gmail suggestions without a certain tracker match.
 - [x] Replace static Coach page with data-driven coaching dashboard for next actions, readiness, interviews, follow-ups, weekly progress, and rejection learning.
 - [x] Add opt-in application overview email digest automation with user-selected frequency.
+- [x] Add teammate setup docs, configuration diagnostics, guided workflow, privacy settings, and clearer AI outputs.

@@ -9,6 +9,7 @@ import {
   LockKeyhole,
   Mail,
 } from 'lucide-react'
+import BrandLogo from '../components/BrandLogo'
 import { fetchWaitlistStats, joinWaitlist } from '../lib/api'
 import { createWaitlistSignup, isSupabaseConfigured } from '../lib/supabase'
 
@@ -47,15 +48,6 @@ const navStyle = {
   justifyContent: 'space-between',
   gap: '18px',
   marginBottom: '54px',
-}
-const logoStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '10px',
-  color: 'var(--color-text-primary)',
-  fontWeight: '800',
-  fontSize: '18px',
-  textDecoration: 'none',
 }
 const primaryButtonStyle = {
   minHeight: 44,
@@ -289,10 +281,7 @@ export default function Waitlist() {
     <div style={pageStyle}>
       <div style={shellStyle}>
         <nav style={navStyle}>
-          <Link to="/waitlist" style={logoStyle}>
-            <Briefcase size={20} strokeWidth={2.5} color="var(--color-applied-teal)" />
-            ApplyWise
-          </Link>
+          <BrandLogo as={Link} to="/waitlist" width={168} />
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <Link to="/login" style={secondaryLinkStyle}>Login</Link>
             <Link to="/signup" style={primaryButtonStyle}>Sign Up</Link>

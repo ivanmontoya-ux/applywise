@@ -80,6 +80,11 @@ export async function fetchAiStatus() {
   return data
 }
 
+export async function fetchConfigStatus() {
+  const { data } = await api.get('/config/status')
+  return data
+}
+
 export async function reviewCv(payload) {
   const { data } = await api.post('/ai/cv-review', payload)
   return data
@@ -167,6 +172,11 @@ export async function disconnectGmail() {
 
 export async function deleteImportedGmailEmail(id) {
   const { data } = await api.delete(`/integrations/gmail/events/${id}`)
+  return data
+}
+
+export async function deleteImportedGmailEmails() {
+  const { data } = await api.delete('/integrations/gmail/events')
   return data
 }
 
