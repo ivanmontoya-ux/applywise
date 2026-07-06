@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle2, Circle, FileText, ListChecks, Search, Sparkles } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Circle, FileText, ListChecks, Search, Sparkles } from 'lucide-react'
 
 const defaultSteps = [
   { id: 'profile', title: 'Extract CV profile', copy: 'Turn the current CV into reusable Personal Information.', to: '/documents', icon: FileText },
@@ -31,11 +31,13 @@ export default function WorkflowGuide({ steps = defaultSteps, title = 'Recommend
         {steps.map((step, index) => {
           const Icon = step.icon || FileText
           const done = Boolean(step.done)
+          const active = Boolean(step.active)
+          const stateLabel = done ? 'Done' : active ? 'Current' : `Step ${index + 1}`
           return (
             <Link
               key={step.id || step.title}
               to={step.to}
-              className={`workflow-step-card ${done ? 'is-done' : ''}`}
+              className={`workflow-step-card ${done ? 'is-done' : ''} ${active ? 'is-active' : ''}`}
               style={{
                 minHeight: 146,
                 display: 'flex',
@@ -44,19 +46,20 @@ export default function WorkflowGuide({ steps = defaultSteps, title = 'Recommend
                 gap: '14px',
                 padding: '16px',
                 borderRadius: 'var(--radius-md)',
-                border: `1px solid ${done ? '#bbf7d0' : 'var(--color-border)'}`,
-                background: done ? '#f0fdf4' : '#fbfdff',
+                border: `1px solid ${active ? 'var(--color-applied-teal)' : 'var(--color-border)'}`,
+                background: active ? '#ffffff' : done ? '#f8fafc' : '#fbfdff',
+                boxShadow: active ? 'var(--shadow-card)' : undefined,
                 color: 'inherit',
                 textDecoration: 'none',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: active ? 'var(--color-applied-teal)' : '#edf7f7', color: active ? '#ffffff' : 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Icon size={17} strokeWidth={2.4} />
                 </span>
-                <span className="workflow-step-state" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: done ? 'var(--color-success)' : 'var(--color-text-muted)', fontSize: '12px', fontWeight: '800' }}>
-                  {done ? <CheckCircle2 size={14} strokeWidth={2.5} /> : <Circle size={13} strokeWidth={2.3} />}
-                  {done ? 'Done' : `Step ${index + 1}`}
+                <span className="workflow-step-state" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: active ? 'var(--color-applied-teal)' : done ? 'var(--color-text-muted)' : 'var(--color-text-muted)', fontSize: '12px', fontWeight: '800' }}>
+                  {done ? <CheckCircle2 size={14} strokeWidth={2.5} /> : active ? <ArrowRight size={14} strokeWidth={2.5} /> : <Circle size={13} strokeWidth={2.3} />}
+                  {stateLabel}
                 </span>
               </div>
               <div>

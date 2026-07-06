@@ -2,7 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   AlertCircle,
+  ArrowRight,
   Briefcase,
+  CalendarDays,
   CheckCircle2,
   Download,
   FileText,
@@ -111,6 +113,171 @@ function SaveHint({ canSave, auth, selectedApplication }) {
   )
 }
 
+function TailoringWorkspace({
+  selectedApplication,
+  hasCvEvidence,
+  review,
+  coverLetter,
+  reviewDisabled,
+  coverLetterDisabled,
+  loading,
+  generatingLetter,
+  onReviewCv,
+  onGenerateCoverLetter,
+}) {
+  const savedReview = Boolean(selectedApplication?.cv_review)
+  const savedCoverLetter = Boolean(selectedApplication?.cover_letter)
+  const hasReview = Boolean(review || savedReview)
+  const hasLetter = Boolean(coverLetter || savedCoverLetter)
+  const notes = String(selectedApplication?.notes || '').toLowerCase()
+  const hasInterviewPrep = selectedApplication?.status === 'Interview' && Boolean(notes.trim())
+  const hasFollowUpPlan = /follow|reply|recruiter|thank|availability/i.test(notes)
+  const hasChecklist = Boolean(
+    selectedApplication &&
+    hasReview &&
+    hasLetter &&
+    (selectedApplication.deadline_date || selectedApplication.deadline_type === 'rolling'),
+  )
+  const baseDisabled = !selectedApplication || !hasCvEvidence
+  const steps = [
+    {
+      id: 'cv-fit',
+      title: 'CV fit analysis',
+      copy: hasReview ? 'Role-specific CV recommendations are ready.' : 'Check strengths, gaps, keywords, and truthful bullet improvements.',
+      done: hasReview,
+      icon: ListChecks,
+      action: (
+        <button
+          type="button"
+          onClick={onReviewCv}
+          disabled={reviewDisabled}
+          style={{ ...secondaryButtonStyle, minHeight: 34, padding: '7px 10px', fontSize: '12px', opacity: reviewDisabled ? 0.6 : 1, cursor: reviewDisabled ? 'default' : 'pointer' }}
+        >
+          {loading ? <RefreshCw size={13} strokeWidth={2.5} /> : <ListChecks size={13} strokeWidth={2.5} />}
+          {loading ? 'Reviewing...' : 'Review CV'}
+        </button>
+      ),
+    },
+    {
+      id: 'cover-letter',
+      title: 'Cover letter draft',
+      copy: hasLetter ? 'A tailored draft is ready to edit, save, or export.' : 'Create a job-specific cover letter from profile evidence and role context.',
+      done: hasLetter,
+      icon: PenLine,
+      action: (
+        <button
+          type="button"
+          onClick={onGenerateCoverLetter}
+          disabled={coverLetterDisabled}
+          style={{ ...secondaryButtonStyle, minHeight: 34, padding: '7px 10px', fontSize: '12px', opacity: coverLetterDisabled ? 0.6 : 1, cursor: coverLetterDisabled ? 'default' : 'pointer' }}
+        >
+          {generatingLetter ? <RefreshCw size={13} strokeWidth={2.5} /> : <PenLine size={13} strokeWidth={2.5} />}
+          {generatingLetter ? 'Drafting...' : 'Draft letter'}
+        </button>
+      ),
+    },
+    {
+      id: 'interview-prep',
+      title: 'Interview prep notes',
+      copy: hasInterviewPrep ? 'Interview preparation notes are captured on the application.' : 'Prepare role-specific STAR prompts once the application reaches Interview.',
+      done: hasInterviewPrep,
+      icon: GraduationCap,
+      action: selectedApplication ? (
+        <Link to={`/tracker/${selectedApplication.id}`} style={{ ...secondaryButtonStyle, minHeight: 34, padding: '7px 10px', fontSize: '12px' }}>
+          Open detail
+          <ArrowRight size={13} strokeWidth={2.5} />
+        </Link>
+      ) : null,
+    },
+    {
+      id: 'follow-up',
+      title: 'Follow-up email',
+      copy: hasFollowUpPlan ? 'A follow-up or recruiter reply note exists.' : 'Plan follow-ups, thank-you emails, and recruiter replies after applying.',
+      done: hasFollowUpPlan,
+      icon: Mail,
+      action: selectedApplication ? (
+        <Link to="/coach" style={{ ...secondaryButtonStyle, minHeight: 34, padding: '7px 10px', fontSize: '12px' }}>
+          Open Coach
+          <ArrowRight size={13} strokeWidth={2.5} />
+        </Link>
+      ) : null,
+    },
+    {
+      id: 'checklist',
+      title: 'Application checklist',
+      copy: hasChecklist ? 'Core preparation items are attached to the application.' : 'Confirm documents, deadline, status, reminders, and notes before submission.',
+      done: hasChecklist,
+      icon: CalendarDays,
+      action: selectedApplication ? (
+        <Link to={`/tracker/${selectedApplication.id}`} style={{ ...secondaryButtonStyle, minHeight: 34, padding: '7px 10px', fontSize: '12px' }}>
+          Review checklist
+          <ArrowRight size={13} strokeWidth={2.5} />
+        </Link>
+      ) : null,
+    },
+  ]
+  const activeIndex = steps.findIndex(step => !step.done)
+
+  return (
+    <section style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: '16px', background: '#fbfdff' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', marginBottom: '14px' }}>
+        <div>
+          <p style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0', marginBottom: '4px' }}>
+            Tailoring workspace
+          </p>
+          <h2 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-text-primary)', margin: 0 }}>
+            Structured application materials
+          </h2>
+        </div>
+        {baseDisabled && (
+          <span style={{ minHeight: 26, display: 'inline-flex', alignItems: 'center', padding: '0 8px', border: '1px solid #fed7aa', borderRadius: '999px', background: '#fff7ed', color: 'var(--color-warning)', fontSize: '11px', fontWeight: '800' }}>
+            Needs CV and job
+          </span>
+        )}
+      </div>
+      <div style={{ display: 'grid', gap: '10px' }}>
+        {steps.map((step, index) => {
+          const Icon = step.icon
+          const active = index === activeIndex
+          return (
+            <div
+              key={step.id}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '34px 1fr auto',
+                gap: '10px',
+                alignItems: 'center',
+                border: `1px solid ${active ? 'var(--color-applied-teal)' : 'var(--color-border)'}`,
+                borderRadius: 'var(--radius-md)',
+                padding: '11px',
+                background: active ? '#ffffff' : step.done ? '#f8fafc' : '#ffffff',
+              }}
+            >
+              <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: active ? 'var(--color-applied-teal)' : '#edf7f7', color: active ? '#ffffff' : 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon size={16} strokeWidth={2.4} />
+              </span>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap', marginBottom: '3px' }}>
+                  <h3 style={{ fontSize: '13px', fontWeight: '800', color: 'var(--color-text-primary)', margin: 0 }}>{step.title}</h3>
+                  {step.done ? (
+                    <span style={{ color: 'var(--color-success)', fontSize: '11px', fontWeight: '800' }}>Done</span>
+                  ) : active ? (
+                    <span style={{ color: 'var(--color-applied-teal)', fontSize: '11px', fontWeight: '800' }}>Current</span>
+                  ) : null}
+                </div>
+                <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{step.copy}</p>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                {step.action}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function bytesToSize(bytes) {
   if (!bytes) return '0 KB'
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
@@ -210,7 +377,7 @@ function EmptyReview() {
           CV insights will appear here
         </h2>
         <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', maxWidth: '360px' }}>
-          Upload or paste a CV to extract profile details, review role-specific improvements, or draft a tailored cover letter.
+          Upload a CV once to extract Personal Information. After that, saved profile data can power CV reviews and cover letters.
         </p>
       </div>
     </div>
@@ -413,6 +580,22 @@ function FieldRows({ rows }) {
 
 function dateRange(item) {
   return [item?.start_date, item?.end_date].filter(Boolean).join(' - ')
+}
+
+function hasProfileEvidence(profile) {
+  if (!profile || typeof profile !== 'object') return false
+  const skills = profile.skills && typeof profile.skills === 'object' ? profile.skills : {}
+  return Boolean(
+    profile.candidate_name ||
+    profile.headline ||
+    profile.summary ||
+    profile.contact?.location ||
+    profile.education?.length ||
+    profile.experience?.length ||
+    profile.projects?.length ||
+    profile.evidence_points?.length ||
+    Object.values(skills).some(items => Array.isArray(items) && items.length),
+  )
 }
 
 function CvProfileResults({ profile }) {
@@ -891,6 +1074,11 @@ export default function Documents() {
     () => applications.find(app => String(app.id) === selectedApplicationId) || null,
     [applications, selectedApplicationId],
   )
+  const reusableProfile = personalInfo || profile
+  const hasReusableProfile = hasProfileEvidence(reusableProfile)
+  const hasDirectCvSource = Boolean(cvText.trim() || cvFile)
+  const hasCvEvidence = hasDirectCvSource || hasReusableProfile
+  const personalInfoPayload = hasReusableProfile ? JSON.stringify(reusableProfile) : ''
 
   function showSavedReview(application = selectedApplication) {
     if (!application?.cv_review) return
@@ -1007,21 +1195,20 @@ export default function Documents() {
     }
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault()
+  async function runCvReview() {
     setError('')
     setSaveNotice('')
     setReview(null)
     setProfile(null)
     setCoverLetter(null)
 
-    if (!cvText.trim() && !cvFile) {
-      setError('We need CV text before reviewing fit. Upload a CV or paste CV text first.')
+    if (!hasCvEvidence) {
+      setError('Upload or paste a CV, or extract and save Personal Information before reviewing fit.')
       return
     }
 
-    if (!jobDescription.trim()) {
-      setError('We need a job description before generating suggestions.')
+    if (!jobDescription.trim() && !selectedApplication) {
+      setError('Add a job description or select an application before generating suggestions.')
       return
     }
 
@@ -1034,7 +1221,7 @@ export default function Documents() {
         company: selectedApplication?.company || '',
         application_notes: selectedApplication?.notes || '',
         job_description: jobDescription,
-        personal_information: personalInfo ? JSON.stringify(personalInfo) : '',
+        personal_information: personalInfoPayload,
       })
       setReview(result)
     } catch (err) {
@@ -1042,6 +1229,11 @@ export default function Documents() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    await runCvReview()
   }
 
   async function handleExtractProfile() {
@@ -1069,6 +1261,7 @@ export default function Documents() {
         try {
           const saved = await savePersonalInformation(result, 'cv_extraction')
           setProfile(saved.profile || result)
+          setPersonalInfo(saved.profile || result)
           setSaveNotice('Saved under Personal Information.')
         } catch {
           setSaveNotice('CV information was extracted, but it could not be saved yet.')
@@ -1088,8 +1281,8 @@ export default function Documents() {
     setProfile(null)
     setCoverLetter(null)
 
-    if (!cvText.trim() && !cvFile) {
-      setError('Upload a CV or paste CV text before generating a cover letter.')
+    if (!hasCvEvidence) {
+      setError('Upload or paste a CV, or extract and save Personal Information before generating a cover letter.')
       return
     }
 
@@ -1107,7 +1300,7 @@ export default function Documents() {
         company: selectedApplication?.company || '',
         application_notes: selectedApplication?.notes || '',
         job_description: jobDescription,
-        personal_information: personalInfo ? JSON.stringify(personalInfo) : '',
+        personal_information: personalInfoPayload,
       })
       setCoverLetter(result)
     } catch (err) {
@@ -1124,22 +1317,30 @@ export default function Documents() {
 
   const connected = aiStatus?.gemini_configured
   const profileSaved = saveNotice === 'Saved under Personal Information.'
+  const extractDisabled = extracting || loading || generatingLetter || !connected || !hasDirectCvSource
+  const reviewDisabled = loading || extracting || generatingLetter || !connected || !hasCvEvidence
+  const coverLetterDisabled = generatingLetter || loading || extracting || !connected || !hasCvEvidence
   const canSaveReview = Boolean(auth.session && selectedApplication && review)
   const canSaveCoverLetter = Boolean(auth.session && selectedApplication && coverLetter)
-  const documentWorkflowSteps = [
-    { id: 'upload', title: 'Upload or paste CV', copy: 'Start from the current CV the user actually wants to improve.', to: '/documents', done: Boolean(cvText.trim() || cvFile), icon: Upload },
-    { id: 'extract', title: 'Extract profile', copy: 'Save confirmed facts under Personal Information for reuse.', to: '/personal-information', done: Boolean(personalInfo || profileSaved), icon: UserRound },
-    { id: 'review', title: 'Review CV for role', copy: 'Use a selected application or pasted job description.', to: '/documents', done: Boolean(review), icon: ListChecks },
-    { id: 'letter', title: 'Generate cover letter', copy: 'Create an editable, job-specific draft and Word document.', to: '/documents', done: Boolean(coverLetter), icon: PenLine },
-    { id: 'save', title: 'Save to application', copy: 'Store the approved review or letter on the tracked job.', to: '/tracker', done: Boolean(selectedApplication?.cv_review || selectedApplication?.cover_letter), icon: Save },
+  const documentWorkflowStepBase = [
+    { id: 'upload', title: 'Add CV source', copy: 'Upload once, paste text, or reuse saved Personal Information.', to: '/documents', done: hasCvEvidence, icon: Upload },
+    { id: 'extract', title: 'Extract profile', copy: 'Save confirmed facts under Personal Information for reuse.', to: '/personal-information', done: hasReusableProfile || profileSaved, icon: UserRound },
+    { id: 'review', title: 'Review CV for role', copy: 'Use a selected application or pasted job description.', to: '/documents', done: Boolean(review || selectedApplication?.cv_review), icon: ListChecks },
+    { id: 'letter', title: 'Generate cover letter', copy: 'Create an editable, job-specific draft and Word document.', to: '/documents', done: Boolean(coverLetter || selectedApplication?.cover_letter), icon: PenLine },
+    { id: 'save', title: 'Save to application', copy: 'Store the approved review or letter on the tracked job.', to: selectedApplication ? `/tracker/${selectedApplication.id}` : '/tracker', done: Boolean(selectedApplication?.cv_review || selectedApplication?.cover_letter), icon: Save },
   ]
+  const documentWorkflowActive = documentWorkflowStepBase.find(step => !step.done)?.id
+  const documentWorkflowSteps = documentWorkflowStepBase.map(step => ({
+    ...step,
+    active: step.id === documentWorkflowActive,
+  }))
 
   return (
     <div style={pageStyle}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '18px', alignItems: 'flex-start', marginBottom: '28px' }}>
         <div>
           <h1 style={titleStyle}>Documents</h1>
-          <p style={subtitleStyle}>Upload a CV to extract profile details, review fit, or draft a tailored cover letter.</p>
+          <p style={subtitleStyle}>Upload a CV once to extract Personal Information, then reuse it for CV reviews and cover letters.</p>
         </div>
         <div style={{
           display: 'flex',
@@ -1191,6 +1392,29 @@ export default function Documents() {
               ))}
             </select>
           </div>
+
+          {hasReusableProfile && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px',
+              padding: '12px',
+              border: '1px solid #b9dada',
+              borderRadius: 'var(--radius-md)',
+              background: '#edf7f7',
+              color: 'var(--color-applied-teal)',
+              fontSize: '13px',
+              lineHeight: '1.45',
+            }}>
+              <ShieldCheck size={17} strokeWidth={2.4} style={{ flexShrink: 0, marginTop: 1 }} />
+              <div>
+                <strong style={{ display: 'block', color: 'var(--color-text-primary)', marginBottom: '3px' }}>
+                  Saved Personal Information is ready
+                </strong>
+                You can review a CV or generate a cover letter without uploading the CV again. Upload only if you want to replace the current source.
+              </div>
+            </div>
+          )}
 
           <div>
             <label style={labelStyle}>CV file</label>
@@ -1302,6 +1526,19 @@ export default function Documents() {
             </div>
           )}
 
+          <TailoringWorkspace
+            selectedApplication={selectedApplication}
+            hasCvEvidence={hasCvEvidence}
+            review={review}
+            coverLetter={coverLetter}
+            reviewDisabled={reviewDisabled}
+            coverLetterDisabled={coverLetterDisabled}
+            loading={loading}
+            generatingLetter={generatingLetter}
+            onReviewCv={runCvReview}
+            onGenerateCoverLetter={handleGenerateCoverLetter}
+          />
+
           {error && (
             <div style={{
               display: 'flex',
@@ -1350,11 +1587,11 @@ export default function Documents() {
             <button
               type="button"
               onClick={handleExtractProfile}
-              disabled={extracting || loading || generatingLetter || !connected}
+              disabled={extractDisabled}
               style={{
                 ...primaryButtonStyle,
-                opacity: extracting || loading || generatingLetter || !connected ? 0.6 : 1,
-                cursor: extracting || loading || generatingLetter || !connected ? 'default' : 'pointer',
+                opacity: extractDisabled ? 0.6 : 1,
+                cursor: extractDisabled ? 'default' : 'pointer',
               }}
             >
               {extracting ? <RefreshCw size={15} strokeWidth={2.5} /> : <UserRound size={15} strokeWidth={2.5} />}
@@ -1362,11 +1599,11 @@ export default function Documents() {
             </button>
             <button
               type="submit"
-              disabled={loading || extracting || generatingLetter || !connected}
+              disabled={reviewDisabled}
               style={{
                 ...secondaryButtonStyle,
-                opacity: loading || extracting || generatingLetter || !connected ? 0.6 : 1,
-                cursor: loading || extracting || generatingLetter || !connected ? 'default' : 'pointer',
+                opacity: reviewDisabled ? 0.6 : 1,
+                cursor: reviewDisabled ? 'default' : 'pointer',
               }}
             >
               {loading ? <RefreshCw size={15} strokeWidth={2.5} /> : <ListChecks size={15} strokeWidth={2.5} />}
@@ -1375,11 +1612,11 @@ export default function Documents() {
             <button
               type="button"
               onClick={handleGenerateCoverLetter}
-              disabled={generatingLetter || loading || extracting || !connected}
+              disabled={coverLetterDisabled}
               style={{
                 ...secondaryButtonStyle,
-                opacity: generatingLetter || loading || extracting || !connected ? 0.6 : 1,
-                cursor: generatingLetter || loading || extracting || !connected ? 'default' : 'pointer',
+                opacity: coverLetterDisabled ? 0.6 : 1,
+                cursor: coverLetterDisabled ? 'default' : 'pointer',
               }}
             >
               {generatingLetter ? <RefreshCw size={15} strokeWidth={2.5} /> : <PenLine size={15} strokeWidth={2.5} />}

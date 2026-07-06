@@ -354,7 +354,7 @@ function normalizeBase64(data) {
   return data.replace(/^data:[^,]+,/, '').replace(/\s/g, '')
 }
 
-function buildPrompt({ cvText, jobTitle, company, jobDescription, applicationNotes }) {
+function buildPrompt({ cvText, jobTitle, company, jobDescription, applicationNotes, personalInfo }) {
   const jobLine = [jobTitle, company].filter(Boolean).join(' at ')
   return [
     'Review this CV for a graduate or early-career application.',
@@ -374,7 +374,10 @@ function buildPrompt({ cvText, jobTitle, company, jobDescription, applicationNot
     'Application notes:',
     applicationNotes || 'No application notes provided.',
     '',
-    'CV text pasted by user:',
+    'Saved personal information, if available:',
+    personalInfo || 'No saved personal information provided.',
+    '',
+    'CV or saved profile evidence:',
     cvText || 'The CV was uploaded as a document. Read the attached document content.',
   ].join('\n')
 }
@@ -423,7 +426,7 @@ function buildCoverLetterPrompt({ cvText, jobTitle, company, jobDescription, app
     'Saved personal information, if available:',
     personalInfo || 'No saved personal information provided.',
     '',
-    'CV text pasted by user:',
+    'CV or saved profile evidence:',
     cvText || 'The CV was uploaded as a document. Read the attached document content.',
   ].join('\n')
 }
@@ -542,9 +545,46 @@ function clampScore(value) {
   return Math.max(0, Math.min(100, Math.round(score)))
 }
 
-function buildCvDocumentInput(payload = {}, missingMessage) {
+function buildPersonalInformationText(value) {
+  if (!value) return ''
+
+  let profile = value
+  if (typeof value === 'string') {
+    try {
+      profile = JSON.parse(value)
+    } catch {
+      return cleanText(value, 12000)
+    }
+  }
+
+  if (!profile || typeof profile !== 'object') return ''
+
+  const compact = compactProfileForRecommendation(profile)
+  const hasContent = Boolean(
+    compact.candidate_name ||
+    compact.headline ||
+    compact.summary ||
+    compact.location ||
+    compact.education.length ||
+    compact.experience.length ||
+    compact.projects.length ||
+    Object.values(compact.skills || {}).some(items => asArray(items).length) ||
+    compact.evidence_points.length,
+  )
+
+  if (!hasContent) return ''
+  return [
+    'Saved Personal Information extracted from the user CV. Treat this as reusable CV evidence.',
+    JSON.stringify(compact, null, 2),
+  ].join('\n')
+}
+
+function buildCvDocumentInput(payload = {}, missingMessage, options = {}) {
   const cvText = cleanText(payload.cv_text, MAX_CV_TEXT_CHARS)
   const cvFile = payload.cv_file && typeof payload.cv_file === 'object' ? payload.cv_file : null
+  const personalInfoText = options.allowPersonalInformation
+    ? buildPersonalInformationText(payload.personal_information)
+    : ''
   const input = []
 
   if (cvFile?.data) {
@@ -568,13 +608,17 @@ function buildCvDocumentInput(payload = {}, missingMessage) {
     })
   }
 
+  if (!cvText && input.length === 0 && personalInfoText) {
+    return { cvText: personalInfoText, input, usedPersonalInformation: true }
+  }
+
   if (!cvText && input.length === 0) {
     const err = new Error(missingMessage)
     err.status = 400
     throw err
   }
 
-  return { cvText, input }
+  return { cvText, input, usedPersonalInformation: false }
 }
 
 function normalizeReview(review) {
@@ -883,16 +927,18 @@ export async function reviewCvWithGemini(payload = {}) {
 
   const { cvText, input } = buildCvDocumentInput(
     payload,
-    'Add CV text or upload a CV file before requesting a review.',
+    'Upload or paste a CV, or extract and save Personal Information before requesting a review.',
+    { allowPersonalInformation: true },
   )
   const jobTitle = cleanText(payload.job_title, 200)
   const company = cleanText(payload.company, 200)
   const jobDescription = cleanText(payload.job_description, MAX_JOB_TEXT_CHARS)
   const applicationNotes = cleanText(payload.application_notes, 4000)
+  const personalInfo = buildPersonalInformationText(payload.personal_information)
 
   input.push({
     type: 'text',
-    text: buildPrompt({ cvText, jobTitle, company, jobDescription, applicationNotes }),
+    text: buildPrompt({ cvText, jobTitle, company, jobDescription, applicationNotes, personalInfo }),
   })
 
   const response = await fetch(GEMINI_INTERACTIONS_URL, {
@@ -985,13 +1031,14 @@ export async function generateCoverLetterWithGemini(payload = {}) {
 
   const { cvText, input } = buildCvDocumentInput(
     payload,
-    'Add CV text or upload a CV file before generating a cover letter.',
+    'Upload or paste a CV, or extract and save Personal Information before generating a cover letter.',
+    { allowPersonalInformation: true },
   )
   const jobTitle = cleanText(payload.job_title, 200)
   const company = cleanText(payload.company, 200)
   const jobDescription = cleanText(payload.job_description, MAX_JOB_TEXT_CHARS)
   const applicationNotes = cleanText(payload.application_notes, 4000)
-  const personalInfo = cleanText(payload.personal_information, 12000)
+  const personalInfo = buildPersonalInformationText(payload.personal_information)
 
   if (!jobDescription && !jobTitle && !company) {
     const err = new Error('Add a job description or select an application before generating a cover letter.')

@@ -210,6 +210,29 @@ function getFirstName(value) {
   return firstWord.charAt(0).toUpperCase() + firstWord.slice(1)
 }
 
+function hasProfileEvidence(profile) {
+  if (!profile || typeof profile !== 'object') return false
+  const skills = profile.skills && typeof profile.skills === 'object' ? profile.skills : {}
+  return Boolean(
+    profile.candidate_name ||
+    profile.headline ||
+    profile.summary ||
+    profile.education?.length ||
+    profile.experience?.length ||
+    profile.projects?.length ||
+    Object.values(skills).some(items => Array.isArray(items) && items.length),
+  )
+}
+
+function applicationLabel(application) {
+  if (!application) return 'this application'
+  return [application.title, application.company].filter(Boolean).join(' at ') || 'this application'
+}
+
+function firstIncompleteStep(steps) {
+  return steps.find(step => !step.done)?.id
+}
+
 export default function Home() {
   const auth = useAuth()
   const [applications, setApplications] = useState([])
@@ -257,6 +280,16 @@ export default function Home() {
     () => activeApplications.slice(0, 3).map(app => ({ app, action: getNextAction(app) })),
     [activeApplications],
   )
+  const profileReady = useMemo(() => hasProfileEvidence(personalInfo), [personalInfo])
+  const firstApplication = activeApplications[0] || applications[0] || null
+  const applicationNeedingDocuments = useMemo(
+    () => activeApplications.find(app => getDocumentReadiness(app) !== 'Complete') || null,
+    [activeApplications],
+  )
+  const applicationMissingDeadline = useMemo(
+    () => activeApplications.find(app => !app.deadline_date && app.deadline_type !== 'rolling') || null,
+    [activeApplications],
+  )
   const counts = useMemo(() => {
     const next = Object.fromEntries(APPLICATION_STATUSES.map(status => [status, 0]))
     applications.forEach(app => {
@@ -279,19 +312,102 @@ export default function Home() {
     return getFirstName(auth.user?.email?.split('@')[0])
   }, [auth.user, personalInfo])
   const workflowSteps = useMemo(() => {
-    const hasProfile = Boolean(personalInfo?.candidate_name || personalInfo?.summary || personalInfo?.experience?.length || personalInfo?.skills)
+    const hasProfile = profileReady
     const hasTrackedJob = applications.length > 0
     const hasTailoredDocs = applications.some(app => app.cv_review || app.cover_letter)
-    const hasProgress = applications.some(app => app.status && app.status !== 'Saved')
-    const hasCoachContext = hasProfile && hasTrackedJob
-    return [
+    const hasTrackerReady = hasTrackedJob && hasTailoredDocs
+    const hasCoachContext = hasProfile && hasTrackedJob && hasTailoredDocs && applications.some(app => app.status && app.status !== 'Saved')
+    const steps = [
       { id: 'profile', title: 'Extract CV profile', copy: 'Upload the current CV and save reusable Personal Information.', to: '/documents', done: hasProfile, icon: FileText },
-      { id: 'jobs', title: 'Review jobs', copy: 'Search roles and use AI recommendations once the CV profile exists.', to: '/jobs', done: hasTrackedJob, icon: Briefcase },
-      { id: 'tracker', title: 'Track application', copy: 'Save a role, add status, deadline, and next action.', to: '/tracker', done: hasProgress, icon: ListChecks },
-      { id: 'documents', title: 'Tailor documents', copy: 'Generate CV recommendations and cover letters per application.', to: '/documents', done: hasTailoredDocs, icon: FileText },
+      { id: 'jobs', title: 'Add first job', copy: 'Find a role or add one manually so there is a real application to work on.', to: '/jobs', done: hasTrackedJob, icon: Briefcase },
+      { id: 'documents', title: 'Tailor documents', copy: 'Generate CV recommendations and a cover letter for the selected role.', to: '/documents', done: hasTailoredDocs, icon: FileText },
+      { id: 'tracker', title: 'Save to tracker', copy: 'Keep the role, deadline, status, documents, and next action together.', to: '/tracker', done: hasTrackerReady, icon: ListChecks },
       { id: 'coach', title: 'Use Coach', copy: 'Let Coach prioritize follow-ups, reminders, and interview prep.', to: '/coach', done: hasCoachContext, icon: CheckCircle2 },
     ]
-  }, [applications, personalInfo])
+    const activeStep = firstIncompleteStep(steps)
+    return steps.map(step => ({ ...step, active: step.id === activeStep }))
+  }, [applications, profileReady])
+  const dashboardAction = useMemo(() => {
+    if (loading) return null
+    if (!profileReady) {
+      return {
+        eyebrow: 'Start here',
+        title: 'Add your CV and extract Personal Information',
+        copy: 'This creates the reusable profile that powers CV reviews, cover letters, job recommendations, and coaching.',
+        reason: 'Recommended because ApplyWise does not have saved Personal Information yet.',
+        to: '/documents',
+        label: 'Add CV',
+        icon: FileText,
+      }
+    }
+    if (applications.length === 0) {
+      return {
+        eyebrow: 'Next best action',
+        title: 'Add your first job',
+        copy: 'Choose a role from Jobs or add one manually so ApplyWise can build a real application workflow.',
+        reason: 'Recommended because there is no tracked application yet.',
+        to: '/jobs',
+        label: 'Find or add a job',
+        icon: Briefcase,
+      }
+    }
+    if (applicationNeedingDocuments && getDocumentReadiness(applicationNeedingDocuments) !== 'Complete') {
+      return {
+        eyebrow: 'Next best action',
+        title: `Tailor documents for ${applicationLabel(applicationNeedingDocuments)}`,
+        copy: 'Run a CV fit analysis and draft a cover letter before moving the application forward.',
+        reason: `Recommended because document readiness is ${getDocumentReadiness(applicationNeedingDocuments)}.`,
+        to: '/documents',
+        label: 'Generate tailored advice',
+        icon: FileText,
+      }
+    }
+    if (applicationMissingDeadline) {
+      return {
+        eyebrow: 'Next best action',
+        title: `Add a deadline for ${applicationLabel(applicationMissingDeadline)}`,
+        copy: 'A deadline makes reminders, follow-ups, and weekly planning much more reliable.',
+        reason: 'Recommended because this tracked application has no deadline yet.',
+        to: `/tracker/${applicationMissingDeadline.id}`,
+        label: 'Open application',
+        icon: CalendarDays,
+      }
+    }
+    const interviewApplication = activeApplications.find(app => app.status === 'Interview')
+    if (interviewApplication) {
+      return {
+        eyebrow: 'Next best action',
+        title: `Prepare interview notes for ${applicationLabel(interviewApplication)}`,
+        copy: 'Use the application detail page to review documents, reminders, and coach suggestions for the interview stage.',
+        reason: 'Recommended because this application is currently in Interview.',
+        to: `/tracker/${interviewApplication.id}`,
+        label: 'Prepare interview',
+        icon: ListChecks,
+      }
+    }
+    const appliedApplication = activeApplications.find(app => app.status === 'Applied')
+    if (appliedApplication) {
+      return {
+        eyebrow: 'Next best action',
+        title: `Check follow-up timing for ${applicationLabel(appliedApplication)}`,
+        copy: 'Review the timeline and decide whether a follow-up reminder or recruiter reply is needed.',
+        reason: 'Recommended because applied applications should not go quiet without a next action.',
+        to: `/tracker/${appliedApplication.id}`,
+        label: 'Review follow-up',
+        icon: CalendarDays,
+      }
+    }
+    return {
+      eyebrow: 'Next best action',
+      title: 'Review your active tracker',
+      copy: 'Check statuses, documents, deadlines, and coach suggestions so the next application step stays clear.',
+      reason: 'Recommended because the setup workflow is complete enough for ongoing tracking.',
+      to: firstApplication ? `/tracker/${firstApplication.id}` : '/tracker',
+      label: 'Open tracker',
+      icon: ListChecks,
+    }
+  }, [activeApplications, applicationMissingDeadline, applicationNeedingDocuments, applications.length, firstApplication, loading, profileReady])
+  const DashboardActionIcon = dashboardAction?.icon || ListChecks
 
   return (
     <div style={pageStyle}>
@@ -318,10 +434,45 @@ export default function Home() {
         </div>
       )}
 
-      <div style={{ marginBottom: '24px' }}>
+      <section style={{ ...panelStyle, padding: '30px', marginBottom: '26px', borderColor: 'rgba(47, 111, 115, 0.28)', background: '#ffffff' }}>
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <SkeletonLine width="120px" height={12} />
+            <SkeletonLine width="56%" height={26} />
+            <SkeletonLine width="78%" height={14} />
+            <SkeletonLine width="180px" height={44} radius={8} />
+          </div>
+        ) : dashboardAction ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '22px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+              <span style={{ width: 48, height: 48, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <DashboardActionIcon size={22} strokeWidth={2.4} />
+              </span>
+              <div>
+                <p style={eyebrowStyle}>{dashboardAction.eyebrow}</p>
+                <h2 style={{ fontSize: '22px', lineHeight: '1.2', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '8px' }}>
+                  {dashboardAction.title}
+                </h2>
+                <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: '1.6', maxWidth: '760px', marginBottom: '12px' }}>
+                  {dashboardAction.copy}
+                </p>
+                <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', lineHeight: '1.5' }}>
+                  {dashboardAction.reason}
+                </p>
+              </div>
+            </div>
+            <Link to={dashboardAction.to} className="primary-action pressable" style={{ ...primaryLinkStyle, minHeight: 48, padding: '0 18px', whiteSpace: 'nowrap' }}>
+              {dashboardAction.label}
+              <ArrowRight size={16} strokeWidth={2.4} />
+            </Link>
+          </div>
+        ) : null}
+      </section>
+
+      <div style={{ marginBottom: '26px' }}>
         <WorkflowGuide
           title="Build one complete application"
-          copy="Best path: extract your CV, find a role, save it, tailor materials, then let Coach manage next actions."
+          copy="Best path: add your CV, add your first job, generate tailored advice, save to tracker, then let Coach manage next actions."
           steps={workflowSteps}
         />
       </div>

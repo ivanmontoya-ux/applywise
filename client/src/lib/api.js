@@ -60,6 +60,11 @@ export async function fetchTracker(status) {
   return data
 }
 
+export async function fetchApplication(id) {
+  const { data } = await api.get(`/tracker/${id}`)
+  return data
+}
+
 export async function updateApplication(id, patch) {
   const { data } = await api.patch(`/tracker/${id}`, patch)
   return data

@@ -9,7 +9,7 @@ const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const GMAIL_API_URL = 'https://gmail.googleapis.com/gmail/v1/users/me'
 const DEFAULT_SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
-const APPLICATION_STATUSES = new Set(['Saved', 'Applied', 'Interview', 'Assessment', 'Offer', 'Rejected', 'Withdrawn'])
+const APPLICATION_STATUSES = new Set(['Saved', 'Applied', 'Interview', 'Assessment', 'Offer', 'Rejected'])
 
 const INBOUND_SEARCH_PHRASES = [
   '"thank you for applying"',

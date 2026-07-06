@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Bell, Calendar, Download, ExternalLink, FileText, MapPin, Pencil, RefreshCcw, Trash2 } from 'lucide-react'
 import { updateApplication, deleteApplication } from '../lib/api'
 import { downloadCoverLetterDoc } from '../lib/documentExport'
@@ -69,14 +70,20 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
       {/* Top row: title + company + actions */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
+          <Link
+            to={`/tracker/${application.id}`}
+            style={{
+              display: 'inline-block',
             fontSize: '15px', fontWeight: '600',
             color: 'var(--color-text-primary)',
             marginBottom: '5px',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
+              textDecoration: 'none',
+              maxWidth: '100%',
+            }}
+          >
             {application.title}
-          </div>
+          </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '500' }}>
               {application.company}
@@ -322,6 +329,28 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
             </span>
           </button>
         )}
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Link to={`/tracker/${application.id}`} className="secondary-action pressable" style={{
+          minHeight: 34,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '7px',
+          padding: '0 12px',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--color-border)',
+          background: '#ffffff',
+          color: 'var(--color-text-primary)',
+          fontSize: '12px',
+          fontWeight: '800',
+          textDecoration: 'none',
+          boxShadow: 'var(--shadow-sm)',
+        }}>
+          Open details
+          <ExternalLink size={13} strokeWidth={2.4} />
+        </Link>
       </div>
     </div>
   )

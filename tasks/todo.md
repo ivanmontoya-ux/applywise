@@ -39,3 +39,6 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Polish the visual design with softer surfaces, clearer button hierarchy, and refined shared tokens.
 - [x] Reduce dashboard visual density and add shared micro-interactions, skeleton loading states, and workflow completion animation.
 - [x] Harden AI job recommendations with smaller Gemini payloads, robust JSON parsing, and local profile-match fallback.
+- [x] Let Documents reuse saved Personal Information for CV reviews and cover letters without reuploading the CV.
+- [x] Improve onboarding, next-best-step dashboard focus, application detail pages, and structured document tailoring.
+- [x] Remove the extra closed application status across the app and backend status flows.

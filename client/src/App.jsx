@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar'
 import Home from './pages/Home'
 import JobFeed from './pages/JobFeed'
 import Tracker from './pages/Tracker'
+import ApplicationDetail from './pages/ApplicationDetail'
 import Documents from './pages/Documents'
 import PersonalInformation from './pages/PersonalInformation'
 import Coach from './pages/Coach'
@@ -125,6 +126,7 @@ function AppLayout() {
           <Route path="/feed" element={<JobFeed />} />
           <Route path="/jobs" element={<JobFeed />} />
           <Route path="/tracker" element={<Tracker />} />
+          <Route path="/tracker/:id" element={<ApplicationDetail />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/personal-information" element={<PersonalInformation />} />
           <Route path="/coach" element={<Coach />} />

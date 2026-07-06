@@ -67,7 +67,6 @@ Application statuses:
 - Assessment
 - Offer
 - Rejected
-- Withdrawn
 
 Reminder types:
 

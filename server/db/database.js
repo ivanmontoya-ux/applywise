@@ -333,7 +333,8 @@ export function initDb() {
   `)
 
   db.prepare("UPDATE tracker SET status = 'Interview' WHERE status IN ('Phone Screen', 'Final Round')").run()
-  db.prepare("UPDATE tracker SET status = 'Withdrawn' WHERE status IN ('Declined', 'Archived')").run()
+  db.prepare("UPDATE tracker SET status = 'Rejected' WHERE status IN ('Declined', 'Archived')").run()
+  db.prepare("UPDATE tracker SET status = 'Rejected' WHERE status NOT IN ('Saved', 'Applied', 'Interview', 'Assessment', 'Offer', 'Rejected') AND status IS NOT NULL AND status != ''").run()
   db.prepare("UPDATE tracker SET status = 'Saved' WHERE status IS NULL OR status = ''").run()
 
   // Back-fill and refresh classification for jobs that predate current categories.

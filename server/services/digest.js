@@ -60,7 +60,7 @@ function formatDate(value) {
 }
 
 function isTerminal(status) {
-  return ['Offer', 'Rejected', 'Withdrawn'].includes(status)
+  return ['Offer', 'Rejected'].includes(status)
 }
 
 function defaultPreference(user) {
@@ -124,7 +124,7 @@ export function saveDigestPreference(db, user, body = {}) {
 }
 
 function getStatusCounts(applications) {
-  const statuses = ['Saved', 'Applied', 'Interview', 'Assessment', 'Offer', 'Rejected', 'Withdrawn']
+  const statuses = ['Saved', 'Applied', 'Interview', 'Assessment', 'Offer', 'Rejected']
   const counts = Object.fromEntries(statuses.map(status => [status, 0]))
   for (const app of applications) {
     if (counts[app.status] !== undefined) counts[app.status] += 1

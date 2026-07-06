@@ -5,10 +5,9 @@ export const APPLICATION_STATUSES = [
   'Assessment',
   'Offer',
   'Rejected',
-  'Withdrawn',
 ]
 
-export const TERMINAL_STATUSES = new Set(['Offer', 'Rejected', 'Withdrawn'])
+export const TERMINAL_STATUSES = new Set(['Offer', 'Rejected'])
 
 export const STATUS_STYLES = {
   Saved: { bg: '#f4f4f5', color: '#52525b', border: '#d4d4d8', accent: '#a1a1aa' },
@@ -17,7 +16,6 @@ export const STATUS_STYLES = {
   Assessment: { bg: '#fff7ed', color: '#a15c07', border: '#fed7aa', accent: '#a15c07' },
   Offer: { bg: '#f0fdf4', color: '#2f6b45', border: '#bbf7d0', accent: '#2f6b45' },
   Rejected: { bg: '#fef2f2', color: '#b42318', border: '#fecaca', accent: '#b42318' },
-  Withdrawn: { bg: '#fafafa', color: '#71717a', border: '#d4d4d8', accent: '#71717a' },
 }
 
 export function getStatusStyle(status) {
@@ -63,6 +61,5 @@ export function getNextAction(application) {
   if (application.status === 'Assessment') return 'Block time to complete the assessment and gather required documents.'
   if (application.status === 'Offer') return 'Review offer details and compare deadlines before deciding.'
   if (application.status === 'Rejected') return 'Record the outcome and reuse any strong application material.'
-  if (application.status === 'Withdrawn') return 'Keep the record for reference; no active next action.'
   return 'Add a next action so this application does not drift.'
 }
