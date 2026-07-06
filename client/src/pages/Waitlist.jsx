@@ -49,6 +49,12 @@ const navStyle = {
   gap: '18px',
   marginBottom: '54px',
 }
+const waitlistLogoStyle = {
+  background: 'transparent',
+}
+const waitlistLogoImageStyle = {
+  mixBlendMode: 'multiply',
+}
 const primaryButtonStyle = {
   minHeight: 44,
   display: 'inline-flex',
@@ -284,7 +290,13 @@ export default function Waitlist() {
     <div style={pageStyle}>
       <div style={shellStyle}>
         <nav style={navStyle}>
-          <BrandLogo as={Link} to="/waitlist" width={168} />
+          <BrandLogo
+            as={Link}
+            to="/waitlist"
+            width={168}
+            style={waitlistLogoStyle}
+            imgStyle={waitlistLogoImageStyle}
+          />
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <Link to="/login" style={secondaryLinkStyle}>Login</Link>
             <Link to="/signup" style={primaryButtonStyle}>Sign Up</Link>

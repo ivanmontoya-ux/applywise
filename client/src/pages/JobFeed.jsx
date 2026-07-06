@@ -102,6 +102,24 @@ function fitStyle(value) {
   return { bg: '#edf7f7', color: 'var(--color-applied-teal)', border: '#b9dada' }
 }
 
+function recommendationErrorMessage(err) {
+  const status = err?.response?.status
+  const serverMessage = String(err?.response?.data?.error || err?.message || '')
+  const lower = serverMessage.toLowerCase()
+
+  if (status === 400 && lower.includes('personal information')) return ''
+  if (status === 400 && lower.includes('no jobs')) return ''
+  if (status === 503) return 'AI job recommendations are unavailable until Gemini is configured in server/.env.'
+  if (lower.includes('api key') || lower.includes('permission') || lower.includes('authentication') || lower.includes('unauthorized')) {
+    return 'Gemini could not authenticate. Check that GEMINI_API_KEY in server/.env is a valid Google AI Studio key, then restart the app.'
+  }
+  if (lower.includes('model')) {
+    return 'Gemini could not use the configured model. Check GEMINI_MODEL in server/.env, then restart the app.'
+  }
+
+  return 'AI job recommendations could not be loaded yet. Check the Gemini key/model in server/.env and restart the app.'
+}
+
 // ── MultiSelect dropdown ─────────────────────────────────────────────────────
 
 function FilterDropdown({ label, unit, groups, selected, onChange, minWidth = '190px' }) {
@@ -521,14 +539,7 @@ export default function JobFeed() {
       setRecommendations(Array.isArray(result?.recommendations) ? result.recommendations : [])
     } catch (err) {
       if (recommendationsRequest.current !== requestId) return
-      const status = err?.response?.status
-      if (status === 400) {
-        setRecommendationError('')
-      } else if (status === 503) {
-        setRecommendationError('AI job recommendations are unavailable until Gemini is configured.')
-      } else {
-        setRecommendationError('AI job recommendations could not be loaded yet.')
-      }
+      setRecommendationError(recommendationErrorMessage(err))
     } finally {
       if (recommendationsRequest.current === requestId) {
         setRecommendationsLoading(false)
