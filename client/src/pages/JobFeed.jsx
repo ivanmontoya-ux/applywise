@@ -321,8 +321,8 @@ function Toast({ message, onDismiss }) {
   )
 }
 
-function RecommendedJobsBand({ recommendations, loading, error }) {
-  if (!loading && !error && recommendations.length === 0) return null
+function RecommendedJobsBand({ recommendations, loading, error, warning }) {
+  if (!loading && !error && !warning && recommendations.length === 0) return null
 
   return (
     <section style={{
@@ -356,7 +356,13 @@ function RecommendedJobsBand({ recommendations, loading, error }) {
           {error}
         </div>
       ) : recommendations.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
+        <>
+          {warning && (
+            <div style={{ padding: '10px 12px', borderRadius: 'var(--radius-md)', background: '#fff7ed', color: '#9a3412', fontSize: '13px', lineHeight: '1.45' }}>
+              {warning}
+            </div>
+          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
           {recommendations.map(({ job, recommendation }) => {
             const style = fitStyle(recommendation.fit_label)
             return (
@@ -412,7 +418,8 @@ function RecommendedJobsBand({ recommendations, loading, error }) {
               </article>
             )
           })}
-        </div>
+          </div>
+        </>
       ) : null}
     </section>
   )
@@ -435,6 +442,7 @@ export default function JobFeed() {
   const [recommendations,   setRecommendations]    = useState([])
   const [recommendationsLoading, setRecommendationsLoading] = useState(false)
   const [recommendationError, setRecommendationError] = useState('')
+  const [recommendationWarning, setRecommendationWarning] = useState('')
   const debounceTimer = useRef(null)
   const recommendationsRequest = useRef(0)
 
@@ -455,6 +463,7 @@ export default function JobFeed() {
     recommendationsRequest.current += 1
     setRecommendations([])
     setRecommendationError('')
+    setRecommendationWarning('')
     setRecommendationsLoading(false)
     try {
       const data = await fetchJobs({
@@ -469,6 +478,7 @@ export default function JobFeed() {
       setJobs([])
       setRecommendations([])
       setRecommendationError('')
+      setRecommendationWarning('')
       setRecommendationsLoading(false)
       setError('Could not load jobs. Make sure the server is running.')
     } finally {
@@ -514,6 +524,7 @@ export default function JobFeed() {
 
     setRecommendations([])
     setRecommendationError('')
+    setRecommendationWarning('')
     setRecommendationsLoading(false)
 
     const jobData = Array.isArray(candidateJobs) ? candidateJobs.filter(Boolean) : []
@@ -537,6 +548,7 @@ export default function JobFeed() {
       })
       if (recommendationsRequest.current !== requestId) return
       setRecommendations(Array.isArray(result?.recommendations) ? result.recommendations : [])
+      setRecommendationWarning(result?.warning || '')
     } catch (err) {
       if (recommendationsRequest.current !== requestId) return
       setRecommendationError(recommendationErrorMessage(err))
@@ -663,6 +675,7 @@ export default function JobFeed() {
         recommendations={recommendedJobs}
         loading={recommendationsLoading}
         error={recommendationError}
+        warning={recommendationWarning}
       />
 
       {/* Error Banner */}

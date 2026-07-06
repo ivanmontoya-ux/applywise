@@ -2,7 +2,7 @@ const GEMINI_INTERACTIONS_URL = 'https://generativelanguage.googleapis.com/v1bet
 const DEFAULT_MODEL = 'gemini-3.5-flash'
 const MAX_CV_TEXT_CHARS = 45000
 const MAX_JOB_TEXT_CHARS = 18000
-const MAX_RECOMMENDATION_JOBS = 60
+const MAX_RECOMMENDATION_JOBS = 30
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
 const DOCUMENT_MIME_TYPES = new Set([
@@ -436,7 +436,41 @@ function compactJobForRecommendation(job = {}) {
     location: cleanText(job.location, 160),
     sector: cleanText(job.sector, 160),
     experience_level: cleanText(job.experience_level, 120),
-    description: cleanText(job.description, 700),
+    description: cleanText(job.description, 420),
+  }
+}
+
+function compactProfileForRecommendation(profile = {}) {
+  const skills = profile.skills && typeof profile.skills === 'object' ? profile.skills : {}
+  return {
+    candidate_name: toText(profile.candidate_name),
+    headline: cleanText(profile.headline, 300),
+    summary: cleanText(profile.summary, 1200),
+    location: cleanText(profile.contact?.location, 160),
+    education: asArray(profile.education).map(item => ({
+      degree: cleanText(item?.degree, 160),
+      field: cleanText(item?.field, 160),
+      details: textArray(item?.details, 4),
+    })).slice(0, 4),
+    experience: asArray(profile.experience).map(item => ({
+      role: cleanText(item?.role, 160),
+      organization: cleanText(item?.organization, 160),
+      achievements: textArray(item?.achievements, 5),
+      skills_used: textArray(item?.skills_used, 8),
+    })).slice(0, 6),
+    projects: asArray(profile.projects).map(item => ({
+      title: cleanText(item?.title, 160),
+      description: cleanText(item?.description, 300),
+      skills_used: textArray(item?.skills_used, 8),
+    })).slice(0, 4),
+    skills: {
+      technical: textArray(skills.technical, 14),
+      business: textArray(skills.business, 14),
+      tools: textArray(skills.tools, 14),
+      languages: textArray(skills.languages, 8),
+      other: textArray(skills.other, 10),
+    },
+    evidence_points: asArray(profile.evidence_points).map(item => toText(item?.evidence || item)).filter(Boolean).slice(0, 8),
   }
 }
 
@@ -460,7 +494,7 @@ function buildJobRecommendationPrompt({ personalInfo, jobs }) {
     '- Keep reasons short and practical.',
     '',
     'Saved personal information:',
-    JSON.stringify(personalInfo || {}, null, 2).slice(0, 18000),
+    JSON.stringify(compactProfileForRecommendation(personalInfo || {}), null, 2).slice(0, 12000),
     '',
     'Available jobs:',
     JSON.stringify(compactJobs, null, 2),
@@ -670,6 +704,138 @@ function normalizeJobRecommendations(result = {}, allowedJobIds = new Set()) {
   }
 }
 
+const LOCAL_MATCH_STOPWORDS = new Set([
+  'and', 'the', 'for', 'with', 'from', 'that', 'this', 'your', 'you', 'are', 'our', 'will',
+  'into', 'about', 'their', 'have', 'has', 'was', 'were', 'been', 'role', 'work', 'job',
+  'jobs', 'team', 'teams', 'using', 'use', 'used', 'within', 'across', 'based', 'help',
+  'helps', 'apply', 'application', 'applications', 'candidate', 'graduate', 'student',
+])
+
+function tokenizeForLocalMatch(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9+#.\s-]/g, ' ')
+    .split(/\s+/)
+    .map(token => token.trim())
+    .filter(token => token.length >= 3 && !LOCAL_MATCH_STOPWORDS.has(token))
+}
+
+function collectProfileText(profile = {}) {
+  const compact = compactProfileForRecommendation(profile)
+  return [
+    compact.headline,
+    compact.summary,
+    compact.location,
+    ...asArray(compact.education).flatMap(item => [item.degree, item.field, ...asArray(item.details)]),
+    ...asArray(compact.experience).flatMap(item => [item.role, item.organization, ...asArray(item.achievements), ...asArray(item.skills_used)]),
+    ...asArray(compact.projects).flatMap(item => [item.title, item.description, ...asArray(item.skills_used)]),
+    ...Object.values(compact.skills || {}).flatMap(asArray),
+    ...asArray(compact.evidence_points),
+  ].filter(Boolean).join(' ')
+}
+
+function topMatchedTerms(profileTerms, text, limit = 5) {
+  const seen = new Set(tokenizeForLocalMatch(text))
+  return [...profileTerms]
+    .filter(term => seen.has(term))
+    .slice(0, limit)
+}
+
+function buildLocalJobRecommendations(personalInfo, jobs, reason = '') {
+  const profileText = collectProfileText(personalInfo)
+  const profileTerms = new Set(tokenizeForLocalMatch(profileText).slice(0, 160))
+  const hasProfileTerms = profileTerms.size > 0
+
+  const scored = jobs.map(job => {
+    const title = cleanText(job.title, 180)
+    const jobText = [
+      title,
+      job.company,
+      job.location,
+      job.sector,
+      job.experience_level,
+      job.description,
+    ].filter(Boolean).join(' ')
+    const titleTerms = topMatchedTerms(profileTerms, `${title} ${job.sector || ''}`, 8)
+    const bodyTerms = topMatchedTerms(profileTerms, jobText, 12)
+    const uniqueMatches = [...new Set([...titleTerms, ...bodyTerms])]
+    const loweredTitle = title.toLowerCase()
+    const earlyCareerBonus = /\b(graduate|intern|internship|junior|trainee|entry|analyst|associate|assistant|coordinator)\b/.test(loweredTitle) ? 12 : 0
+    const seniorPenalty = /\b(senior|director|head|lead|principal|manager)\b/.test(loweredTitle) ? 16 : 0
+    const descriptionBonus = job.description ? 4 : 0
+    const matchScore = Math.min(34, titleTerms.length * 7 + bodyTerms.length * 3)
+    const score = Math.max(45, Math.min(94, 52 + matchScore + earlyCareerBonus + descriptionBonus - seniorPenalty))
+
+    return {
+      job,
+      score,
+      matches: uniqueMatches,
+      earlyCareerBonus,
+      seniorPenalty,
+    }
+  })
+
+  return {
+    recommendations: scored
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map(({ job, score, matches, seniorPenalty }) => {
+        const readableMatches = matches.slice(0, 4).map(term => term.replace(/[-_]/g, ' '))
+        const fitLabel = score >= 80 ? 'strong_fit' : score >= 64 ? 'potential_fit' : 'stretch'
+        const reasonText = readableMatches.length
+          ? `Matches your saved profile through ${readableMatches.join(', ')}.`
+          : hasProfileTerms
+            ? 'Looks relevant to your saved profile and early-career search based on the role title and sector.'
+            : 'Looks relevant to an early-career job search based on the role title and sector.'
+
+        return {
+          job_id: toText(job.id),
+          fit_score: score,
+          fit_label: fitLabel,
+          reason: reasonText,
+          matching_evidence: readableMatches.length
+            ? readableMatches.map(term => `Saved profile includes evidence related to ${term}.`)
+            : ['Saved profile exists, but ApplyWise could not identify many exact keyword overlaps.'],
+          concerns: [
+            seniorPenalty ? 'The title may imply more experience than a graduate role.' : '',
+            job.description ? '' : 'The job description is short, so check the original posting before applying.',
+          ].filter(Boolean),
+          next_step: 'Open the job details and save it if the responsibilities match your target role.',
+        }
+      }),
+    model: 'applywise-local-fit-matcher',
+    interaction_id: null,
+    ai_unavailable: true,
+    warning: reason
+      ? `Gemini job matching failed, so ApplyWise used local profile matching instead. Reason: ${cleanText(reason, 160)}`
+      : 'Gemini job matching failed, so ApplyWise used local profile matching instead.',
+  }
+}
+
+function parseJsonFromText(text) {
+  const trimmed = String(text || '').trim()
+  if (!trimmed) return null
+
+  const candidates = [trimmed]
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)
+  if (fenced?.[1]) candidates.push(fenced[1].trim())
+
+  const firstBrace = trimmed.indexOf('{')
+  const lastBrace = trimmed.lastIndexOf('}')
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    candidates.push(trimmed.slice(firstBrace, lastBrace + 1))
+  }
+
+  for (const candidate of candidates) {
+    try {
+      return JSON.parse(candidate)
+    } catch {
+      // Try the next candidate shape.
+    }
+  }
+  return null
+}
+
 async function readGeminiJsonResponse(response, emptyMessage) {
   const rawText = await response.text()
   let data = null
@@ -693,16 +859,14 @@ async function readGeminiJsonResponse(response, emptyMessage) {
     throw err
   }
 
-  try {
-    return {
-      parsed: JSON.parse(outputText),
-      data,
-    }
-  } catch {
+  const parsed = parseJsonFromText(outputText)
+  if (!parsed) {
     const err = new Error('Gemini returned a response that could not be parsed as JSON.')
     err.status = 502
     throw err
   }
+
+  return { parsed, data }
 }
 
 export function isGeminiConfigured() {
@@ -914,37 +1078,47 @@ export async function recommendJobsWithGemini(payload = {}) {
     throw err
   }
 
-  const response = await fetch(GEMINI_INTERACTIONS_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
-    },
-    body: JSON.stringify({
+  try {
+    const response = await fetch(GEMINI_INTERACTIONS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify({
+        model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
+        system_instruction: 'You are ApplyWise, a private job-fit recommender for graduates. Recommend roles from the provided list using only confirmed candidate information. Never fabricate fit evidence.',
+        input: [{
+          type: 'text',
+          text: buildJobRecommendationPrompt({ personalInfo, jobs }),
+        }],
+        generation_config: {
+          temperature: 0.2,
+          thinking_level: 'low',
+        },
+        response_format: {
+          type: 'text',
+          mime_type: 'application/json',
+          schema: jobRecommendationSchema,
+        },
+      }),
+    })
+
+    const { parsed, data } = await readGeminiJsonResponse(response, 'Gemini returned no job recommendations.')
+    const allowedJobIds = new Set(jobs.map(job => job.id))
+    const normalized = normalizeJobRecommendations(parsed, allowedJobIds)
+
+    if (normalized.recommendations.length === 0) {
+      return buildLocalJobRecommendations(personalInfo, jobs, 'Gemini did not return matching job IDs.')
+    }
+
+    return {
+      ...normalized,
       model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
-      system_instruction: 'You are ApplyWise, a private job-fit recommender for graduates. Recommend roles from the provided list using only confirmed candidate information. Never fabricate fit evidence.',
-      input: [{
-        type: 'text',
-        text: buildJobRecommendationPrompt({ personalInfo, jobs }),
-      }],
-      generation_config: {
-        temperature: 0.2,
-        thinking_level: 'low',
-      },
-      response_format: {
-        type: 'text',
-        mime_type: 'application/json',
-        schema: jobRecommendationSchema,
-      },
-    }),
-  })
-
-  const { parsed, data } = await readGeminiJsonResponse(response, 'Gemini returned no job recommendations.')
-  const allowedJobIds = new Set(jobs.map(job => job.id))
-
-  return {
-    ...normalizeJobRecommendations(parsed, allowedJobIds),
-    model: process.env.GEMINI_MODEL || DEFAULT_MODEL,
-    interaction_id: data?.id || null,
+      interaction_id: data?.id || null,
+    }
+  } catch (error) {
+    console.error('[gemini] Job recommendations failed:', error.message)
+    return buildLocalJobRecommendations(personalInfo, jobs, error.message)
   }
 }

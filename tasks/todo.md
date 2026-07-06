@@ -38,3 +38,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Add teammate setup docs, configuration diagnostics, guided workflow, privacy settings, and clearer AI outputs.
 - [x] Polish the visual design with softer surfaces, clearer button hierarchy, and refined shared tokens.
 - [x] Reduce dashboard visual density and add shared micro-interactions, skeleton loading states, and workflow completion animation.
+- [x] Harden AI job recommendations with smaller Gemini payloads, robust JSON parsing, and local profile-match fallback.
