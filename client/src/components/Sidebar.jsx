@@ -26,6 +26,7 @@ function NavItem({ to, icon: Icon, label, collapsed }) {
     <NavLink
       to={to}
       title={collapsed ? label : undefined}
+      className="sidebar-nav-item"
       style={({ isActive }) => ({
         display: 'flex',
         alignItems: 'center',
@@ -113,6 +114,7 @@ export default function Sidebar() {
         <button
           onClick={toggle}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="secondary-action"
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             width: '28px', height: '28px', flexShrink: 0,
@@ -166,6 +168,7 @@ export default function Sidebar() {
             type="button"
             onClick={handleLogout}
             title="Log out"
+            className="secondary-action"
             style={{
               width: '100%',
               minHeight: 34,

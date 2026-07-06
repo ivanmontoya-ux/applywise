@@ -49,6 +49,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
 
   return (
     <div
+      className="interactive-card"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -56,10 +57,10 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
         border: '1px solid var(--color-border)',
         borderTop: `3px solid ${currentStatusColor.accent}`,
         borderRadius: 'var(--radius-lg)',
-        padding: '20px 24px',
+        padding: '24px 28px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '16px',
+        gap: '18px',
         boxShadow: hovered ? 'var(--shadow-card-hover)' : 'var(--shadow-card)',
         transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
         transition: 'box-shadow 0.2s ease, transform 0.2s ease',
@@ -117,6 +118,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
             <a
               href={application.url} target="_blank" rel="noopener noreferrer"
               title="Open listing"
+              className="secondary-action pressable"
               style={{
                 padding: '6px', color: 'var(--color-text-muted)',
                 display: 'flex', borderRadius: 'var(--radius-sm)',
@@ -133,6 +135,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
             <button
               title="Delete"
               onClick={() => setConfirmDelete(true)}
+              className="pressable"
               style={{
                 padding: '6px', color: 'var(--color-text-muted)',
                 background: 'none', border: 'none', cursor: 'pointer',
@@ -149,12 +152,14 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
               <span style={{ color: 'var(--color-text-secondary)', fontWeight: '500' }}>Delete?</span>
               <button
                 onClick={handleDelete}
+                className="pressable"
                 style={{ padding: '4px 10px', background: 'var(--color-danger)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '12px', fontWeight: '500' }}
               >
                 Yes
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
+                className="secondary-action pressable"
                 style={{ padding: '4px 10px', background: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: '12px' }}
               >
                 No
@@ -174,6 +179,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
               key={status}
               onClick={() => handleStatusChange(status)}
               disabled={!!updatingStatus}
+              className="status-choice pressable"
               style={{
                 minHeight: 32,
                 padding: '0 12px',
@@ -210,14 +216,14 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
 
       {/* Next action + readiness */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 14px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff' }}>
           <Bell size={14} strokeWidth={2.4} style={{ color: 'var(--color-applied-teal)', flexShrink: 0, marginTop: 2 }} />
           <div>
             <p style={{ fontSize: '11px', fontWeight: '800', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0', marginBottom: '2px' }}>Next action</p>
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{nextAction}</p>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff' }}>
           <FileText size={14} strokeWidth={2.4} style={{ color: documentReadiness === 'Complete' ? 'var(--color-success)' : 'var(--color-warning)', flexShrink: 0 }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', minWidth: 0 }}>
             <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
@@ -234,6 +240,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
                   <button
                     type="button"
                     onClick={() => downloadCoverLetterDoc(application.cover_letter, application)}
+                    className="secondary-action pressable"
                     style={{ minHeight: 24, display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '0 8px', borderRadius: '6px', border: '1px solid #b9dada', background: '#ffffff', color: 'var(--color-applied-teal)', fontSize: '11px', fontWeight: '800', cursor: 'pointer' }}
                   >
                     <Download size={11} strokeWidth={2.5} />
@@ -287,6 +294,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
         ) : (
           <button
             onClick={() => setEditingNotes(true)}
+            className="secondary-action pressable"
             style={{
               display: 'flex', alignItems: 'flex-start', gap: '7px', width: '100%',
               background: notes ? 'var(--color-bg-secondary)' : 'transparent',

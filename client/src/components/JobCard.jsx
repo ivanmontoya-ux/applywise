@@ -230,14 +230,15 @@ export default function JobCard({ job, onSave }) {
 
   return (
     <div
+      className="interactive-card"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         background: '#ffffff',
         border: '1px solid var(--color-border)',
         borderRadius: 'var(--radius-lg)',
-        padding: '22px',
-        display: 'flex', flexDirection: 'column', gap: '14px',
+        padding: '26px',
+        display: 'flex', flexDirection: 'column', gap: '16px',
         boxShadow: hovered ? 'var(--shadow-card-hover)' : 'var(--shadow-card)',
         transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
         transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease',
@@ -315,6 +316,7 @@ export default function JobCard({ job, onSave }) {
             onClick={handleSave}
             disabled={saved || saving}
             title={saved ? 'Saved to tracker' : 'Save to tracker'}
+            className="pressable"
             style={{
               display: 'flex', alignItems: 'center', gap: '5px',
               minHeight: 44,
@@ -351,6 +353,7 @@ export default function JobCard({ job, onSave }) {
             target="_blank"
             rel="noopener noreferrer"
             title="View on original job board"
+            className="secondary-action pressable"
             style={{
               display: 'flex', alignItems: 'center', gap: '4px',
               minHeight: 44,
@@ -380,6 +383,7 @@ export default function JobCard({ job, onSave }) {
             target="_blank"
             rel="noopener noreferrer"
             title={isKnownEmployer(job.company) ? `Go to ${job.company} careers portal` : 'Search on Google'}
+            className="primary-action pressable"
             style={{
               display: 'flex', alignItems: 'center', gap: '5px',
               minHeight: 44,

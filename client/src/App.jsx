@@ -48,6 +48,7 @@ function TopAuthBar({ isPublicPage }) {
           <button
             type="button"
             onClick={handleLogout}
+            className="secondary-action"
             style={{
               minHeight: 34,
               padding: '0 12px',
@@ -69,7 +70,7 @@ function TopAuthBar({ isPublicPage }) {
           <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: '600' }}>
             Demo mode
           </span>
-          <Link to="/login" style={{
+          <Link to="/login" className="secondary-action pressable" style={{
             minHeight: 34,
             display: 'inline-flex',
             alignItems: 'center',
@@ -85,7 +86,7 @@ function TopAuthBar({ isPublicPage }) {
           }}>
             Login
           </Link>
-          <Link to="/signup" style={{
+          <Link to="/signup" className="primary-action pressable" style={{
             minHeight: 34,
             display: 'inline-flex',
             alignItems: 'center',

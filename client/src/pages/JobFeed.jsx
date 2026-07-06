@@ -32,7 +32,7 @@ const JOB_TYPE_GROUPS = [
 // ── Styles ───────────────────────────────────────────────────────────────────
 
 const pageStyle        = { padding: '36px 40px', maxWidth: '1140px' }
-const headerRowStyle   = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px' }
+const headerRowStyle   = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', gap: '24px', flexWrap: 'wrap' }
 const titleStyle       = { fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: '0' }
 const subtitleStyle    = { fontSize: '16px', color: 'var(--color-text-secondary)', fontWeight: '400' }
 const refreshBtnStyle  = {
@@ -60,7 +60,7 @@ const secondaryLinkStyle = {
 }
 const filterBarStyle   = {
   display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
-  marginBottom: '28px', padding: '14px 18px',
+  marginBottom: '30px', padding: '18px 20px',
   background: '#ffffff',
   border: '1px solid var(--color-border)',
   borderRadius: 'var(--radius-lg)',
@@ -88,7 +88,7 @@ const searchWrapperStyle = {
   transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
 }
 const searchInputStyle   = { border: 'none', outline: 'none', background: 'transparent', fontSize: '13px', color: 'var(--color-text-primary)', width: '100%' }
-const gridStyle          = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }
+const gridStyle          = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }
 
 function fitLabel(value) {
   if (value === 'strong_fit') return 'Strong fit'
@@ -260,25 +260,25 @@ function FilterDropdown({ label, unit, groups, selected, onChange, minWidth = '1
 
 function SkeletonCard() {
   return (
-    <div style={{
+    <div className="skeleton-card" style={{
       background: 'var(--color-bg)', border: '1px solid var(--color-border)',
-      borderRadius: 'var(--radius-lg)', padding: '20px',
-      display: 'flex', flexDirection: 'column', gap: '14px',
+      borderRadius: 'var(--radius-lg)', padding: '24px',
+      display: 'flex', flexDirection: 'column', gap: '16px',
     }}>
       <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-bg-secondary)', flexShrink: 0 }} />
+        <div className="skeleton-block" style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
-          <div style={{ height: 14, background: 'var(--color-bg-secondary)', borderRadius: 4, marginBottom: 8, width: '70%' }} />
-          <div style={{ height: 12, background: 'var(--color-bg-secondary)', borderRadius: 4, width: '45%' }} />
+          <div className="skeleton-block" style={{ height: 14, borderRadius: 6, marginBottom: 10, width: '70%' }} />
+          <div className="skeleton-block" style={{ height: 12, borderRadius: 6, width: '45%' }} />
         </div>
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ height: 20, width: 80, background: 'var(--color-bg-secondary)', borderRadius: 999 }} />
-        <div style={{ height: 20, width: 100, background: 'var(--color-bg-secondary)', borderRadius: 999 }} />
+        <div className="skeleton-block" style={{ height: 22, width: 80, borderRadius: 999 }} />
+        <div className="skeleton-block" style={{ height: 22, width: 100, borderRadius: 999 }} />
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div style={{ height: 12, width: 60, background: 'var(--color-bg-secondary)', borderRadius: 4 }} />
-        <div style={{ height: 28, width: 120, background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)' }} />
+        <div className="skeleton-block" style={{ height: 12, width: 60, borderRadius: 6 }} />
+        <div className="skeleton-block" style={{ height: 32, width: 120, borderRadius: 'var(--radius-md)' }} />
       </div>
     </div>
   )
@@ -342,7 +342,7 @@ function RecommendedJobsBand({ recommendations, loading, error }) {
           {recommendations.map(({ job, recommendation }) => {
             const style = fitStyle(recommendation.fit_label)
             return (
-              <article key={job.id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <article key={job.id} className="interactive-card" style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start' }}>
                   <div>
                     <h3 style={{ fontSize: '14px', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '3px', lineHeight: '1.35' }}>{job.title}</h3>
@@ -560,11 +560,12 @@ export default function JobFeed() {
           <p style={subtitleStyle}>Search stored graduate roles, save strong matches, and keep source URLs attached.</p>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <Link to="/tracker" style={secondaryLinkStyle}>
+          <Link to="/tracker" className="secondary-action pressable" style={secondaryLinkStyle}>
             <Plus size={15} strokeWidth={2.5} />
             Add manual job
           </Link>
           <button
+            className="primary-action"
             style={refreshBtnStyle}
             onClick={handleRefresh}
             disabled={refreshing}

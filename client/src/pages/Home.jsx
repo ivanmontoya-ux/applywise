@@ -9,6 +9,7 @@ import {
   FileText,
   ListChecks,
 } from 'lucide-react'
+import { useAuth } from '../auth/AuthContext'
 import { fetchJobs, fetchPersonalInformation, fetchTracker } from '../lib/api'
 import WorkflowGuide from '../components/WorkflowGuide'
 import {
@@ -21,7 +22,28 @@ import {
 } from '../lib/application'
 
 const pageStyle = { padding: '36px 40px', maxWidth: '1180px' }
-const titleStyle = { fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: '0' }
+const heroStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  gap: '24px',
+  flexWrap: 'wrap',
+  marginBottom: '32px',
+  padding: '28px',
+  background: 'linear-gradient(135deg, #ffffff 0%, #f7fbfb 100%)',
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-lg)',
+  boxShadow: 'var(--shadow-card)',
+}
+const eyebrowStyle = {
+  fontSize: '12px',
+  fontWeight: '800',
+  color: 'var(--color-applied-teal)',
+  textTransform: 'uppercase',
+  letterSpacing: '0',
+  marginBottom: '8px',
+}
+const titleStyle = { fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '8px', letterSpacing: '0' }
 const subtitleStyle = { fontSize: '16px', color: 'var(--color-text-secondary)', maxWidth: '620px' }
 const panelStyle = {
   background: 'var(--color-bg)',
@@ -64,8 +86,8 @@ const secondaryLinkStyle = {
 
 function Panel({ title, eyebrow, children, action }) {
   return (
-    <section style={{ ...panelStyle, padding: '22px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start', marginBottom: '16px' }}>
+    <section className="interactive-card" style={{ ...panelStyle, padding: '28px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start', marginBottom: '20px' }}>
         <div>
           {eyebrow && (
             <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0', marginBottom: '5px' }}>
@@ -80,6 +102,39 @@ function Panel({ title, eyebrow, children, action }) {
       </div>
       {children}
     </section>
+  )
+}
+
+function SkeletonLine({ width = '100%', height = 12, radius = 6 }) {
+  return (
+    <div
+      className="skeleton-block"
+      style={{ width, height, borderRadius: radius }}
+    />
+  )
+}
+
+function ActionSkeletonList() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div key={index} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '16px', background: '#fbfdff' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', alignItems: 'flex-start', marginBottom: '12px' }}>
+            <div style={{ flex: 1 }}>
+              <SkeletonLine width="64%" height={14} />
+              <div style={{ marginTop: 8 }}>
+                <SkeletonLine width="38%" height={11} />
+              </div>
+            </div>
+            <SkeletonLine width={58} height={24} radius={999} />
+          </div>
+          <SkeletonLine width="92%" height={12} />
+          <div style={{ marginTop: 8 }}>
+            <SkeletonLine width="70%" height={12} />
+          </div>
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -145,7 +200,18 @@ function sortByDeadline(applications) {
   })
 }
 
+function getFirstName(value) {
+  const normalized = String(value || '').trim().replace(/[._-]+/g, ' ')
+  if (!normalized) return ''
+
+  const firstWord = normalized.split(/\s+/)[0]?.replace(/[^a-z0-9']/gi, '')
+  if (!firstWord) return ''
+
+  return firstWord.charAt(0).toUpperCase() + firstWord.slice(1)
+}
+
 export default function Home() {
+  const auth = useAuth()
   const [applications, setApplications] = useState([])
   const [jobs, setJobs] = useState([])
   const [personalInfo, setPersonalInfo] = useState(null)
@@ -198,6 +264,20 @@ export default function Home() {
     })
     return next
   }, [applications])
+  const firstName = useMemo(() => {
+    const profileName = getFirstName(personalInfo?.candidate_name)
+    if (profileName) return profileName
+
+    const metadataName = getFirstName(
+      auth.user?.user_metadata?.full_name ||
+      auth.user?.user_metadata?.name ||
+      auth.user?.full_name ||
+      auth.user?.name,
+    )
+    if (metadataName) return metadataName
+
+    return getFirstName(auth.user?.email?.split('@')[0])
+  }, [auth.user, personalInfo])
   const workflowSteps = useMemo(() => {
     const hasProfile = Boolean(personalInfo?.candidate_name || personalInfo?.summary || personalInfo?.experience?.length || personalInfo?.skills)
     const hasTrackedJob = applications.length > 0
@@ -215,17 +295,20 @@ export default function Home() {
 
   return (
     <div style={pageStyle}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px', marginBottom: '28px' }}>
+      <header style={heroStyle}>
         <div>
-          <h1 style={titleStyle}>Here is your next best step.</h1>
-          <p style={subtitleStyle}>ApplyWise keeps your jobs, applications, documents, reminders, and CV work in one private workspace.</p>
+          <p style={eyebrowStyle}>Today in ApplyWise</p>
+          <h1 style={titleStyle}>
+            {firstName ? `${firstName}, here is your next best step.` : 'Here is your next best step.'}
+          </h1>
+          <p style={subtitleStyle}>Your jobs, applications, documents, reminders, and CV work stay organized in one private workspace.</p>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <Link to="/jobs" style={primaryLinkStyle}>
+          <Link to="/jobs" className="primary-action pressable" style={primaryLinkStyle}>
             <Briefcase size={16} strokeWidth={2.4} />
             Find jobs
           </Link>
-          <Link to="/tracker" style={secondaryLinkStyle}>Open tracker</Link>
+          <Link to="/tracker" className="secondary-action pressable" style={secondaryLinkStyle}>Open tracker</Link>
         </div>
       </header>
 
@@ -235,7 +318,7 @@ export default function Home() {
         </div>
       )}
 
-      <div style={{ marginBottom: '18px' }}>
+      <div style={{ marginBottom: '24px' }}>
         <WorkflowGuide
           title="Build one complete application"
           copy="Best path: extract your CV, find a role, save it, tailor materials, then let Coach manage next actions."
@@ -243,26 +326,26 @@ export default function Home() {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '18px', alignItems: 'start' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '22px', alignItems: 'start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
           <Panel
             eyebrow="Today"
             title="Application work waiting for action"
-            action={<Link to="/reminders" style={{ ...secondaryLinkStyle, minHeight: 36, padding: '0 12px', fontSize: '13px' }}>View reminders</Link>}
+            action={<Link to="/reminders" className="secondary-action pressable" style={{ ...secondaryLinkStyle, minHeight: 36, padding: '0 12px', fontSize: '13px' }}>View reminders</Link>}
           >
             {loading ? (
-              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>Loading your next actions...</p>
+              <ActionSkeletonList />
             ) : nextActions.length === 0 ? (
               <EmptyState
                 icon={ListChecks}
                 title="Save your first job to start tracking applications."
                 copy="Jobs you save will appear here with next actions, deadlines, and document prompts."
-                action={<Link to="/jobs" style={primaryLinkStyle}>Find or add a job</Link>}
+                action={<Link to="/jobs" className="primary-action pressable" style={primaryLinkStyle}>Find or add a job</Link>}
               />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {nextActions.map(({ app, action }) => (
-                  <article key={app.id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '14px', background: '#fbfdff' }}>
+                  <article key={app.id} className="interactive-card" style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '16px', background: '#fbfdff' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', alignItems: 'flex-start', marginBottom: '8px' }}>
                       <div>
                         <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '2px' }}>{app.title}</h3>
@@ -301,12 +384,12 @@ export default function Home() {
                 icon={Briefcase}
                 title="Find or add a job to start building your application list."
                 copy="The Jobs screen is where relevant roles become tracked applications."
-                action={<Link to="/jobs" style={primaryLinkStyle}>Open Jobs</Link>}
+                action={<Link to="/jobs" className="primary-action pressable" style={primaryLinkStyle}>Open Jobs</Link>}
               />
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                 {jobs.map(job => (
-                  <article key={job.id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '14px', background: '#ffffff' }}>
+                  <article key={job.id} className="interactive-card" style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '16px', background: '#ffffff' }}>
                     <h3 style={{ fontSize: '14px', fontWeight: '800', color: 'var(--color-text-primary)', lineHeight: '1.35', marginBottom: '5px' }}>{job.title}</h3>
                     <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '10px' }}>{job.company}</p>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '12px', color: 'var(--color-text-muted)' }}>
@@ -320,7 +403,7 @@ export default function Home() {
           </Panel>
         </div>
 
-        <aside style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        <aside style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
           <Panel eyebrow="Upcoming" title="Deadlines and reminders">
             {upcomingDeadlines.length === 0 ? (
               <EmptyState
@@ -350,7 +433,7 @@ export default function Home() {
                 icon={FileText}
                 title="Upload a CV before tailoring applications."
                 copy="CV suggestions stay editable and user-approved."
-                action={<Link to="/documents" style={secondaryLinkStyle}>Open Documents</Link>}
+                action={<Link to="/documents" className="secondary-action pressable" style={secondaryLinkStyle}>Open Documents</Link>}
               />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -376,7 +459,7 @@ export default function Home() {
                 Choose an application before asking for fit, CV, cover letter, or next-step support.
               </p>
             </div>
-            <Link to="/coach" style={{ ...secondaryLinkStyle, marginTop: '14px' }}>Open Coach</Link>
+            <Link to="/coach" className="secondary-action pressable" style={{ ...secondaryLinkStyle, marginTop: '14px' }}>Open Coach</Link>
           </Panel>
 
           {applications.some(app => !isTerminalStatus(app.status) && !app.deadline_date) && (

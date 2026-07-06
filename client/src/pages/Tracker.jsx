@@ -8,7 +8,7 @@ import { APPLICATION_STATUSES, getStatusStyle } from '../lib/application'
 const ALL_STATUSES = ['All', ...APPLICATION_STATUSES]
 
 const pageStyle = { padding: '36px 40px', maxWidth: '1060px' }
-const headerRowStyle = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px' }
+const headerRowStyle = { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', gap: '24px', flexWrap: 'wrap' }
 const titleStyle = { fontSize: '28px', lineHeight: '1.15', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '6px', letterSpacing: '0' }
 const subtitleStyle = { fontSize: '16px', color: 'var(--color-text-secondary)', fontWeight: '400' }
 const addBtnStyle = {
@@ -18,7 +18,7 @@ const addBtnStyle = {
   cursor: 'pointer', transition: 'background 0.12s ease, transform 0.14s ease, box-shadow 0.14s ease', flexShrink: 0,
   boxShadow: 'var(--shadow-primary)',
 }
-const filterRowStyle = { display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '28px' }
+const filterRowStyle = { display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '30px' }
 
 function statusFilterBtnStyle(isActive, status) {
   const colorMap = status === 'All'
@@ -33,6 +33,45 @@ function statusFilterBtnStyle(isActive, status) {
     background: isActive ? colorMap.bg : 'var(--color-bg)',
     color: isActive ? colorMap.color : 'var(--color-text-secondary)',
   }
+}
+
+function SkeletonLine({ width = '100%', height = 12, radius = 6 }) {
+  return <div className="skeleton-block" style={{ width, height, borderRadius: radius }} />
+}
+
+function ApplicationSkeleton() {
+  return (
+    <div className="skeleton-card" style={{
+      background: '#ffffff',
+      border: '1px solid var(--color-border)',
+      borderRadius: 'var(--radius-lg)',
+      padding: '24px 28px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '18px',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '18px' }}>
+        <div style={{ flex: 1 }}>
+          <SkeletonLine width="48%" height={15} />
+          <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+            <SkeletonLine width={92} height={22} radius={999} />
+            <SkeletonLine width={70} height={22} radius={999} />
+            <SkeletonLine width={76} height={22} radius={999} />
+          </div>
+        </div>
+        <SkeletonLine width={72} height={28} radius={999} />
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {Array.from({ length: 7 }).map((_, index) => (
+          <SkeletonLine key={index} width={index === 2 ? 82 : 68} height={32} radius={6} />
+        ))}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+        <SkeletonLine height={54} radius={8} />
+        <SkeletonLine height={54} radius={8} />
+      </div>
+    </div>
+  )
 }
 
 export default function Tracker() {
@@ -69,6 +108,7 @@ export default function Tracker() {
           <p style={subtitleStyle}>Move each application from saved role to final outcome with documents and next actions visible.</p>
         </div>
         <button
+          className="primary-action"
           style={addBtnStyle}
           onClick={() => setShowModal(true)}
           onMouseEnter={e => {
@@ -102,16 +142,16 @@ export default function Tracker() {
 
       {/* Applications list */}
       {loading ? (
-        <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '14px' }}>
-          Loading applications...
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {Array.from({ length: 3 }).map((_, index) => <ApplicationSkeleton key={index} />)}
         </div>
       ) : applications.length === 0 ? (
-        <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '280px', gap: '8px', padding: '28px', textAlign: 'center' }}>
+        <div className="interactive-card" style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '280px', gap: '10px', padding: '32px', textAlign: 'center', boxShadow: 'var(--shadow-card)' }}>
           <p style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-text-primary)' }}>Saved jobs become applications here.</p>
           <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>Save your first job or add one manually to start tracking deadlines and next actions.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {applications.map(app => (
             <ApplicationCard
               key={app.id}
