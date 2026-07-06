@@ -308,9 +308,9 @@ export default function JobCard({ job, onSave }) {
       <DeadlineBadge deadlineType={job.deadline_type} deadlineDate={job.deadline_date} />
 
       {/* Footer: time ago + actions */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-        <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>{timeAgo}</span>
-        <div style={{ display: 'flex', gap: '8px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '14px', marginTop: 'auto' }}>
+        <span style={{ fontSize: '12px', lineHeight: '1.3', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>{timeAgo}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '8px', width: '100%' }}>
           {/* Save — outlined */}
           <button
             onClick={handleSave}
@@ -318,15 +318,17 @@ export default function JobCard({ job, onSave }) {
             title={saved ? 'Saved to tracker' : 'Save to tracker'}
             className="pressable"
             style={{
-              display: 'flex', alignItems: 'center', gap: '5px',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
               minHeight: 44,
-              padding: '0 14px', borderRadius: 'var(--radius-md)',
+              padding: '0 10px', borderRadius: 'var(--radius-md)',
               border: saved ? '1.5px solid #bbf7d0' : '1.5px solid var(--color-border-strong)',
               background: saved ? '#f0fdf4' : 'transparent',
               color: saved ? 'var(--color-success)' : 'var(--color-text-secondary)',
               fontSize: '12px', fontWeight: '700',
               cursor: saved ? 'default' : 'pointer',
               transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap',
+              width: '100%',
             }}
             onMouseEnter={e => {
               if (!saved) {
@@ -355,14 +357,16 @@ export default function JobCard({ job, onSave }) {
             title="View on original job board"
             className="secondary-action pressable"
             style={{
-              display: 'flex', alignItems: 'center', gap: '4px',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
               minHeight: 44,
-              padding: '0 12px', borderRadius: 'var(--radius-md)',
+              padding: '0 10px', borderRadius: 'var(--radius-md)',
               background: 'transparent',
               color: 'var(--color-text-secondary)',
               fontSize: '12px', fontWeight: '700', textDecoration: 'none',
               border: '1.5px solid var(--color-border-strong)',
               transition: 'all 0.15s ease',
+              whiteSpace: 'nowrap',
+              width: '100%',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.borderColor = 'var(--color-applied-teal)'
@@ -385,13 +389,15 @@ export default function JobCard({ job, onSave }) {
             title={isKnownEmployer(job.company) ? `Go to ${job.company} careers portal` : 'Search on Google'}
             className="primary-action pressable"
             style={{
-              display: 'flex', alignItems: 'center', gap: '5px',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
               minHeight: 44,
-              padding: '0 14px', borderRadius: 'var(--radius-md)',
+              padding: '0 10px', borderRadius: 'var(--radius-md)',
               background: 'var(--color-applied-teal)', color: '#ffffff',
               fontSize: '12px', fontWeight: '700', textDecoration: 'none',
               transition: 'background 0.15s ease',
               border: '1.5px solid transparent',
+              whiteSpace: 'nowrap',
+              width: '100%',
             }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--color-navy-hover)'}
             onMouseLeave={e => e.currentTarget.style.background = 'var(--color-applied-teal)'}

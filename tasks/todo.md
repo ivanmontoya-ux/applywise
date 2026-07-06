@@ -42,3 +42,5 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Let Documents reuse saved Personal Information for CV reviews and cover letters without reuploading the CV.
 - [x] Improve onboarding, next-best-step dashboard focus, application detail pages, and structured document tailoring.
 - [x] Remove the extra closed application status across the app and backend status flows.
+- [x] Make AI job recommendations opt-in from the Jobs page before running matching.
+- [x] Fix job card footer date and action icon alignment across job listings.

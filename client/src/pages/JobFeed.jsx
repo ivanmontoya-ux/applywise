@@ -89,6 +89,17 @@ const searchWrapperStyle = {
 }
 const searchInputStyle   = { border: 'none', outline: 'none', background: 'transparent', fontSize: '13px', color: 'var(--color-text-primary)', width: '100%' }
 const gridStyle          = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '18px' }
+const recommendationsBandStyle = {
+  marginTop: '-8px',
+  marginBottom: '20px',
+  padding: '16px 20px',
+  background: '#ffffff',
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-lg)',
+  boxShadow: 'var(--shadow-card)',
+  position: 'relative',
+  zIndex: 1,
+}
 
 function fitLabel(value) {
   if (value === 'strong_fit') return 'Strong fit'
@@ -321,19 +332,11 @@ function Toast({ message, onDismiss }) {
   )
 }
 
-function RecommendedJobsBand({ recommendations, loading, error, warning }) {
-  if (!loading && !error && !warning && recommendations.length === 0) return null
-
+function RecommendedJobsBand({ enabled, onEnabledChange, recommendations, loading, error, warning }) {
+  const hasContent = enabled && (loading || error || warning || recommendations.length > 0)
   return (
-    <section style={{
-      ...filterBarStyle,
-      alignItems: 'stretch',
-      flexDirection: 'column',
-      gap: '14px',
-      marginTop: '-8px',
-      zIndex: 1,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
+    <section style={recommendationsBandStyle}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap', marginBottom: hasContent ? '14px' : 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
           <span style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Sparkles size={17} strokeWidth={2.4} />
@@ -343,7 +346,30 @@ function RecommendedJobsBand({ recommendations, loading, error, warning }) {
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>Based on the Personal Information extracted from your CV.</p>
           </div>
         </div>
-        {loading && (
+        <label style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          minHeight: 34,
+          padding: '0 10px',
+          border: `1px solid ${enabled ? '#b9dada' : 'var(--color-border)'}`,
+          borderRadius: 'var(--radius-md)',
+          background: enabled ? '#edf7f7' : '#ffffff',
+          color: enabled ? 'var(--color-applied-teal)' : 'var(--color-text-secondary)',
+          fontSize: '12px',
+          fontWeight: '800',
+          cursor: 'pointer',
+          userSelect: 'none',
+        }}>
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={event => onEnabledChange(event.target.checked)}
+            style={{ width: 15, height: 15, cursor: 'pointer', accentColor: 'var(--color-applied-teal)' }}
+          />
+          Show AI recommendations
+        </label>
+        {enabled && loading && (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', color: 'var(--color-text-secondary)', fontSize: '13px', fontWeight: '700' }}>
             <RefreshCw size={14} strokeWidth={2.4} />
             Matching jobs...
@@ -351,7 +377,11 @@ function RecommendedJobsBand({ recommendations, loading, error, warning }) {
         )}
       </div>
 
-      {error ? (
+      {!enabled ? (
+        <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: '1.45' }}>
+          Turn this on when you want ApplyWise to compare the visible job list with your saved CV profile.
+        </p>
+      ) : error ? (
         <div style={{ padding: '10px 12px', borderRadius: 'var(--radius-md)', background: '#fff7ed', color: '#9a3412', fontSize: '13px', lineHeight: '1.45' }}>
           {error}
         </div>
@@ -362,11 +392,11 @@ function RecommendedJobsBand({ recommendations, loading, error, warning }) {
               {warning}
             </div>
           )}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', alignItems: 'start' }}>
           {recommendations.map(({ job, recommendation }) => {
             const style = fitStyle(recommendation.fit_label)
             return (
-              <article key={job.id} className="interactive-card" style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <article key={job.id} className="interactive-card" style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff', padding: '18px', display: 'flex', flexDirection: 'column', gap: '12px', alignSelf: 'start' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start' }}>
                   <div>
                     <h3 style={{ fontSize: '14px', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '3px', lineHeight: '1.35' }}>{job.title}</h3>
@@ -443,6 +473,7 @@ export default function JobFeed() {
   const [recommendationsLoading, setRecommendationsLoading] = useState(false)
   const [recommendationError, setRecommendationError] = useState('')
   const [recommendationWarning, setRecommendationWarning] = useState('')
+  const [recommendationsEnabled, setRecommendationsEnabled] = useState(false)
   const debounceTimer = useRef(null)
   const recommendationsRequest = useRef(0)
 
@@ -560,9 +591,17 @@ export default function JobFeed() {
   }, [])
 
   useEffect(() => {
+    if (!recommendationsEnabled) {
+      recommendationsRequest.current += 1
+      setRecommendations([])
+      setRecommendationError('')
+      setRecommendationWarning('')
+      setRecommendationsLoading(false)
+      return
+    }
     if (loading || error) return
     loadRecommendations(displayedJobs)
-  }, [displayedJobs, error, loading, loadRecommendations])
+  }, [displayedJobs, error, loading, loadRecommendations, recommendationsEnabled])
 
   const recommendedJobs = useMemo(() => {
     const jobsById = new Map(jobs.map(job => [String(job.id), job]))
@@ -672,6 +711,8 @@ export default function JobFeed() {
       </div>
 
       <RecommendedJobsBand
+        enabled={recommendationsEnabled}
+        onEnabledChange={setRecommendationsEnabled}
         recommendations={recommendedJobs}
         loading={recommendationsLoading}
         error={recommendationError}
