@@ -44,3 +44,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Remove the extra closed application status across the app and backend status flows.
 - [x] Make AI job recommendations opt-in from the Jobs page before running matching.
 - [x] Fix job card footer date and action icon alignment across job listings.
+- [x] Improve CV AI recommendations with evidence separation, priorities, copy action, and confirmation questions.

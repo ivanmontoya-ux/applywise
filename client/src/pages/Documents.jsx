@@ -6,6 +6,7 @@ import {
   Briefcase,
   CalendarDays,
   CheckCircle2,
+  Copy,
   Download,
   FileText,
   GraduationCap,
@@ -482,19 +483,81 @@ function DetailList({ items }) {
   )
 }
 
+function normalizePriority(value, fallback = 'Medium') {
+  return ['High', 'Medium', 'Low'].includes(value) ? value : fallback
+}
+
+function priorityMeta(priority) {
+  const normalized = normalizePriority(priority)
+  if (normalized === 'High') return { label: 'High priority', bg: '#fff1f2', color: 'var(--color-danger)', border: '#fecaca' }
+  if (normalized === 'Low') return { label: 'Low priority', bg: '#f8fafc', color: 'var(--color-info)', border: '#cbd5e1' }
+  return { label: 'Medium priority', bg: '#fff7ed', color: 'var(--color-warning)', border: '#fed7aa' }
+}
+
+function reviewConfirmedEvidence(review) {
+  if (review.confirmed_evidence?.length) return review.confirmed_evidence
+  return (review.top_strengths || []).map(item => ({
+    evidence: item.evidence,
+    source: 'CV or saved profile',
+    job_requirement_supported: '',
+    why_it_matters: item.why_it_matters,
+  }))
+}
+
+function reviewMissingEvidence(review) {
+  if (review.missing_evidence?.length) return review.missing_evidence
+  return (review.evidence_gaps || []).map(item => ({
+    requirement: item.requirement,
+    missing_or_unclear: item.cv_gap,
+    why_it_matters: '',
+    what_to_add_if_true: item.how_to_fix,
+    priority: item.priority || 'High',
+  }))
+}
+
+function reviewRiskyClaims(review) {
+  if (review.risky_claims?.length) return review.risky_claims
+  return (review.risks || []).map(item => ({
+    claim: item.claim,
+    why_risky: item.concern,
+    safer_wording: item.safer_alternative,
+    evidence_needed: '',
+    priority: item.priority || 'Medium',
+  }))
+}
+
+function reviewPriorityItems(review) {
+  const provided = (review.priority_recommendations || []).filter(item => item?.recommendation || item?.user_action)
+  if (provided.length) return provided
+
+  return [
+    ...(review.evidence_gaps || []).slice(0, 3).map(item => ({
+      priority: item.priority || 'High',
+      recommendation: item.how_to_fix || item.requirement,
+      reason: item.cv_gap,
+      user_action: 'Add truthful evidence for this requirement before applying.',
+    })),
+    ...(review.bullet_rewrites || []).slice(0, 3).map(item => ({
+      priority: item.priority || 'Medium',
+      recommendation: item.suggested_bullet,
+      reason: item.reason || item.current_issue,
+      user_action: item.confirmation_needed || 'Use only if this claim is accurate.',
+    })),
+    ...(review.keyword_suggestions || []).slice(0, 2).map(item => ({
+      priority: item.priority || 'Low',
+      recommendation: `Add keyword if true: ${item.keyword}`,
+      reason: item.why,
+      user_action: item.where_to_add,
+    })),
+  ].filter(item => item.recommendation || item.user_action)
+}
+
 function ReviewPriority({ review }) {
-  const highImpact = [
-    ...(review.evidence_gaps || []).slice(0, 2).map(item => item.how_to_fix || item.cv_gap || item.requirement),
-    ...(review.bullet_rewrites || []).slice(0, 2).map(item => item.suggested_bullet),
-  ].filter(Boolean)
-  const niceToHave = (review.keyword_suggestions || [])
-    .slice(0, 4)
-    .map(item => [item.keyword, item.where_to_add].filter(Boolean).join(' - '))
-    .filter(Boolean)
-  const needsEvidence = [
-    ...(review.evidence_gaps || []).slice(0, 3).map(item => item.cv_gap),
-    ...(review.risks || []).slice(0, 2).map(item => item.safer_alternative || item.concern),
-  ].filter(Boolean)
+  const items = reviewPriorityItems(review)
+  const grouped = ['High', 'Medium', 'Low'].map(priority => ({
+    priority,
+    items: items.filter(item => normalizePriority(item.priority) === priority),
+  }))
 
   return (
     <section style={{ ...panelStyle, padding: '18px' }}>
@@ -505,27 +568,174 @@ function ReviewPriority({ review }) {
         <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text-primary)', margin: 0 }}>Recommendation priorities</h2>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '10px' }}>
-        {[
-          ['High impact fixes', highImpact, '#fff7ed', 'var(--color-warning)'],
-          ['Nice to have', niceToHave, '#edf7f7', 'var(--color-applied-teal)'],
-          ['Needs evidence', needsEvidence, '#fff1f2', 'var(--color-danger)'],
-        ].map(([title, items, bg, color]) => (
-          <div key={title} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '12px', background: bg }}>
-            <p style={{ fontSize: '12px', fontWeight: '800', color, marginBottom: '8px' }}>{title}</p>
-            {items.length ? (
-              <ul style={{ display: 'grid', gap: '7px' }}>
-                {items.slice(0, 4).map((item, index) => (
-                  <li key={`${title}-${index}`} style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{item}</li>
-                ))}
-              </ul>
+        {grouped.map(group => {
+          const meta = priorityMeta(group.priority)
+          return (
+            <div key={group.priority} style={{ border: `1px solid ${meta.border}`, borderRadius: 'var(--radius-md)', padding: '12px', background: meta.bg }}>
+              <p style={{ fontSize: '12px', fontWeight: '800', color: meta.color, marginBottom: '8px' }}>{meta.label}</p>
+              <p style={{ fontSize: '11px', color: 'var(--color-text-muted)', lineHeight: '1.4', marginBottom: '9px' }}>
+                {group.priority === 'High' ? 'Must fix before applying.' : group.priority === 'Medium' ? 'Improves application quality.' : 'Optional polish.'}
+              </p>
+              {group.items.length ? (
+                <div style={{ display: 'grid', gap: '9px' }}>
+                  {group.items.slice(0, 4).map((item, index) => (
+                    <article key={`${group.priority}-${index}`} style={{ display: 'grid', gap: '4px' }}>
+                      <p style={{ fontSize: '12px', color: 'var(--color-text-primary)', fontWeight: '800', lineHeight: '1.45' }}>{item.recommendation}</p>
+                      {item.reason && <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{item.reason}</p>}
+                      {item.user_action && <p style={{ fontSize: '12px', color: meta.color, lineHeight: '1.45', fontWeight: '700' }}>{item.user_action}</p>}
+                    </article>
+                  ))}
+                </div>
             ) : (
               <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: '1.45' }}>No items returned.</p>
             )}
-          </div>
-        ))}
+            </div>
+          )
+        })}
       </div>
     </section>
   )
+}
+
+function EvidenceSeparation({ review }) {
+  const groups = [
+    {
+      title: 'Confirmed evidence',
+      icon: CheckCircle2,
+      items: reviewConfirmedEvidence(review),
+      bg: '#f0fdf4',
+      color: 'var(--color-success)',
+      render: item => ({
+        title: item.evidence,
+        copy: [item.job_requirement_supported, item.why_it_matters].filter(Boolean).join(' - '),
+        meta: item.source,
+      }),
+    },
+    {
+      title: 'Missing evidence',
+      icon: AlertCircle,
+      items: reviewMissingEvidence(review),
+      bg: '#fff7ed',
+      color: 'var(--color-warning)',
+      render: item => ({
+        title: item.requirement,
+        copy: item.missing_or_unclear,
+        meta: item.what_to_add_if_true,
+        priority: item.priority,
+      }),
+    },
+    {
+      title: 'Risky claims',
+      icon: ShieldCheck,
+      items: reviewRiskyClaims(review),
+      bg: '#fff1f2',
+      color: 'var(--color-danger)',
+      render: item => ({
+        title: item.claim,
+        copy: item.why_risky,
+        meta: item.safer_wording || item.evidence_needed,
+        priority: item.priority,
+      }),
+    },
+  ]
+
+  return (
+    <section style={{ ...panelStyle, padding: '18px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '14px' }}>
+        <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <ShieldCheck size={16} strokeWidth={2.4} />
+        </span>
+        <div>
+          <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text-primary)', margin: 0 }}>Evidence check</h2>
+          <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: '1.45', marginTop: '2px' }}>What the CV proves, what is missing, and what should not be claimed without proof.</p>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '10px' }}>
+        {groups.map(group => {
+          const Icon = group.icon
+          return (
+            <div key={group.title} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '13px', background: group.bg }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
+                <Icon size={15} strokeWidth={2.5} style={{ color: group.color, flexShrink: 0 }} />
+                <p style={{ fontSize: '12px', fontWeight: '800', color: group.color }}>{group.title}</p>
+              </div>
+              {group.items.length ? (
+                <div style={{ display: 'grid', gap: '9px' }}>
+                  {group.items.slice(0, 5).map((rawItem, index) => {
+                    const item = group.render(rawItem)
+                    const meta = item.priority ? priorityMeta(item.priority) : null
+                    return (
+                      <article key={`${group.title}-${index}`} style={{ display: 'grid', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '7px', justifyContent: 'space-between' }}>
+                          <p style={{ fontSize: '12px', color: 'var(--color-text-primary)', fontWeight: '800', lineHeight: '1.45' }}>{item.title || 'No detail returned.'}</p>
+                          {meta && (
+                            <span style={{ border: `1px solid ${meta.border}`, background: '#ffffff', color: meta.color, borderRadius: '999px', padding: '2px 6px', fontSize: '10px', fontWeight: '800', whiteSpace: 'nowrap' }}>
+                              {item.priority}
+                            </span>
+                          )}
+                        </div>
+                        {item.copy && <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>{item.copy}</p>}
+                        {item.meta && <p style={{ fontSize: '12px', color: group.color, lineHeight: '1.45', fontWeight: '700' }}>{item.meta}</p>}
+                      </article>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: '1.45' }}>No items returned.</p>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function ConfirmationQuestions({ questions }) {
+  if (!questions?.length) return null
+
+  return (
+    <Section icon={Lightbulb} title="Questions before strengthening bullets">
+      <div style={{ display: 'grid', gap: '10px' }}>
+        {questions.slice(0, 8).map((item, index) => (
+          <article key={`${item.question}-${index}`} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '13px 14px', background: '#fbfdff' }}>
+            <p style={{ fontSize: '13px', color: 'var(--color-text-primary)', fontWeight: '800', lineHeight: '1.45', marginBottom: '5px' }}>
+              {item.question}
+            </p>
+            <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>
+              {[item.why_asking, item.answer_would_improve, item.related_cv_area].filter(Boolean).join(' - ')}
+            </p>
+          </article>
+        ))}
+      </div>
+    </Section>
+  )
+}
+
+function formatReviewForClipboard(review) {
+  const lines = [
+    `ApplyWise CV recommendations${review.role_focus ? ` - ${review.role_focus}` : ''}`,
+    '',
+    `Summary: ${review.summary || 'No summary returned.'}`,
+    `Fit score: ${review.fit_score ?? 'N/A'}/100`,
+    '',
+    'Confirmed evidence:',
+    ...reviewConfirmedEvidence(review).map(item => `- ${[item.evidence, item.job_requirement_supported, item.why_it_matters].filter(Boolean).join(' | ')}`),
+    '',
+    'Missing evidence:',
+    ...reviewMissingEvidence(review).map(item => `- [${normalizePriority(item.priority, 'High')}] ${item.requirement}: ${item.missing_or_unclear || item.what_to_add_if_true || ''}`),
+    '',
+    'Risky claims:',
+    ...reviewRiskyClaims(review).map(item => `- [${normalizePriority(item.priority)}] ${item.claim}: ${item.why_risky || item.safer_wording || ''}`),
+    '',
+    'Priority recommendations:',
+    ...reviewPriorityItems(review).map(item => `- [${normalizePriority(item.priority)}] ${item.recommendation}${item.user_action ? ` | Action: ${item.user_action}` : ''}`),
+    '',
+    'Questions to confirm:',
+    ...(review.confirmation_questions || []).map(item => `- ${item.question}`),
+  ]
+
+  return lines.filter(line => line !== null && line !== undefined).join('\n')
 }
 
 function PillList({ items }) {
@@ -788,6 +998,17 @@ function CvProfileResults({ profile }) {
 
 function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplication }) {
   const rec = recommendationColor(review.recommendation)
+  const [copyNotice, setCopyNotice] = useState('')
+
+  async function handleCopyRecommendations() {
+    const text = formatReviewForClipboard(review)
+    try {
+      await navigator.clipboard?.writeText(text)
+      setCopyNotice('Recommendations copied.')
+    } catch {
+      setCopyNotice('Could not copy recommendations in this browser.')
+    }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -819,6 +1040,17 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
             </div>
             <button
               type="button"
+              onClick={handleCopyRecommendations}
+              style={{
+                ...secondaryButtonStyle,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Copy size={14} strokeWidth={2.5} />
+              Copy recommendations
+            </button>
+            <button
+              type="button"
               onClick={onSave}
               disabled={!canSave || saving}
               style={{
@@ -834,12 +1066,19 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
             <SaveHint canSave={canSave} auth={auth} selectedApplication={selectedApplication} />
           </div>
         </div>
+        {copyNotice && (
+          <p style={{ fontSize: '12px', color: copyNotice.includes('copied') ? 'var(--color-success)' : 'var(--color-warning)', fontWeight: '700', marginBottom: '8px' }}>
+            {copyNotice}
+          </p>
+        )}
         <p style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
           Suggestions are draft guidance. Review and approve any CV changes yourself before using them.
         </p>
       </section>
 
+      <EvidenceSeparation review={review} />
       <ReviewPriority review={review} />
+      <ConfirmationQuestions questions={review.confirmation_questions} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
         <Section icon={CheckCircle2} title="Strong evidence">
@@ -856,6 +1095,7 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
             items={review.evidence_gaps}
             fields={[
               { key: 'requirement', label: 'Requirement', strong: true },
+              { key: 'priority', label: 'Priority', strong: true },
               { key: 'cv_gap', label: 'Gap' },
               { key: 'how_to_fix', label: 'Fix' },
             ]}
@@ -869,8 +1109,10 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
           fields={[
             { key: 'section', label: 'Section', strong: true },
             { key: 'current_issue', label: 'Issue' },
+            { key: 'priority', label: 'Priority', strong: true },
             { key: 'suggested_bullet', label: 'Suggested bullet', strong: true },
             { key: 'reason', label: 'Reason' },
+            { key: 'confirmation_needed', label: 'Confirm first' },
           ]}
         />
       </Section>
@@ -881,6 +1123,7 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
             items={review.keyword_suggestions}
             fields={[
               { key: 'keyword', label: 'Keyword', strong: true },
+              { key: 'priority', label: 'Priority', strong: true },
               { key: 'why', label: 'Why' },
               { key: 'where_to_add', label: 'Where' },
             ]}
@@ -891,6 +1134,7 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
             items={review.risks}
             fields={[
               { key: 'claim', label: 'Claim', strong: true },
+              { key: 'priority', label: 'Priority', strong: true },
               { key: 'concern', label: 'Concern' },
               { key: 'safer_alternative', label: 'Safer alternative' },
             ]}

@@ -45,6 +45,60 @@ const cvReviewSchema = {
         required: ['evidence', 'why_it_matters'],
       },
     },
+    confirmed_evidence: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          evidence: { type: 'string' },
+          source: { type: 'string' },
+          job_requirement_supported: { type: 'string' },
+          why_it_matters: { type: 'string' },
+        },
+        required: ['evidence', 'source', 'job_requirement_supported', 'why_it_matters'],
+      },
+    },
+    missing_evidence: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          requirement: { type: 'string' },
+          missing_or_unclear: { type: 'string' },
+          why_it_matters: { type: 'string' },
+          what_to_add_if_true: { type: 'string' },
+          priority: { type: 'string', enum: ['High', 'Medium', 'Low'] },
+        },
+        required: ['requirement', 'missing_or_unclear', 'why_it_matters', 'what_to_add_if_true', 'priority'],
+      },
+    },
+    risky_claims: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          claim: { type: 'string' },
+          why_risky: { type: 'string' },
+          safer_wording: { type: 'string' },
+          evidence_needed: { type: 'string' },
+          priority: { type: 'string', enum: ['High', 'Medium', 'Low'] },
+        },
+        required: ['claim', 'why_risky', 'safer_wording', 'evidence_needed', 'priority'],
+      },
+    },
+    priority_recommendations: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          priority: { type: 'string', enum: ['High', 'Medium', 'Low'] },
+          recommendation: { type: 'string' },
+          reason: { type: 'string' },
+          user_action: { type: 'string' },
+        },
+        required: ['priority', 'recommendation', 'reason', 'user_action'],
+      },
+    },
     evidence_gaps: {
       type: 'array',
       items: {
@@ -53,8 +107,9 @@ const cvReviewSchema = {
           requirement: { type: 'string' },
           cv_gap: { type: 'string' },
           how_to_fix: { type: 'string' },
+          priority: { type: 'string', enum: ['High', 'Medium', 'Low'] },
         },
-        required: ['requirement', 'cv_gap', 'how_to_fix'],
+        required: ['requirement', 'cv_gap', 'how_to_fix', 'priority'],
       },
     },
     bullet_rewrites: {
@@ -66,8 +121,10 @@ const cvReviewSchema = {
           current_issue: { type: 'string' },
           suggested_bullet: { type: 'string' },
           reason: { type: 'string' },
+          priority: { type: 'string', enum: ['High', 'Medium', 'Low'] },
+          confirmation_needed: { type: 'string' },
         },
-        required: ['section', 'current_issue', 'suggested_bullet', 'reason'],
+        required: ['section', 'current_issue', 'suggested_bullet', 'reason', 'priority', 'confirmation_needed'],
       },
     },
     keyword_suggestions: {
@@ -78,8 +135,9 @@ const cvReviewSchema = {
           keyword: { type: 'string' },
           why: { type: 'string' },
           where_to_add: { type: 'string' },
+          priority: { type: 'string', enum: ['High', 'Medium', 'Low'] },
         },
-        required: ['keyword', 'why', 'where_to_add'],
+        required: ['keyword', 'why', 'where_to_add', 'priority'],
       },
     },
     risks: {
@@ -90,8 +148,22 @@ const cvReviewSchema = {
           claim: { type: 'string' },
           concern: { type: 'string' },
           safer_alternative: { type: 'string' },
+          priority: { type: 'string', enum: ['High', 'Medium', 'Low'] },
         },
-        required: ['claim', 'concern', 'safer_alternative'],
+        required: ['claim', 'concern', 'safer_alternative', 'priority'],
+      },
+    },
+    confirmation_questions: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          question: { type: 'string' },
+          why_asking: { type: 'string' },
+          answer_would_improve: { type: 'string' },
+          related_cv_area: { type: 'string' },
+        },
+        required: ['question', 'why_asking', 'answer_would_improve', 'related_cv_area'],
       },
     },
     next_steps: {
@@ -109,10 +181,15 @@ const cvReviewSchema = {
     'recommendation',
     'role_focus',
     'top_strengths',
+    'confirmed_evidence',
+    'missing_evidence',
+    'risky_claims',
+    'priority_recommendations',
     'evidence_gaps',
     'bullet_rewrites',
     'keyword_suggestions',
     'risks',
+    'confirmation_questions',
     'next_steps',
     'cover_letter_angles',
   ],
@@ -363,6 +440,11 @@ function buildPrompt({ cvText, jobTitle, company, jobDescription, applicationNot
     '- Base every recommendation on evidence from the CV and job context.',
     '- Do not invent achievements, employers, grades, tools, languages, or metrics.',
     '- If evidence is missing, say what the user should add or verify.',
+    '- Separate confirmed_evidence, missing_evidence, and risky_claims clearly.',
+    '- Give each important recommendation a priority: High, Medium, or Low.',
+    '- High priority means must fix before applying; Medium priority improves quality; Low priority is optional polish.',
+    '- If unsure, ask a confirmation question instead of guessing. Useful questions include tools used, whether work was individual or team-based, whether results can be quantified, who saw the output, and what evidence the user can prove.',
+    '- Suggested bullets must not include unverified tools, metrics, client exposure, leadership, or results unless the CV or saved profile already supports them. If verification is needed, put it in confirmation_needed.',
     '- Make suggestions practical for European graduate roles.',
     '- Keep the tone calm, direct, and specific.',
     '',
@@ -622,6 +704,33 @@ function buildCvDocumentInput(payload = {}, missingMessage, options = {}) {
 }
 
 function normalizeReview(review) {
+  const confirmedEvidence = asArray(review.confirmed_evidence).length
+    ? asArray(review.confirmed_evidence).slice(0, 8)
+    : asArray(review.top_strengths).slice(0, 5).map(item => ({
+      evidence: toText(item?.evidence),
+      source: 'CV or saved profile',
+      job_requirement_supported: '',
+      why_it_matters: toText(item?.why_it_matters),
+    }))
+  const missingEvidence = asArray(review.missing_evidence).length
+    ? asArray(review.missing_evidence).slice(0, 8)
+    : asArray(review.evidence_gaps).slice(0, 6).map(item => ({
+      requirement: toText(item?.requirement),
+      missing_or_unclear: toText(item?.cv_gap),
+      why_it_matters: '',
+      what_to_add_if_true: toText(item?.how_to_fix),
+      priority: normalizePriority(item?.priority, 'High'),
+    }))
+  const riskyClaims = asArray(review.risky_claims).length
+    ? asArray(review.risky_claims).slice(0, 6)
+    : asArray(review.risks).slice(0, 5).map(item => ({
+      claim: toText(item?.claim),
+      why_risky: toText(item?.concern),
+      safer_wording: toText(item?.safer_alternative),
+      evidence_needed: '',
+      priority: normalizePriority(item?.priority, 'Medium'),
+    }))
+
   return {
     summary: String(review.summary || '').trim(),
     fit_score: clampScore(review.fit_score),
@@ -630,13 +739,57 @@ function normalizeReview(review) {
       : 'possible_match',
     role_focus: String(review.role_focus || '').trim(),
     top_strengths: asArray(review.top_strengths).slice(0, 5),
+    confirmed_evidence: confirmedEvidence,
+    missing_evidence: missingEvidence,
+    risky_claims: riskyClaims,
+    priority_recommendations: normalizePriorityRecommendations(review).slice(0, 8),
     evidence_gaps: asArray(review.evidence_gaps).slice(0, 6),
     bullet_rewrites: asArray(review.bullet_rewrites).slice(0, 6),
     keyword_suggestions: asArray(review.keyword_suggestions).slice(0, 8),
     risks: asArray(review.risks).slice(0, 5),
+    confirmation_questions: asArray(review.confirmation_questions).slice(0, 8),
     next_steps: asArray(review.next_steps).slice(0, 5),
     cover_letter_angles: asArray(review.cover_letter_angles).slice(0, 4),
   }
+}
+
+function normalizePriority(value, fallback = 'Medium') {
+  const normalized = toText(value)
+  return ['High', 'Medium', 'Low'].includes(normalized) ? normalized : fallback
+}
+
+function normalizePriorityRecommendations(review = {}) {
+  const provided = asArray(review.priority_recommendations)
+    .map(item => ({
+      priority: normalizePriority(item?.priority),
+      recommendation: toText(item?.recommendation),
+      reason: toText(item?.reason),
+      user_action: toText(item?.user_action),
+    }))
+    .filter(item => item.recommendation || item.user_action)
+
+  if (provided.length) return provided
+
+  return [
+    ...asArray(review.evidence_gaps).slice(0, 3).map(item => ({
+      priority: normalizePriority(item?.priority, 'High'),
+      recommendation: toText(item?.how_to_fix || item?.requirement),
+      reason: toText(item?.cv_gap),
+      user_action: 'Add truthful evidence for this requirement before applying.',
+    })),
+    ...asArray(review.bullet_rewrites).slice(0, 3).map(item => ({
+      priority: normalizePriority(item?.priority, 'Medium'),
+      recommendation: toText(item?.suggested_bullet),
+      reason: toText(item?.reason || item?.current_issue),
+      user_action: 'Review this bullet and only use it if the claim is accurate.',
+    })),
+    ...asArray(review.keyword_suggestions).slice(0, 2).map(item => ({
+      priority: normalizePriority(item?.priority, 'Low'),
+      recommendation: `Add keyword if true: ${toText(item?.keyword)}`,
+      reason: toText(item?.why),
+      user_action: toText(item?.where_to_add),
+    })),
+  ].filter(item => item.recommendation || item.user_action)
 }
 
 function normalizeEducation(item = {}) {
