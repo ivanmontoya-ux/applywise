@@ -47,3 +47,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Improve CV AI recommendations with evidence separation, priorities, copy action, and confirmation questions.
 - [x] Add social-login UI and subscription pricing page for ApplyWise.
 - [x] Add dashboard AI chatbot for next-step, deadline, follow-up, and weekly improvement questions.
+- [x] Modernize shared UI styling with softer surfaces, clearer navigation states, and improved interaction polish.

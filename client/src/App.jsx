@@ -30,17 +30,20 @@ function TopAuthBar({ isPublicPage }) {
 
   return (
     <div style={{
-      minHeight: 52,
+      minHeight: 56,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'flex-end',
       gap: '10px',
       padding: '10px 40px',
       borderBottom: '1px solid var(--color-border)',
-      background: 'rgba(248, 250, 252, 0.94)',
+      background: 'rgba(255, 255, 255, 0.82)',
+      backdropFilter: 'blur(18px)',
+      WebkitBackdropFilter: 'blur(18px)',
       position: 'sticky',
       top: 0,
       zIndex: 50,
+      boxShadow: '0 1px 0 rgba(15, 23, 42, 0.03)',
     }}>
       {auth.session ? (
         <>
@@ -53,7 +56,7 @@ function TopAuthBar({ isPublicPage }) {
             className="secondary-action"
             style={{
               minHeight: 34,
-              padding: '0 12px',
+              padding: '0 14px',
               borderRadius: 'var(--radius-md)',
               border: '1px solid var(--color-border)',
               background: '#ffffff',
@@ -76,7 +79,7 @@ function TopAuthBar({ isPublicPage }) {
             minHeight: 34,
             display: 'inline-flex',
             alignItems: 'center',
-            padding: '0 12px',
+            padding: '0 14px',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--color-border)',
             background: '#ffffff',
@@ -92,7 +95,7 @@ function TopAuthBar({ isPublicPage }) {
             minHeight: 34,
             display: 'inline-flex',
             alignItems: 'center',
-            padding: '0 12px',
+            padding: '0 14px',
             borderRadius: 'var(--radius-md)',
             background: 'var(--color-applied-teal)',
             color: '#ffffff',

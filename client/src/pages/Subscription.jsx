@@ -63,11 +63,11 @@ const headerStyle = {
 }
 
 const titleStyle = {
-  fontSize: '38px',
-  lineHeight: '1.05',
-  fontWeight: '900',
-  color: '#073438',
-  marginBottom: '10px',
+  fontSize: '28px',
+  lineHeight: '1.15',
+  fontWeight: '800',
+  color: 'var(--color-text-primary)',
+  marginBottom: '8px',
   letterSpacing: 0,
 }
 

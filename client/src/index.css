@@ -158,30 +158,32 @@ img, video {
 :root {
   /* Backgrounds */
   --color-bg: #ffffff;
-  --color-bg-page: #f5f7fa;
+  --color-bg-page: #f4f7fa;
   --color-bg-sidebar: #ffffff;
-  --color-bg-secondary: #f3f6f8;
-  --color-bg-hover: #eef4f5;
+  --color-bg-secondary: #f1f5f7;
+  --color-bg-hover: #eaf3f3;
+  --color-surface-raised: rgba(255, 255, 255, 0.94);
+  --color-surface-soft: #f9fbfc;
 
   /* Borders */
-  --color-border: #e4e9ee;
-  --color-border-strong: #cfd8df;
+  --color-border: #dde6ec;
+  --color-border-strong: #c3d0d8;
 
   /* Text */
-  --color-text-primary: #18181b;
-  --color-text-secondary: #71717a;
-  --color-text-muted: #a1a1aa;
+  --color-text-primary: #111827;
+  --color-text-secondary: #64707d;
+  --color-text-muted: #9aa4af;
 
   /* Brand — Applied Teal */
-  --color-navy: #2f6f73;
-  --color-navy-light: #3f8589;
-  --color-navy-hover: #24595d;
-  --color-applied-teal: #2f6f73;
-  --color-applied-teal-soft: #edf7f7;
-  --color-applied-teal-muted: #5f8f92;
+  --color-navy: #27676b;
+  --color-navy-light: #3a8286;
+  --color-navy-hover: #1f5559;
+  --color-applied-teal: #276f73;
+  --color-applied-teal-soft: #e9f6f5;
+  --color-applied-teal-muted: #5f8589;
 
   /* Semantic */
-  --color-accent: #2f6f73;
+  --color-accent: #276f73;
   --color-success: #2f6b45;
   --color-warning: #a15c07;
   --color-danger: #b42318;
@@ -191,15 +193,15 @@ img, video {
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 8px;
-  --radius-xl: 12px;
+  --radius-xl: 10px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 14px 34px rgba(15, 23, 42, 0.08);
-  --shadow-card: 0 10px 24px rgba(15, 23, 42, 0.055);
-  --shadow-card-hover: 0 18px 38px rgba(15, 23, 42, 0.10);
-  --shadow-primary: 0 10px 20px rgba(47, 111, 115, 0.20);
-  --shadow-primary-hover: 0 14px 26px rgba(47, 111, 115, 0.24);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.045), 0 1px 1px rgba(15, 23, 42, 0.035);
+  --shadow-md: 0 18px 38px rgba(15, 23, 42, 0.085);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.045), 0 16px 34px rgba(15, 23, 42, 0.055);
+  --shadow-card-hover: 0 2px 4px rgba(15, 23, 42, 0.055), 0 22px 44px rgba(15, 23, 42, 0.095);
+  --shadow-primary: 0 12px 24px rgba(39, 111, 115, 0.22);
+  --shadow-primary-hover: 0 16px 30px rgba(39, 111, 115, 0.28);
 
   /* Typography */
   --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
@@ -215,7 +217,8 @@ html, body {
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-bg-page);
+  background:
+    linear-gradient(180deg, #f8fafc 0%, var(--color-bg-page) 44%, #eef3f6 100%);
   color: var(--color-text-primary);
   font-size: 14px;
   font-weight: 400;
@@ -260,6 +263,7 @@ body {
    ============================================================ */
 
 .interactive-card {
+  isolation: isolate;
   transition:
     border-color 0.18s ease,
     box-shadow 0.18s ease,
@@ -271,6 +275,35 @@ body {
   border-color: var(--color-border-strong);
   box-shadow: var(--shadow-card-hover);
   transform: translateY(-2px);
+}
+
+input,
+select,
+textarea {
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--color-border-strong) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-applied-teal) !important;
+  box-shadow: 0 0 0 4px rgba(39, 111, 115, 0.11) !important;
+}
+
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid rgba(39, 111, 115, 0.22);
+  outline-offset: 3px;
 }
 
 .pressable,

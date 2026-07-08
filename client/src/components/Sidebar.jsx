@@ -33,15 +33,17 @@ function NavItem({ to, icon: Icon, label, collapsed }) {
         alignItems: 'center',
         justifyContent: collapsed ? 'center' : 'flex-start',
         gap: collapsed ? '0' : '10px',
+        minHeight: 38,
         padding: collapsed ? '9px 0' : '9px 12px',
-        borderRadius: '8px',
-        fontSize: '14px',
-        fontWeight: isActive ? '700' : '500',
+        borderRadius: 'var(--radius-md)',
+        fontSize: '13px',
+        fontWeight: isActive ? '800' : '650',
         textDecoration: 'none',
         color: isActive ? 'var(--color-applied-teal)' : 'var(--color-text-secondary)',
-        background: isActive ? '#edf7f7' : 'transparent',
-        border: isActive ? '1px solid #cfe7e8' : '1px solid transparent',
-        transition: 'background 0.12s ease, color 0.12s ease, border-color 0.12s ease',
+        background: isActive ? 'linear-gradient(180deg, #f1fbfa 0%, #e8f5f5 100%)' : 'transparent',
+        border: isActive ? '1px solid #c6e3e3' : '1px solid transparent',
+        boxShadow: isActive ? 'inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 5px 14px rgba(39, 111, 115, 0.08)' : 'none',
+        transition: 'background 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease',
         cursor: 'pointer',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
@@ -94,8 +96,9 @@ export default function Sidebar() {
       height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'var(--color-bg-sidebar)',
+      background: 'rgba(255, 255, 255, 0.96)',
       borderRight: '1px solid var(--color-border)',
+      boxShadow: '8px 0 26px rgba(15, 23, 42, 0.035)',
       overflow: 'hidden',
       transition: 'width 0.22s ease, min-width 0.22s ease',
       flexShrink: 0,
@@ -105,9 +108,9 @@ export default function Sidebar() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: collapsed ? 'center' : 'space-between',
-        padding: collapsed ? '18px 0 16px' : '18px 12px 16px 20px',
+        padding: collapsed ? '18px 0 16px' : '18px 12px 16px 18px',
         borderBottom: '1px solid var(--color-border)',
-        minHeight: '61px',
+        minHeight: '68px',
       }}>
         {!collapsed && (
           <BrandLogo width={150} style={{ minWidth: 0 }} />
@@ -118,10 +121,11 @@ export default function Sidebar() {
           className="secondary-action"
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            width: '28px', height: '28px', flexShrink: 0,
-            background: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border)', borderRadius: '6px',
+            width: '30px', height: '30px', flexShrink: 0,
+            background: '#ffffff',
+            border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)',
             cursor: 'pointer', color: 'var(--color-text-secondary)',
+            boxShadow: 'var(--shadow-sm)',
             transition: 'background 0.15s ease',
           }}
           onMouseEnter={e => e.currentTarget.style.background = 'var(--color-bg-hover)'}
@@ -136,10 +140,10 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav style={{
         flex: 1,
-        padding: collapsed ? '12px 8px' : '12px 10px',
+        padding: collapsed ? '14px 8px' : '14px 10px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '2px',
+        gap: '4px',
       }}>
         <NavItem to="/home" icon={Home} label="Home" collapsed={collapsed} />
         <NavItem to="/jobs" icon={Briefcase} label="Jobs" collapsed={collapsed} />
