@@ -103,6 +103,7 @@ const ctaStyle = {
 
 function getCardStyle(plan, selected) {
   const isPopular = plan.tone === 'popular'
+  const isPremium = plan.tone === 'premium'
   return {
     minHeight: 460,
     position: 'relative',
@@ -111,10 +112,10 @@ function getCardStyle(plan, selected) {
     rowGap: '22px',
     padding: '26px 34px 34px',
     borderRadius: 'var(--radius-lg)',
-    border: selected ? '2px solid #0dbfa6' : '1px solid var(--color-border)',
-    background: isPopular ? '#078b95' : '#edf6f4',
-    color: isPopular ? '#ffffff' : '#0b3034',
-    boxShadow: selected ? '0 18px 42px rgba(13, 191, 166, 0.20)' : 'var(--shadow-card)',
+    border: selected ? `2px solid ${isPremium ? 'var(--color-indigo)' : '#0dbfa6'}` : '1px solid var(--color-border)',
+    background: isPopular ? '#078b95' : isPremium ? 'var(--color-indigo-soft)' : '#edf6f4',
+    color: isPopular ? '#ffffff' : isPremium ? 'var(--color-indigo-text)' : '#0b3034',
+    boxShadow: selected ? (isPremium ? 'var(--shadow-indigo)' : '0 18px 42px rgba(13, 191, 166, 0.20)') : 'var(--shadow-card)',
     transform: selected ? 'translateY(-3px)' : 'none',
   }
 }
@@ -122,7 +123,8 @@ function getCardStyle(plan, selected) {
 function PlanCard({ plan, selected, onSelect }) {
   const Icon = plan.icon
   const isPopular = plan.tone === 'popular'
-  const iconBackground = isPopular ? '#d8f5f1' : plan.tone === 'premium' ? '#006a73' : '#5f7d81'
+  const isPremium = plan.tone === 'premium'
+  const iconBackground = isPopular ? '#d8f5f1' : isPremium ? 'var(--color-indigo)' : '#5f7d81'
   const iconColor = isPopular ? '#ffffff' : '#ffffff'
 
   return (
@@ -167,8 +169,8 @@ function PlanCard({ plan, selected, onSelect }) {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-        <span style={{ fontSize: '18px', fontWeight: '900', color: isPopular ? '#ffffff' : '#017f8b' }}>{plan.price}</span>
-        <span style={{ fontSize: '15px', color: isPopular ? 'rgba(255,255,255,0.78)' : 'var(--color-applied-teal-muted)' }}>/ {plan.period}</span>
+        <span style={{ fontSize: '18px', fontWeight: '900', color: isPopular ? '#ffffff' : isPremium ? 'var(--color-indigo)' : '#017f8b' }}>{plan.price}</span>
+        <span style={{ fontSize: '15px', color: isPopular ? 'rgba(255,255,255,0.78)' : isPremium ? 'var(--color-indigo-text)' : 'var(--color-applied-teal-muted)' }}>/ {plan.period}</span>
       </div>
 
       <ul style={{ display: 'grid', alignContent: 'start', gap: '10px', fontSize: '15px', lineHeight: '1.45' }}>
@@ -188,8 +190,8 @@ function PlanCard({ plan, selected, onSelect }) {
           style={{
             ...ctaStyle,
             borderColor: isPopular ? 'rgba(255,255,255,0.42)' : 'var(--color-border)',
-            background: selected ? '#0ac7a8' : isPopular ? 'rgba(255,255,255,0.12)' : '#ffffff',
-            color: selected ? '#063237' : isPopular ? '#ffffff' : 'var(--color-text-primary)',
+            background: selected ? (isPremium ? 'var(--color-indigo)' : '#0ac7a8') : isPopular ? 'rgba(255,255,255,0.12)' : '#ffffff',
+            color: selected ? (isPremium ? '#ffffff' : '#063237') : isPopular ? '#ffffff' : 'var(--color-text-primary)',
           }}
         >
           {selected ? <Check size={16} strokeWidth={2.5} /> : <Zap size={15} strokeWidth={2.5} />}

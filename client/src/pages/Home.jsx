@@ -10,10 +10,9 @@ import {
   FileText,
   ListChecks,
   Send,
-  Sparkles,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
-import { fetchJobs, fetchPersonalInformation, fetchTracker } from '../lib/api'
+import { fetchPersonalInformation, fetchTracker } from '../lib/api'
 import WorkflowGuide from '../components/WorkflowGuide'
 import {
   APPLICATION_STATUSES,
@@ -86,11 +85,33 @@ const secondaryLinkStyle = {
   textDecoration: 'none',
   boxShadow: 'var(--shadow-sm)',
 }
+const featureIconBaseStyle = {
+  width: 48,
+  height: 48,
+  minWidth: 48,
+  borderRadius: 'var(--radius-md)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+}
+const tealFeatureIconStyle = {
+  ...featureIconBaseStyle,
+  background: 'var(--color-applied-teal-soft)',
+  color: 'var(--color-applied-teal)',
+  border: '1px solid #c6e3e3',
+}
+const indigoFeatureIconStyle = {
+  ...featureIconBaseStyle,
+  background: 'var(--color-indigo-soft)',
+  color: 'var(--color-indigo)',
+  border: '1px solid var(--color-indigo-border)',
+}
 
 function Panel({ title, eyebrow, children, action }) {
   return (
-    <section className="interactive-card" style={{ ...panelStyle, padding: '28px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start', marginBottom: '20px' }}>
+    <section className="interactive-card" style={{ ...panelStyle, padding: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start', marginBottom: '16px' }}>
         <div>
           {eyebrow && (
             <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0', marginBottom: '5px' }}>
@@ -164,7 +185,7 @@ function StatusBadge({ status }) {
 function EmptyState({ icon: Icon, title, copy, action }) {
   return (
     <div style={{
-      minHeight: 180,
+      minHeight: 150,
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
@@ -172,17 +193,8 @@ function EmptyState({ icon: Icon, title, copy, action }) {
       gap: '12px',
       color: 'var(--color-text-secondary)',
     }}>
-      <span style={{
-        width: 42,
-        height: 42,
-        borderRadius: 'var(--radius-md)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#edf7f7',
-        color: 'var(--color-applied-teal)',
-      }}>
-        <Icon size={20} strokeWidth={2.4} />
+      <span style={tealFeatureIconStyle}>
+        <Icon size={22} strokeWidth={2.4} />
       </span>
       <div>
         <h3 style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '4px' }}>
@@ -394,10 +406,9 @@ function DashboardChatbot({ applications, upcomingDeadlines, dashboardAction, pr
   }, [loading, starter])
 
   const quickQuestions = [
-    'What applications need attention today?',
-    'Which deadline is closest?',
+    'What needs attention today?',
+    'Closest deadline?',
     'Who should I follow up with?',
-    'What should I improve this week?',
   ]
 
   function ask(question) {
@@ -419,44 +430,38 @@ function DashboardChatbot({ applications, upcomingDeadlines, dashboardAction, pr
     ask(draft)
   }
 
+  const visibleMessages = messages.slice(-2)
+
   return (
-    <section style={{ ...panelStyle, padding: '24px', marginBottom: '26px', background: '#ffffff' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-          <span style={{ width: 42, height: 42, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Bot size={20} strokeWidth={2.4} />
-          </span>
-          <div>
-            <p style={eyebrowStyle}>AI command center</p>
-            <h2 style={{ fontSize: '18px', lineHeight: '1.2', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '5px' }}>
-              What should I do next?
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55', maxWidth: '720px' }}>
-              Ask about urgent applications, deadlines, follow-ups, or what to improve this week.
-            </p>
-          </div>
-        </div>
-        <span style={{ minHeight: 28, display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '0 9px', borderRadius: '999px', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', fontSize: '12px', fontWeight: '800', whiteSpace: 'nowrap' }}>
-          <Sparkles size={13} strokeWidth={2.4} />
-          Personalized
+    <section style={{ ...panelStyle, padding: '18px 20px', marginBottom: '22px', background: '#ffffff' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+        <span style={indigoFeatureIconStyle}>
+          <Bot size={22} strokeWidth={2.4} />
         </span>
+        <div>
+          <p style={{ ...eyebrowStyle, marginBottom: '3px' }}>AI command center</p>
+          <h2 style={{ fontSize: '17px', lineHeight: '1.2', fontWeight: '800', color: 'var(--color-text-primary)', margin: 0 }}>
+            What should I do next?
+          </h2>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(240px, 0.42fr)', gap: '16px', alignItems: 'stretch' }} className="dashboard-chat-grid">
-        <div style={{ minHeight: 160, display: 'flex', flexDirection: 'column', gap: '10px', padding: '14px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff' }}>
-          {messages.map((message, index) => (
+      <div style={{ display: 'grid', gap: '10px' }}>
+        <div style={{ display: 'grid', gap: '8px' }}>
+          {visibleMessages.map((message, index) => (
             <div
               key={`${message.role}-${index}-${message.text.slice(0, 20)}`}
               style={{
                 alignSelf: message.role === 'user' ? 'flex-end' : 'flex-start',
-                maxWidth: '88%',
-                padding: '10px 12px',
-                borderRadius: '14px',
-                border: message.role === 'user' ? '1px solid #b9dada' : '1px solid var(--color-border)',
-                background: message.role === 'user' ? 'var(--color-applied-teal-soft)' : '#ffffff',
+                justifySelf: message.role === 'user' ? 'end' : 'start',
+                maxWidth: message.role === 'user' ? '82%' : '100%',
+                padding: '9px 11px',
+                borderRadius: '12px',
+                border: message.role === 'user' ? '1px solid var(--color-indigo-border)' : '1px solid var(--color-border)',
+                background: message.role === 'user' ? 'var(--color-indigo-soft)' : '#ffffff',
                 color: 'var(--color-text-primary)',
                 fontSize: '13px',
-                lineHeight: '1.5',
+                lineHeight: '1.45',
                 boxShadow: 'var(--shadow-sm)',
               }}
             >
@@ -465,7 +470,7 @@ function DashboardChatbot({ applications, upcomingDeadlines, dashboardAction, pr
           ))}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {quickQuestions.map(question => (
             <button
               key={question}
@@ -474,15 +479,14 @@ function DashboardChatbot({ applications, upcomingDeadlines, dashboardAction, pr
               disabled={loading}
               className="secondary-action pressable"
               style={{
-                minHeight: 38,
-                padding: '0 11px',
-                borderRadius: 'var(--radius-md)',
+                minHeight: 32,
+                padding: '0 10px',
+                borderRadius: '999px',
                 border: '1px solid var(--color-border)',
                 background: '#ffffff',
                 color: 'var(--color-text-primary)',
                 fontSize: '12px',
                 fontWeight: '800',
-                textAlign: 'left',
                 boxShadow: 'var(--shadow-sm)',
                 opacity: loading ? 0.55 : 1,
               }}
@@ -493,7 +497,7 @@ function DashboardChatbot({ applications, upcomingDeadlines, dashboardAction, pr
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '8px', marginTop: '12px' }}>
         <input
           type="text"
           value={draft}
@@ -502,7 +506,7 @@ function DashboardChatbot({ applications, upcomingDeadlines, dashboardAction, pr
           disabled={loading}
           style={{
             flex: 1,
-            minHeight: 42,
+            minHeight: 38,
             border: '1.5px solid var(--color-border)',
             borderRadius: 'var(--radius-md)',
             padding: '0 12px',
@@ -517,7 +521,7 @@ function DashboardChatbot({ applications, upcomingDeadlines, dashboardAction, pr
           disabled={loading || !draft.trim()}
           className="primary-action pressable"
           style={{
-            minHeight: 42,
+            minHeight: 38,
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -544,7 +548,6 @@ function DashboardChatbot({ applications, upcomingDeadlines, dashboardAction, pr
 export default function Home() {
   const auth = useAuth()
   const [applications, setApplications] = useState([])
-  const [jobs, setJobs] = useState([])
   const [personalInfo, setPersonalInfo] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -556,14 +559,12 @@ export default function Home() {
       setLoading(true)
       setError('')
       try {
-        const [trackerData, jobsData, personalData] = await Promise.all([
+        const [trackerData, personalData] = await Promise.all([
           fetchTracker('All'),
-          fetchJobs({}),
           fetchPersonalInformation().catch(() => ({ profile: null })),
         ])
         if (cancelled) return
         setApplications(trackerData)
-        setJobs(jobsData.slice(0, 4))
         setPersonalInfo(personalData?.profile || null)
       } catch {
         if (!cancelled) setError('Could not load Home. Make sure the local server is running.')
@@ -742,7 +743,7 @@ export default function Home() {
         </div>
       )}
 
-      <section style={{ ...panelStyle, padding: '30px', marginBottom: '26px', borderColor: 'rgba(47, 111, 115, 0.28)', background: '#ffffff' }}>
+      <section style={{ ...panelStyle, padding: '26px', marginBottom: '22px', borderColor: 'rgba(47, 111, 115, 0.28)', background: '#ffffff' }}>
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <SkeletonLine width="120px" height={12} />
@@ -753,7 +754,7 @@ export default function Home() {
         ) : dashboardAction ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '22px', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-              <span style={{ width: 48, height: 48, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={tealFeatureIconStyle}>
                 <DashboardActionIcon size={22} strokeWidth={2.4} />
               </span>
               <div>
@@ -787,9 +788,10 @@ export default function Home() {
 
       <div style={{ marginBottom: '26px' }}>
         <WorkflowGuide
-          title="Build one complete application"
-          copy="Best path: add your CV, add your first job, generate tailored advice, save to tracker, then let Coach manage next actions."
+          title="Application setup"
+          copy="Add your CV, add a job, tailor documents, and save everything in the tracker."
           steps={workflowSteps}
+          compact
         />
       </div>
 
@@ -844,30 +846,6 @@ export default function Home() {
               })}
             </div>
           </Panel>
-
-          <Panel eyebrow="Suggested jobs" title="Roles to review next">
-            {jobs.length === 0 ? (
-              <EmptyState
-                icon={Briefcase}
-                title="Find or add a job to start building your application list."
-                copy="The Jobs screen is where relevant roles become tracked applications."
-                action={<Link to="/jobs" className="primary-action pressable" style={primaryLinkStyle}>Open Jobs</Link>}
-              />
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-                {jobs.map(job => (
-                  <article key={job.id} className="interactive-card" style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '16px', background: '#ffffff' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: '800', color: 'var(--color-text-primary)', lineHeight: '1.35', marginBottom: '5px' }}>{job.title}</h3>
-                    <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '10px' }}>{job.company}</p>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                      {job.location && <span>{job.location}</span>}
-                      {job.sector && <span>{job.sector}</span>}
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </Panel>
         </div>
 
         <aside style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
@@ -918,17 +896,6 @@ export default function Home() {
               </div>
             )}
           </Panel>
-
-          <Panel eyebrow="Coach" title="Specific help, not generic advice">
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <CheckCircle2 size={18} strokeWidth={2.4} style={{ color: 'var(--color-success)', flexShrink: 0, marginTop: 2 }} />
-              <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55' }}>
-                Choose an application before asking for fit, CV, cover letter, or next-step support.
-              </p>
-            </div>
-            <Link to="/coach" className="secondary-action pressable" style={{ ...secondaryLinkStyle, marginTop: '14px' }}>Open Coach</Link>
-          </Panel>
-
           {applications.some(app => !isTerminalStatus(app.status) && !app.deadline_date) && (
             <div style={{ ...panelStyle, padding: '16px', display: 'flex', gap: '10px', alignItems: 'flex-start', background: '#fffaf0', borderColor: '#fed7aa' }}>
               <AlertCircle size={18} strokeWidth={2.3} style={{ color: 'var(--color-warning)', flexShrink: 0, marginTop: 2 }} />

@@ -182,12 +182,19 @@ img, video {
   --color-applied-teal-soft: #e9f6f5;
   --color-applied-teal-muted: #5f8589;
 
+  /* Secondary Accent — AI Indigo */
+  --color-indigo: #4f63b6;
+  --color-indigo-hover: #4052a0;
+  --color-indigo-soft: #eef1ff;
+  --color-indigo-border: #cdd5ff;
+  --color-indigo-text: #34428a;
+
   /* Semantic */
   --color-accent: #276f73;
   --color-success: #2f6b45;
   --color-warning: #a15c07;
   --color-danger: #b42318;
-  --color-info: #475569;
+  --color-info: var(--color-indigo-text);
 
   /* Radius */
   --radius-sm: 4px;
@@ -202,6 +209,7 @@ img, video {
   --shadow-card-hover: 0 2px 4px rgba(15, 23, 42, 0.055), 0 22px 44px rgba(15, 23, 42, 0.095);
   --shadow-primary: 0 12px 24px rgba(39, 111, 115, 0.22);
   --shadow-primary-hover: 0 16px 30px rgba(39, 111, 115, 0.28);
+  --shadow-indigo: 0 12px 24px rgba(79, 99, 182, 0.18);
 
   /* Typography */
   --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;

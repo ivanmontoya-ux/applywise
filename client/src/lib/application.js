@@ -12,7 +12,7 @@ export const TERMINAL_STATUSES = new Set(['Offer', 'Rejected'])
 export const STATUS_STYLES = {
   Saved: { bg: '#f4f4f5', color: '#52525b', border: '#d4d4d8', accent: '#a1a1aa' },
   Applied: { bg: '#edf7f7', color: '#2f6f73', border: '#b9dada', accent: '#2f6f73' },
-  Interview: { bg: '#f8fafc', color: '#475569', border: '#cbd5e1', accent: '#475569' },
+  Interview: { bg: '#eef1ff', color: '#34428a', border: '#cdd5ff', accent: '#4f63b6' },
   Assessment: { bg: '#fff7ed', color: '#a15c07', border: '#fed7aa', accent: '#a15c07' },
   Offer: { bg: '#f0fdf4', color: '#2f6b45', border: '#bbf7d0', accent: '#2f6b45' },
   Rejected: { bg: '#fef2f2', color: '#b42318', border: '#fecaca', accent: '#b42318' },

@@ -48,3 +48,6 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Add social-login UI and subscription pricing page for ApplyWise.
 - [x] Add dashboard AI chatbot for next-step, deadline, follow-up, and weekly improvement questions.
 - [x] Modernize shared UI styling with softer surfaces, clearer navigation states, and improved interaction polish.
+- [x] Add soft indigo as a secondary accent for AI, interview, and premium UI states.
+- [x] Standardize dashboard feature icon sizing and container style.
+- [x] Clean up the Home dashboard by compacting the chatbot, slimming the workflow, and removing repeated lower-page sections.
