@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardList,
+  CreditCard,
   FileText,
   Home,
   LogOut,
@@ -148,6 +149,7 @@ export default function Sidebar() {
         <NavItem to="/coach" icon={MessageSquareText} label="Coach" collapsed={collapsed} />
         <NavItem to="/reminders" icon={Bell} label="Reminders" collapsed={collapsed} />
         <NavItem to="/email" icon={Mail} label="Email" collapsed={collapsed} />
+        <NavItem to="/subscription" icon={CreditCard} label="Subscription" collapsed={collapsed} />
         <NavItem to="/settings" icon={Settings} label="Settings" collapsed={collapsed} />
         <NavItem to="/waitlist" icon={UserPlus} label="Waitlist" collapsed={collapsed} />
       </nav>

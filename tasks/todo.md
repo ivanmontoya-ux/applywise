@@ -45,3 +45,5 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Make AI job recommendations opt-in from the Jobs page before running matching.
 - [x] Fix job card footer date and action icon alignment across job listings.
 - [x] Improve CV AI recommendations with evidence separation, priorities, copy action, and confirmation questions.
+- [x] Add social-login UI and subscription pricing page for ApplyWise.
+- [x] Add dashboard AI chatbot for next-step, deadline, follow-up, and weekly improvement questions.

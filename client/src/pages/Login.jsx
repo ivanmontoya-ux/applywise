@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { AlertCircle, LogIn } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import BrandLogo from '../components/BrandLogo'
+import SocialAuthButtons from '../components/SocialAuthButtons'
 
 const pageStyle = {
   minHeight: '100dvh',
@@ -108,6 +109,14 @@ export default function Login() {
           <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55' }}>
             Continue to your job-search dashboard.
           </p>
+        </div>
+
+        <SocialAuthButtons mode="login" redirectTo={redirectTo} />
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: '10px', margin: '18px 0', color: 'var(--color-text-muted)', fontSize: '12px', fontWeight: '800' }}>
+          <span style={{ height: 1, background: 'var(--color-border)' }} />
+          <span>or use email</span>
+          <span style={{ height: 1, background: 'var(--color-border)' }} />
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

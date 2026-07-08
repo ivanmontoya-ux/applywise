@@ -12,6 +12,7 @@ import Coach from './pages/Coach'
 import Reminders from './pages/Reminders'
 import EmailImport from './pages/EmailImport'
 import Settings from './pages/Settings'
+import Subscription from './pages/Subscription'
 import Waitlist from './pages/Waitlist'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -132,6 +133,8 @@ function AppLayout() {
           <Route path="/coach" element={<Coach />} />
           <Route path="/reminders" element={<Reminders />} />
           <Route path="/email" element={<EmailImport />} />
+          <Route path="/subscription" element={<Subscription />} />
+          <Route path="/pricing" element={<Subscription />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/waitlist" element={<Waitlist />} />
           <Route path="/landing" element={<Waitlist />} />

@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import {
+  completeOAuthRedirect,
   getCurrentSession,
   isSupabaseConfigured,
+  signInWithOAuthProvider,
   signInWithPassword,
   signOutFromSupabase,
   signUpWithEmail,
@@ -30,7 +32,7 @@ export function AuthProvider({ children }) {
     async function loadSession() {
       setLoading(true)
       try {
-        const nextSession = await getCurrentSession()
+        const nextSession = await completeOAuthRedirect() || await getCurrentSession()
         if (!cancelled) setSession(nextSession)
       } finally {
         if (!cancelled) setLoading(false)
@@ -60,6 +62,10 @@ export function AuthProvider({ children }) {
     return result
   }
 
+  function socialLogin(details) {
+    return signInWithOAuthProvider(details)
+  }
+
   async function signup(details) {
     const result = await signUpWithEmail(details)
     setSession(result.session || null)
@@ -77,6 +83,7 @@ export function AuthProvider({ children }) {
     session,
     user: session?.user || null,
     login,
+    socialLogin,
     signup,
     logout,
   }), [loading, session])

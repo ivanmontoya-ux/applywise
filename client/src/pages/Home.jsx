@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom'
 import {
   AlertCircle,
   ArrowRight,
+  Bot,
   Briefcase,
   CalendarDays,
   CheckCircle2,
   FileText,
   ListChecks,
+  Send,
+  Sparkles,
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 import { fetchJobs, fetchPersonalInformation, fetchTracker } from '../lib/api'
@@ -231,6 +234,311 @@ function applicationLabel(application) {
 
 function firstIncompleteStep(steps) {
   return steps.find(step => !step.done)?.id
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null
+  const target = new Date(dateStr)
+  if (Number.isNaN(target.getTime())) return null
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  target.setHours(0, 0, 0, 0)
+  return Math.ceil((target.getTime() - today.getTime()) / 86_400_000)
+}
+
+function daysSince(dateStr) {
+  const until = daysUntil(dateStr)
+  return until === null ? null : Math.abs(Math.min(until, 0))
+}
+
+function pluralize(value, singular, plural = `${singular}s`) {
+  return `${value} ${value === 1 ? singular : plural}`
+}
+
+function applicationShortName(app) {
+  if (!app) return 'this application'
+  if (app.company && app.title) return `${app.company} (${app.title})`
+  return app.company || app.title || 'this application'
+}
+
+function buildAttentionItems(applications) {
+  const active = applications.filter(app => !isTerminalStatus(app.status))
+  return active
+    .map(app => {
+      const deadlineDays = daysUntil(app.deadline_date)
+      const appliedAge = daysSince(app.date_applied || app.date_saved)
+      const needsDocuments = getDocumentReadiness(app) !== 'Complete'
+      let score = 0
+      const reasons = []
+
+      if (app.status === 'Interview') {
+        score += 35
+        reasons.push('it is in Interview stage')
+      }
+      if (app.status === 'Assessment') {
+        score += 30
+        reasons.push('an assessment may need action')
+      }
+      if (deadlineDays !== null && deadlineDays < 0) {
+        score += 45
+        reasons.push('the saved deadline has passed')
+      } else if (deadlineDays !== null && deadlineDays <= 1) {
+        score += 40
+        reasons.push(deadlineDays === 0 ? 'the deadline is today' : 'the deadline is tomorrow')
+      } else if (deadlineDays !== null && deadlineDays <= 3) {
+        score += 25
+        reasons.push(`the deadline is in ${pluralize(deadlineDays, 'day')}`)
+      }
+      if (app.status === 'Applied' && appliedAge !== null && appliedAge >= 10) {
+        score += 28
+        reasons.push(`it has been ${pluralize(appliedAge, 'day')} since you applied`)
+      }
+      if (needsDocuments && ['Saved', 'Applied'].includes(app.status)) {
+        score += 18
+        reasons.push(`documents are ${getDocumentReadiness(app).toLowerCase()}`)
+      }
+      if (!app.deadline_date && app.deadline_type !== 'rolling' && ['Saved', 'Applied', 'Assessment'].includes(app.status)) {
+        score += 12
+        reasons.push('no deadline is saved')
+      }
+
+      return { app, score, reasons, deadlineDays, appliedAge }
+    })
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+}
+
+function buildFollowUpItems(applications) {
+  return applications
+    .filter(app => !isTerminalStatus(app.status) && app.status === 'Applied')
+    .map(app => ({ app, age: daysSince(app.date_applied || app.date_saved) }))
+    .filter(item => item.age !== null && item.age >= 10)
+    .sort((a, b) => b.age - a.age)
+}
+
+function buildDashboardChatAnswer(question, context) {
+  const normalized = String(question || '').toLowerCase()
+  const applications = context.applications || []
+  const attentionItems = buildAttentionItems(applications)
+  const followUps = buildFollowUpItems(applications)
+  const closestDeadline = context.upcomingDeadlines?.[0] || null
+  const mostUrgent = attentionItems[0] || null
+
+  if (!applications.length) {
+    if (!context.profileReady) {
+      return 'Start by uploading your CV and extracting Personal Information. After that, add your first job so ApplyWise can give specific next steps instead of generic advice.'
+    }
+    return 'Add your first job to the tracker. Once there is a real application, I can tell you which deadline, follow-up, or document task is most urgent.'
+  }
+
+  if (normalized.includes('deadline') || normalized.includes('closest') || normalized.includes('soon')) {
+    if (!closestDeadline) return 'No saved deadlines are visible yet. Add deadlines to your active applications so I can prioritize what is closest.'
+    const deadlineDays = daysUntil(closestDeadline.deadline_date)
+    const timing = deadlineDays === 0
+      ? 'today'
+      : deadlineDays === 1
+        ? 'tomorrow'
+        : deadlineDays < 0
+          ? `${pluralize(Math.abs(deadlineDays), 'day')} ago`
+          : `in ${pluralize(deadlineDays, 'day')}`
+    return `The closest deadline is ${applicationShortName(closestDeadline)}, due ${timing} on ${formatApplicationDate(closestDeadline.deadline_date)}. Open it and check documents before moving forward.`
+  }
+
+  if (normalized.includes('follow')) {
+    if (!followUps.length) return 'No follow-up is clearly due yet. I would still add follow-up reminders for Applied applications so nothing goes quiet.'
+    const top = followUps[0]
+    return `Follow up with ${applicationShortName(top.app)} first. It has been ${pluralize(top.age, 'day')} since you applied, so it is the strongest follow-up candidate.`
+  }
+
+  if (normalized.includes('urgent') || normalized.includes('attention') || normalized.includes('today')) {
+    if (!attentionItems.length) return 'Nothing looks urgent today. The best use of time is to improve one active application: add missing deadlines, finish documents, or prepare the next follow-up.'
+    const topItems = attentionItems.slice(0, 2).map(item => `${applicationShortName(item.app)} because ${item.reasons.slice(0, 2).join(' and ')}`)
+    return `These need attention: ${topItems.join('; ')}. Start with ${applicationShortName(mostUrgent.app)}.`
+  }
+
+  if (normalized.includes('improve') || normalized.includes('week') || normalized.includes('better')) {
+    const missingDocs = applications.filter(app => !isTerminalStatus(app.status) && getDocumentReadiness(app) !== 'Complete').length
+    const missingDeadlines = applications.filter(app => !isTerminalStatus(app.status) && !app.deadline_date && app.deadline_type !== 'rolling').length
+    if (!context.profileReady) return 'This week, improve your setup by saving Personal Information from your CV. That will make CV reviews, cover letters, and job recommendations more specific.'
+    if (missingDocs > 0) return `This week, focus on document quality. ${pluralize(missingDocs, 'active application')} still need CV review or cover letter work.`
+    if (missingDeadlines > 0) return `This week, improve tracking quality. ${pluralize(missingDeadlines, 'active application')} still need a deadline or next expected date.`
+    if (followUps.length > 0) return `This week, clean up follow-ups. Start with ${applicationShortName(followUps[0].app)}, then review the rest of your Applied applications.`
+    return 'This week, add one or two better-fit jobs and keep each application complete: deadline, tailored documents, status, and next action.'
+  }
+
+  if (context.dashboardAction) {
+    return `${context.dashboardAction.title}. ${context.dashboardAction.reason} ${context.dashboardAction.copy}`
+  }
+
+  if (mostUrgent) {
+    return `Start with ${applicationShortName(mostUrgent.app)} because ${mostUrgent.reasons.join(' and ')}.`
+  }
+
+  return 'Review your tracker and choose one concrete next action: finish documents, add a deadline, prepare for an interview, or create a follow-up reminder.'
+}
+
+function DashboardChatbot({ applications, upcomingDeadlines, dashboardAction, profileReady, loading }) {
+  const starter = dashboardAction
+    ? `${dashboardAction.title}. ${dashboardAction.reason}`
+    : 'Ask me what needs attention, which deadline is closest, or who to follow up with.'
+  const [messages, setMessages] = useState([{ role: 'assistant', text: starter }])
+  const [draft, setDraft] = useState('')
+
+  useEffect(() => {
+    if (!loading) {
+      setMessages(prev => {
+        if (prev.length > 1) return prev
+        return [{ role: 'assistant', text: starter }]
+      })
+    }
+  }, [loading, starter])
+
+  const quickQuestions = [
+    'What applications need attention today?',
+    'Which deadline is closest?',
+    'Who should I follow up with?',
+    'What should I improve this week?',
+  ]
+
+  function ask(question) {
+    const cleanQuestion = String(question || '').trim()
+    if (!cleanQuestion || loading) return
+
+    const answer = buildDashboardChatAnswer(cleanQuestion, {
+      applications,
+      upcomingDeadlines,
+      dashboardAction,
+      profileReady,
+    })
+    setMessages(prev => [...prev.slice(-4), { role: 'user', text: cleanQuestion }, { role: 'assistant', text: answer }])
+    setDraft('')
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    ask(draft)
+  }
+
+  return (
+    <section style={{ ...panelStyle, padding: '24px', marginBottom: '26px', background: '#ffffff' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+          <span style={{ width: 42, height: 42, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Bot size={20} strokeWidth={2.4} />
+          </span>
+          <div>
+            <p style={eyebrowStyle}>AI command center</p>
+            <h2 style={{ fontSize: '18px', lineHeight: '1.2', fontWeight: '800', color: 'var(--color-text-primary)', marginBottom: '5px' }}>
+              What should I do next?
+            </h2>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55', maxWidth: '720px' }}>
+              Ask about urgent applications, deadlines, follow-ups, or what to improve this week.
+            </p>
+          </div>
+        </div>
+        <span style={{ minHeight: 28, display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '0 9px', borderRadius: '999px', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', fontSize: '12px', fontWeight: '800', whiteSpace: 'nowrap' }}>
+          <Sparkles size={13} strokeWidth={2.4} />
+          Personalized
+        </span>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(240px, 0.42fr)', gap: '16px', alignItems: 'stretch' }} className="dashboard-chat-grid">
+        <div style={{ minHeight: 160, display: 'flex', flexDirection: 'column', gap: '10px', padding: '14px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: '#fbfdff' }}>
+          {messages.map((message, index) => (
+            <div
+              key={`${message.role}-${index}-${message.text.slice(0, 20)}`}
+              style={{
+                alignSelf: message.role === 'user' ? 'flex-end' : 'flex-start',
+                maxWidth: '88%',
+                padding: '10px 12px',
+                borderRadius: '14px',
+                border: message.role === 'user' ? '1px solid #b9dada' : '1px solid var(--color-border)',
+                background: message.role === 'user' ? 'var(--color-applied-teal-soft)' : '#ffffff',
+                color: 'var(--color-text-primary)',
+                fontSize: '13px',
+                lineHeight: '1.5',
+                boxShadow: 'var(--shadow-sm)',
+              }}
+            >
+              {message.text}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+          {quickQuestions.map(question => (
+            <button
+              key={question}
+              type="button"
+              onClick={() => ask(question)}
+              disabled={loading}
+              className="secondary-action pressable"
+              style={{
+                minHeight: 38,
+                padding: '0 11px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--color-border)',
+                background: '#ffffff',
+                color: 'var(--color-text-primary)',
+                fontSize: '12px',
+                fontWeight: '800',
+                textAlign: 'left',
+                boxShadow: 'var(--shadow-sm)',
+                opacity: loading ? 0.55 : 1,
+              }}
+            >
+              {question}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
+        <input
+          type="text"
+          value={draft}
+          onChange={event => setDraft(event.target.value)}
+          placeholder="Ask: Which application is most urgent?"
+          disabled={loading}
+          style={{
+            flex: 1,
+            minHeight: 42,
+            border: '1.5px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)',
+            padding: '0 12px',
+            background: '#ffffff',
+            color: 'var(--color-text-primary)',
+            fontSize: '13px',
+            outline: 'none',
+          }}
+        />
+        <button
+          type="submit"
+          disabled={loading || !draft.trim()}
+          className="primary-action pressable"
+          style={{
+            minHeight: 42,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '0 14px',
+            border: 'none',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-applied-teal)',
+            color: '#ffffff',
+            fontSize: '13px',
+            fontWeight: '800',
+            boxShadow: 'var(--shadow-primary)',
+            opacity: loading || !draft.trim() ? 0.55 : 1,
+          }}
+        >
+          <Send size={14} strokeWidth={2.4} />
+          Ask
+        </button>
+      </form>
+    </section>
+  )
 }
 
 export default function Home() {
@@ -468,6 +776,14 @@ export default function Home() {
           </div>
         ) : null}
       </section>
+
+      <DashboardChatbot
+        applications={applications}
+        upcomingDeadlines={upcomingDeadlines}
+        dashboardAction={dashboardAction}
+        profileReady={profileReady}
+        loading={loading}
+      />
 
       <div style={{ marginBottom: '26px' }}>
         <WorkflowGuide

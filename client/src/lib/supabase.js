@@ -55,6 +55,23 @@ function normalizeSession(data) {
   }
 }
 
+function cleanOAuthHash() {
+  if (typeof window === 'undefined') return
+  const cleanUrl = `${window.location.pathname}${window.location.search}`
+  window.history.replaceState({}, document.title, cleanUrl)
+}
+
+async function fetchUserForToken(accessToken) {
+  if (!accessToken) return null
+  const data = await authRequest('/user', {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+  return data || null
+}
+
 async function authRequest(path, options = {}) {
   const { url, key } = getSupabaseConfig()
   const response = await fetch(`${url}/auth/v1${path}`, {
@@ -89,6 +106,40 @@ export function clearAuthSession() {
   writeStoredSession(null)
 }
 
+export async function completeOAuthRedirect() {
+  if (typeof window === 'undefined' || !window.location.hash.includes('access_token=')) {
+    return null
+  }
+
+  const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  const accessToken = params.get('access_token')
+  const refreshToken = params.get('refresh_token')
+  const expiresIn = params.get('expires_in')
+  const tokenType = params.get('token_type')
+
+  if (!accessToken) {
+    cleanOAuthHash()
+    return null
+  }
+
+  const session = normalizeSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    expires_in: expiresIn,
+    token_type: tokenType,
+  })
+
+  try {
+    session.user = await fetchUserForToken(session.access_token)
+  } catch {
+    session.user = null
+  }
+
+  writeStoredSession(session)
+  cleanOAuthHash()
+  return session
+}
+
 export async function refreshAuthSession(session = readStoredSession()) {
   if (!session?.refresh_token) {
     clearAuthSession()
@@ -114,6 +165,18 @@ export async function getCurrentSession() {
   if (!session?.access_token) return null
 
   if (session.expires_at && session.expires_at > Date.now() + 60_000) {
+    if (!session.user) {
+      try {
+        const hydratedSession = {
+          ...session,
+          user: await fetchUserForToken(session.access_token),
+        }
+        writeStoredSession(hydratedSession)
+        return hydratedSession
+      } catch {
+        return session
+      }
+    }
     return session
   }
 
@@ -147,6 +210,18 @@ export async function signInWithPassword({ email, password }) {
   const session = normalizeSession(data)
   writeStoredSession(session)
   return { session, user: session?.user || data?.user || null }
+}
+
+export function signInWithOAuthProvider({ provider, redirectTo = '/dashboard' }) {
+  const { url, key } = getSupabaseConfig()
+  if (typeof window === 'undefined') return
+
+  const redirectUrl = new URL(redirectTo, window.location.origin).toString()
+  const authUrl = new URL(`${url}/auth/v1/authorize`)
+  authUrl.searchParams.set('provider', provider)
+  authUrl.searchParams.set('redirect_to', redirectUrl)
+  authUrl.searchParams.set('apikey', key)
+  window.location.assign(authUrl.toString())
 }
 
 export async function signOutFromSupabase() {

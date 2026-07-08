@@ -69,6 +69,28 @@ RESEND_API_KEY=your_resend_api_key
 DIGEST_FROM_EMAIL=ApplyWise <onboarding@resend.dev>
 ```
 
+## Optional: Social Login
+
+The Login and Sign Up screens include Facebook and LinkedIn login buttons. To make them work, enable the providers in Supabase:
+
+1. Open Supabase.
+2. Go to Authentication > Providers.
+3. Enable Facebook and LinkedIn.
+4. Add the client ID and secret from each provider's developer portal.
+5. In the Facebook/LinkedIn developer portals, add the callback URL shown by Supabase, usually:
+
+```text
+https://your-project-ref.supabase.co/auth/v1/callback
+```
+
+6. In Supabase Authentication > URL Configuration, add the local app redirect URL:
+
+```text
+http://localhost:5173/dashboard
+```
+
+Instagram is shown as a future option in the UI. It needs a custom OAuth setup before it can work as a login provider.
+
 ## 5. Start The App
 
 ```bash

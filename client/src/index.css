@@ -408,6 +408,16 @@ button:not(:disabled):active,
   }
 }
 
+@media (max-width: 1040px) {
+  .pricing-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-chat-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .interactive-card,
   .pressable,
