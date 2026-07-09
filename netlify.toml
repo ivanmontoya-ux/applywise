@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "client/dist"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://applywise-api.onrender.com/"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
