@@ -547,7 +547,7 @@ export default function ApplicationDetail() {
                   title: 'CV fit analysis',
                   done: Boolean(application.cv_review),
                   copy: application.cv_review?.summary || 'Generate and save role-specific CV recommendations.',
-                  action: <Link to="/documents" style={{ ...secondaryButtonStyle, minHeight: 36, fontSize: '13px' }}>Review CV</Link>,
+                  action: <Link to={`/documents?applicationId=${application.id}&mode=cv-review`} style={{ ...secondaryButtonStyle, minHeight: 36, fontSize: '13px' }}>Review CV</Link>,
                 },
                 {
                   title: 'Cover letter draft',
@@ -560,7 +560,7 @@ export default function ApplicationDetail() {
                         Create doc
                       </button>
                     )
-                    : <Link to="/documents" style={{ ...secondaryButtonStyle, minHeight: 36, fontSize: '13px' }}>Draft letter</Link>,
+                    : <Link to={`/documents?applicationId=${application.id}&mode=cover-letter`} style={{ ...secondaryButtonStyle, minHeight: 36, fontSize: '13px' }}>Draft letter</Link>,
                 },
               ].map(item => (
                 <article key={item.title} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '16px', background: item.done ? '#f8fafc' : '#fffaf0' }}>

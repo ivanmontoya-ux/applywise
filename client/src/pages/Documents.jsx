@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   AlertCircle,
   ArrowRight,
@@ -102,7 +102,13 @@ function readinessForSavedMaterial(application, materialType) {
 }
 
 function SaveHint({ canSave, auth, selectedApplication }) {
-  if (canSave) return null
+  if (canSave && selectedApplication) {
+    return (
+      <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: '1.45', maxWidth: 260 }}>
+        This will be stored on <strong style={{ color: 'var(--color-text-primary)' }}>{applicationLabel(selectedApplication)}</strong>.
+      </p>
+    )
+  }
   return (
     <p style={{ fontSize: '12px', color: 'var(--color-text-muted)', lineHeight: '1.45', maxWidth: 220 }}>
       {!auth.session
@@ -1061,7 +1067,7 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
               }}
             >
               {saving ? <RefreshCw size={14} strokeWidth={2.5} /> : <Save size={14} strokeWidth={2.5} />}
-              {saving ? 'Saving...' : 'Save to application'}
+              {saving ? 'Saving...' : 'Save CV review to application'}
             </button>
             <SaveHint canSave={canSave} auth={auth} selectedApplication={selectedApplication} />
           </div>
@@ -1205,7 +1211,7 @@ function CoverLetterResults({ letter, onSave, saving, canSave, auth, selectedApp
                 }}
               >
                 {saving ? <RefreshCw size={14} strokeWidth={2.5} /> : <Save size={14} strokeWidth={2.5} />}
-                {saving ? 'Saving...' : 'Save to application'}
+                {saving ? 'Saving...' : 'Save cover letter to application'}
               </button>
             </div>
             <SaveHint canSave={canSave} auth={auth} selectedApplication={selectedApplication} />
@@ -1270,6 +1276,8 @@ function CoverLetterResults({ letter, onSave, saving, canSave, auth, selectedApp
 
 export default function Documents() {
   const auth = useAuth()
+  const [searchParams] = useSearchParams()
+  const requestedApplicationId = searchParams.get('applicationId') || searchParams.get('application_id') || ''
   const [applications, setApplications] = useState([])
   const [selectedApplicationId, setSelectedApplicationId] = useState('')
   const [aiStatus, setAiStatus] = useState(null)
@@ -1302,7 +1310,9 @@ export default function Documents() {
         setApplications(trackerData)
         setAiStatus(statusData)
         setPersonalInfo(personalInfoData?.profile || null)
-        if (trackerData[0]?.id) setSelectedApplicationId(String(trackerData[0].id))
+        const requestedApplication = trackerData.find(app => String(app.id) === String(requestedApplicationId))
+        if (requestedApplication?.id) setSelectedApplicationId(String(requestedApplication.id))
+        else if (trackerData[0]?.id) setSelectedApplicationId(String(trackerData[0].id))
       } catch {
         if (!cancelled) setError('Could not load application context. Make sure the server is running.')
       } finally {
@@ -1312,7 +1322,7 @@ export default function Documents() {
 
     loadContext()
     return () => { cancelled = true }
-  }, [])
+  }, [requestedApplicationId])
 
   const selectedApplication = useMemo(
     () => applications.find(app => String(app.id) === selectedApplicationId) || null,
