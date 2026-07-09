@@ -3,8 +3,8 @@
   publish = "client/dist"
 
 [[redirects]]
-  from = "/*"
-  to = "https://applywise-api.onrender.com/"
+  from = "/api/*"
+  to = "https://applywise-api.onrender.com/api/:splat"
   status = 200
   force = true
 
