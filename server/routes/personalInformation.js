@@ -104,65 +104,70 @@ router.get('/', (_req, res) => {
 })
 
 router.put('/', requireAuth, (req, res) => {
-  const db = getDb()
-  const userId = req.user.id
-  const profile = normalizeProfile(req.body.profile || req.body)
-  const source = clean(req.body.source, 80) || 'cv_extraction'
+  try {
+    const db = getDb()
+    const userId = req.user.id
+    const profile = normalizeProfile(req.body.profile || req.body)
+    const source = clean(req.body.source, 80) || 'cv_extraction'
 
-  db.prepare(`
-    INSERT INTO personal_information (
-      user_id,
-      candidate_name,
-      headline,
-      summary,
-      contact_json,
-      education_json,
-      experience_json,
-      projects_json,
-      skills_json,
-      certifications_json,
-      evidence_points_json,
-      missing_fields_json,
-      extraction_notes_json,
-      source
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(user_id) DO UPDATE SET
-      candidate_name = excluded.candidate_name,
-      headline = excluded.headline,
-      summary = excluded.summary,
-      contact_json = excluded.contact_json,
-      education_json = excluded.education_json,
-      experience_json = excluded.experience_json,
-      projects_json = excluded.projects_json,
-      skills_json = excluded.skills_json,
-      certifications_json = excluded.certifications_json,
-      evidence_points_json = excluded.evidence_points_json,
-      missing_fields_json = excluded.missing_fields_json,
-      extraction_notes_json = excluded.extraction_notes_json,
-      source = excluded.source,
-      updated_at = datetime('now')
-  `).run(
-    userId,
-    profile.candidate_name || null,
-    profile.headline || null,
-    profile.summary || null,
-    stringify(profile.contact),
-    stringify(profile.education),
-    stringify(profile.experience),
-    stringify(profile.projects),
-    stringify(profile.skills),
-    stringify(profile.certifications),
-    stringify(profile.evidence_points),
-    stringify(profile.missing_fields),
-    stringify(profile.extraction_notes),
-    source,
-  )
+    db.prepare(`
+      INSERT INTO personal_information (
+        user_id,
+        candidate_name,
+        headline,
+        summary,
+        contact_json,
+        education_json,
+        experience_json,
+        projects_json,
+        skills_json,
+        certifications_json,
+        evidence_points_json,
+        missing_fields_json,
+        extraction_notes_json,
+        source
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        candidate_name = excluded.candidate_name,
+        headline = excluded.headline,
+        summary = excluded.summary,
+        contact_json = excluded.contact_json,
+        education_json = excluded.education_json,
+        experience_json = excluded.experience_json,
+        projects_json = excluded.projects_json,
+        skills_json = excluded.skills_json,
+        certifications_json = excluded.certifications_json,
+        evidence_points_json = excluded.evidence_points_json,
+        missing_fields_json = excluded.missing_fields_json,
+        extraction_notes_json = excluded.extraction_notes_json,
+        source = excluded.source,
+        updated_at = datetime('now')
+    `).run(
+      userId,
+      profile.candidate_name || null,
+      profile.headline || null,
+      profile.summary || null,
+      stringify(profile.contact),
+      stringify(profile.education),
+      stringify(profile.experience),
+      stringify(profile.projects),
+      stringify(profile.skills),
+      stringify(profile.certifications),
+      stringify(profile.evidence_points),
+      stringify(profile.missing_fields),
+      stringify(profile.extraction_notes),
+      source,
+    )
 
-  const row = db.prepare('SELECT * FROM personal_information WHERE user_id = ?').get(userId)
-  res.json({
-    saved: true,
-    profile: rowToProfile(row),
-  })
+    const row = db.prepare('SELECT * FROM personal_information WHERE user_id = ?').get(userId)
+    res.json({
+      saved: true,
+      profile: rowToProfile(row),
+    })
+  } catch (error) {
+    console.error('[personal-information] Save failed:', error)
+    res.status(500).json({ error: error.message || 'Personal information could not be saved.' })
+  }
 })
 
 router.delete('/', requireAuth, (_req, res) => {

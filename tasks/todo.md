@@ -57,3 +57,4 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Improve Gmail detection for short interview and application-confirmation emails, with explicit connect-or-create review controls.
 - [x] Limit Gmail scanning to application-related Inbox and Sent messages from the past 2 weeks.
 - [x] Make CV reviews and cover letters save clearly to the selected application from the Documents flow.
+- [x] Add manual add, edit, and delete controls to the Personal Information page.
