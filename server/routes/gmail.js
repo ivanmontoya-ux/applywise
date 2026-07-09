@@ -10,6 +10,7 @@ const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const GMAIL_API_URL = 'https://gmail.googleapis.com/gmail/v1/users/me'
 const DEFAULT_SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
 const APPLICATION_STATUSES = new Set(['Saved', 'Applied', 'Interview', 'Assessment', 'Offer', 'Rejected'])
+const GMAIL_LOOKBACK_DAYS = 14
 
 const INBOUND_SEARCH_PHRASES = [
   '"thank you for applying"',
@@ -19,6 +20,9 @@ const INBOUND_SEARCH_PHRASES = [
   '"application confirmation"',
   '"application status"',
   '"your application for"',
+  '"submitting your application"',
+  '"submitted your application"',
+  '"application as"',
   '"application update"',
   '"we regret to inform you"',
   '"unfortunately, we will not be moving forward"',
@@ -28,6 +32,8 @@ const INBOUND_SEARCH_PHRASES = [
   '"thank you for your interest"',
   '"we are pleased to invite you"',
   '"we would like to invite you"',
+  '"upcoming interview"',
+  '"interview for"',
   '"job interview"',
   '"interview invitation"',
   '"schedule an interview"',
@@ -124,6 +130,8 @@ const CATEGORY_RULES = [
     direction: 'inbound',
     patterns: [
       ['interview invitation', /\binterview invitation\b/i],
+      ['upcoming interview', /\bupcoming interview\b/i],
+      ['interview for', /\binterview for\b/i],
       ['schedule an interview', /\bschedule (?:an|your|the)? ?interview\b/i],
       ['job interview', /\bjob interview\b/i],
       ['we would like to invite you', /\bwe would like to invite you\b/i],
@@ -165,6 +173,9 @@ const CATEGORY_RULES = [
       ['application has been received', /\byour application has been received\b/i],
       ['application confirmation', /\bapplication confirmation\b/i],
       ['application submitted', /\bapplication (?:has been )?submitted\b/i],
+      ['thank you for submitting your application', /\bthank you for submitting your application\b/i],
+      ['submitting your application as', /\bsubmitting your application as\b/i],
+      ['submitted your application as', /\bsubmitted your application as\b/i],
       ['your application for', /\byour application for\b/i],
     ],
   },
@@ -492,6 +503,12 @@ function parseEmailDate(internalDate, dateHeader) {
   return new Date().toISOString()
 }
 
+function isInsideGmailLookbackWindow(receivedAt) {
+  const parsed = new Date(receivedAt)
+  if (Number.isNaN(parsed.getTime())) return false
+  return parsed.getTime() >= Date.now() - GMAIL_LOOKBACK_DAYS * 24 * 60 * 60 * 1000
+}
+
 function safeJson(value, fallback = '[]') {
   try {
     return JSON.stringify(value)
@@ -621,8 +638,12 @@ function cleanExtractedValue(value, max = 90) {
 function extractRoleTitle(text) {
   const compact = normalizeText(text)
   const patterns = [
+    /\bthank you for submitting your application as (?:the )?(.{3,90}?)(?: for | at | with |,|\.|\n|$)/i,
+    /\b(?:submitting|submitted) your application as (?:the )?(.{3,90}?)(?: for | at | with |,|\.|\n|$)/i,
     /\byour application for (?:the )?(.{3,90}?)(?: at | with | has | was | is |,|\.|\n|$)/i,
     /\bapplication for (?:the )?(.{3,90}?)(?: at | with | has | was | is |,|\.|\n|$)/i,
+    /\bupcoming interview for (?:the )?(.{3,90}?)(?: on | at | with |,|\.|\n|$)/i,
+    /\binterview for (?:the )?(.{3,90}?)(?: on | at | with |,|\.|\n|$)/i,
     /\binterview for (?:the )?(.{3,90}?)(?: at | with |,|\.|\n|$)/i,
     /\bassessment for (?:the )?(.{3,90}?)(?: at | with |,|\.|\n|$)/i,
     /\bi am applying for (?:the )?(.{3,90}?)(?: at | with |,|\.|\n|$)/i,
@@ -645,6 +666,8 @@ function extractRoleTitle(text) {
 function extractCompanyName(text, direction, fromEmail, recipients) {
   const compact = normalizeText(text)
   const patterns = [
+    /\bthank you for submitting your application as .{3,90}? for ([A-Z][A-Za-z0-9&.'\- ]{2,60}?)(?:,|\.|\n|$)/,
+    /\b(?:submitting|submitted) your application as .{3,90}? for ([A-Z][A-Za-z0-9&.'\- ]{2,60}?)(?:,|\.|\n|$)/,
     /\b(?:at|with) ([A-Z][A-Za-z0-9&.'\- ]{2,60}?)(?: for | regarding | about | as |,|\.|\n|$)/,
     /\bfrom ([A-Z][A-Za-z0-9&.'\- ]{2,60}?)(?: talent| hiring| recruitment| careers| team|,|\.|\n|$)/,
   ]
@@ -1067,9 +1090,10 @@ router.post('/sync', requireAuth, async (req, res) => {
     const applications = db.prepare('SELECT * FROM tracker WHERE user_id = ?').all(userId)
     const messageIds = new Map()
 
+    const lookbackQuery = `newer_than:${GMAIL_LOOKBACK_DAYS}d`
     const queryGroups = [
-      ...INBOUND_SEARCH_PHRASES.map(phrase => ({ q: `in:inbox newer_than:365d ${phrase}`, direction: 'inbound' })),
-      ...SENT_SEARCH_PHRASES.map(phrase => ({ q: `in:sent newer_than:365d ${phrase}`, direction: 'outbound' })),
+      ...INBOUND_SEARCH_PHRASES.map(phrase => ({ q: `in:inbox ${lookbackQuery} ${phrase}`, direction: 'inbound' })),
+      ...SENT_SEARCH_PHRASES.map(phrase => ({ q: `in:sent ${lookbackQuery} ${phrase}`, direction: 'outbound' })),
     ]
 
     for (const query of queryGroups) {
@@ -1108,6 +1132,10 @@ router.post('/sync', requireAuth, async (req, res) => {
       else inboundScanned++
 
       const receivedAt = parseEmailDate(message.internalDate, dateHeader)
+      if (!isInsideGmailLookbackWindow(receivedAt)) {
+        suppressed++
+        continue
+      }
       const body = extractBody(message.payload)
       const snippet = clean(message.snippet, 1000)
       const emailText = `${subject}\n${fromRaw}\n${toRaw}\n${ccRaw}\n${snippet}\n${body}`
@@ -1237,6 +1265,7 @@ router.post('/sync', requireAuth, async (req, res) => {
       suppressed,
       imported,
       suggestions_created: suggestionsCreated,
+      lookback_days: GMAIL_LOOKBACK_DAYS,
     })
   } catch (error) {
     const status = error.status && Number.isInteger(error.status) ? error.status : 500

@@ -54,3 +54,5 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Recolor the ApplyWise UI and logo from green/teal to the blue presentation palette.
 - [x] Replace the shared ApplyWise logo asset with the final blue presentation logo.
 - [x] Update the pricing page cards and buttons to the blue presentation color scheme.
+- [x] Improve Gmail detection for short interview and application-confirmation emails, with explicit connect-or-create review controls.
+- [x] Limit Gmail scanning to application-related Inbox and Sent messages from the past 2 weeks.

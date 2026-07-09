@@ -175,7 +175,7 @@ function EmptyState({ connected }) {
         </h2>
         <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55', maxWidth: 470 }}>
           {connected
-            ? 'Scan Gmail to review recent Inbox and Sent messages that look like real application activity.'
+            ? 'Scan Gmail to review Inbox and Sent messages from the past 2 weeks that look like real application activity.'
             : 'Connect Gmail to bring application emails into your ApplyWise workspace for review.'}
         </p>
       </div>
@@ -341,16 +341,35 @@ function SuggestionCard({ suggestion, applications, busy, onApprove, onReject, o
               </p>
             </>
           ) : (
-            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>
-              No certain tracker match. Create a new manual application from this email, or choose an existing application in Edit if you know it fits.
-            </p>
+            <div style={{ display: 'grid', gap: '9px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.45' }}>
+                No certain tracker match. Connect this email to an existing application, or leave it as new to create a tracked application from the email.
+              </p>
+              {applications.length > 0 && (
+                <label>
+                  <span style={labelStyle}>Connect existing application</span>
+                  <select
+                    value={draft.application_id}
+                    onChange={event => updateDraft('application_id', event.target.value)}
+                    style={inputStyle}
+                  >
+                    <option value="">Create new application from email</option>
+                    {applications.map(application => (
+                      <option key={application.id} value={application.id}>
+                        {application.title} at {application.company}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+            </div>
           )}
         </div>
       </div>
 
       {!suggestion.application && (
         <Notice tone="warning">
-          ApplyWise did not connect this email to a current application because the match was not certain enough.
+          ApplyWise did not auto-link this email because the match was not certain enough. Confirm the right application before updating the tracker.
         </Notice>
       )}
 
@@ -681,7 +700,7 @@ export default function EmailImport() {
         <div>
           <h1 style={titleStyle}>Email</h1>
           <p style={subtitleStyle}>
-            Review Gmail messages that look like real job application activity across Inbox and Sent.
+            Review Gmail messages from the past 2 weeks that look like real job application activity across Inbox and Sent.
           </p>
         </div>
 
@@ -767,7 +786,7 @@ export default function EmailImport() {
           {connected && (
             <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--color-border)' }}>
               <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', lineHeight: '1.5' }}>
-                ApplyWise uses read-only Gmail access for application tracking only. Gmail data stays in your workspace, is not shared with recruiters or companies, and can be disconnected or deleted from this page.
+                ApplyWise uses read-only Gmail access for application tracking only and only scans matching Inbox and Sent messages from the past 2 weeks. Gmail data stays in your workspace, is not shared with recruiters or companies, and can be disconnected or deleted from this page.
               </p>
             </div>
           )}
