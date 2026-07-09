@@ -5,7 +5,7 @@ import { saveJob } from '../lib/api'
 import { buildDirectUrl, isKnownEmployer } from '../lib/careers'
 
 const NEUTRAL_CHIP_STYLE = { bg: '#f4f4f5', color: '#52525b', dot: '#71717a' }
-const TEAL_CHIP_STYLE = { bg: '#edf7f7', color: '#2f6f73', dot: '#2f6f73' }
+const TEAL_CHIP_STYLE = { bg: 'var(--color-applied-teal-soft)', color: '#2168b3', dot: '#2168b3' }
 const LEVEL_STYLES = {
   'Graduate': TEAL_CHIP_STYLE,
   'Internship': TEAL_CHIP_STYLE,
@@ -334,7 +334,7 @@ export default function JobCard({ job, onSave }) {
               if (!saved) {
                 e.currentTarget.style.borderColor = 'var(--color-applied-teal)'
                 e.currentTarget.style.color = 'var(--color-applied-teal)'
-                e.currentTarget.style.background = '#edf7f7'
+                e.currentTarget.style.background = 'var(--color-applied-teal-soft)'
               }
             }}
             onMouseLeave={e => {

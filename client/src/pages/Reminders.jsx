@@ -107,7 +107,7 @@ export default function Reminders() {
           <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>Loading reminders...</p>
         ) : generatedReminders.length === 0 ? (
           <div style={{ minHeight: 240, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', gap: '12px' }}>
-            <span style={{ width: 42, height: 42, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#edf7f7', color: 'var(--color-applied-teal)' }}>
+            <span style={{ width: 42, height: 42, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)' }}>
               <Bell size={20} strokeWidth={2.4} />
             </span>
             <div>

@@ -123,7 +123,7 @@ function ProductPreview() {
           <p style={{ fontSize: '12px', fontWeight: '800', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 0 }}>Today</p>
           <h2 style={{ fontSize: '17px', fontWeight: '800', color: 'var(--color-text-primary)', marginTop: '3px' }}>3 applications need action</h2>
         </div>
-        <span style={{ minHeight: 28, display: 'inline-flex', alignItems: 'center', padding: '0 9px', borderRadius: '6px', background: '#edf7f7', color: 'var(--color-applied-teal)', fontSize: '12px', fontWeight: '800' }}>
+        <span style={{ minHeight: 28, display: 'inline-flex', alignItems: 'center', padding: '0 9px', borderRadius: '6px', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', fontSize: '12px', fontWeight: '800' }}>
           Private beta
         </span>
       </div>
@@ -165,7 +165,7 @@ function ProductPreview() {
 function Benefit({ icon: Icon, title, copy }) {
   return (
     <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-      <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         <Icon size={17} strokeWidth={2.4} />
       </span>
       <div>

@@ -64,7 +64,7 @@ function Section({ icon: Icon, title, children }) {
           width: 30,
           height: 30,
           borderRadius: 'var(--radius-md)',
-          background: '#edf7f7',
+          background: 'var(--color-applied-teal-soft)',
           color: 'var(--color-applied-teal)',
           display: 'flex',
           alignItems: 'center',
@@ -99,7 +99,7 @@ function EmptyState({ error }) {
         width: 52,
         height: 52,
         borderRadius: '50%',
-        background: error ? '#fff1f2' : '#edf7f7',
+        background: error ? '#fff1f2' : 'var(--color-applied-teal-soft)',
         color: error ? 'var(--color-danger)' : 'var(--color-applied-teal)',
         display: 'flex',
         alignItems: 'center',
@@ -154,8 +154,8 @@ function PillList({ items }) {
         <span
           key={`${item}-${index}`}
           style={{
-            border: '1px solid #b9dada',
-            background: '#edf7f7',
+            border: '1px solid #bddbf5',
+            background: 'var(--color-applied-teal-soft)',
             color: 'var(--color-applied-teal)',
             borderRadius: '999px',
             padding: '5px 9px',
@@ -365,7 +365,7 @@ export default function PersonalInformation() {
             width: 42,
             height: 42,
             borderRadius: 'var(--radius-md)',
-            background: '#edf7f7',
+            background: 'var(--color-applied-teal-soft)',
             color: 'var(--color-applied-teal)',
             display: 'flex',
             alignItems: 'center',

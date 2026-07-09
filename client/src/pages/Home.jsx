@@ -99,13 +99,13 @@ const tealFeatureIconStyle = {
   ...featureIconBaseStyle,
   background: 'var(--color-applied-teal-soft)',
   color: 'var(--color-applied-teal)',
-  border: '1px solid #c6e3e3',
+  border: '1px solid #bddbf5',
 }
 const indigoFeatureIconStyle = {
   ...featureIconBaseStyle,
-  background: 'var(--color-indigo-soft)',
-  color: 'var(--color-indigo)',
-  border: '1px solid var(--color-indigo-border)',
+  background: 'var(--color-applied-teal-soft)',
+  color: 'var(--color-applied-teal)',
+  border: '1px solid #bddbf5',
 }
 
 function Panel({ title, eyebrow, children, action }) {
@@ -743,7 +743,7 @@ export default function Home() {
         </div>
       )}
 
-      <section style={{ ...panelStyle, padding: '26px', marginBottom: '22px', borderColor: 'rgba(47, 111, 115, 0.28)', background: '#ffffff' }}>
+      <section style={{ ...panelStyle, padding: '26px', marginBottom: '22px', borderColor: 'rgba(33, 104, 179, 0.28)', background: '#ffffff' }}>
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <SkeletonLine width="120px" height={12} />

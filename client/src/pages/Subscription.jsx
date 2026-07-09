@@ -112,10 +112,10 @@ function getCardStyle(plan, selected) {
     rowGap: '22px',
     padding: '26px 34px 34px',
     borderRadius: 'var(--radius-lg)',
-    border: selected ? `2px solid ${isPremium ? 'var(--color-indigo)' : '#0dbfa6'}` : '1px solid var(--color-border)',
-    background: isPopular ? '#078b95' : isPremium ? 'var(--color-indigo-soft)' : '#edf6f4',
-    color: isPopular ? '#ffffff' : isPremium ? 'var(--color-indigo-text)' : '#0b3034',
-    boxShadow: selected ? (isPremium ? 'var(--shadow-indigo)' : '0 18px 42px rgba(13, 191, 166, 0.20)') : 'var(--shadow-card)',
+    border: selected ? '2px solid var(--color-indigo)' : '1px solid var(--color-border)',
+    background: isPopular ? '#0f6fb8' : isPremium ? 'var(--color-indigo-soft)' : '#f4f9ff',
+    color: isPopular ? '#ffffff' : isPremium ? 'var(--color-navy)' : 'var(--color-text-primary)',
+    boxShadow: selected ? '0 18px 42px rgba(33, 104, 179, 0.20)' : 'var(--shadow-card)',
     transform: selected ? 'translateY(-3px)' : 'none',
   }
 }
@@ -124,8 +124,8 @@ function PlanCard({ plan, selected, onSelect }) {
   const Icon = plan.icon
   const isPopular = plan.tone === 'popular'
   const isPremium = plan.tone === 'premium'
-  const iconBackground = isPopular ? '#d8f5f1' : isPremium ? 'var(--color-indigo)' : '#5f7d81'
-  const iconColor = isPopular ? '#ffffff' : '#ffffff'
+  const iconBackground = isPopular ? 'rgba(255,255,255,0.9)' : isPremium ? 'var(--color-indigo)' : 'var(--color-applied-teal)'
+  const iconColor = isPopular ? 'var(--color-applied-teal)' : '#ffffff'
 
   return (
     <article className="interactive-card" style={getCardStyle(plan, selected)}>
@@ -138,8 +138,8 @@ function PlanCard({ plan, selected, onSelect }) {
           justifyContent: 'center',
           padding: '0 36px',
           borderRadius: '999px',
-          background: '#0ac7a8',
-          color: '#063237',
+          background: 'var(--color-indigo)',
+          color: '#ffffff',
           fontSize: '11px',
           fontWeight: '900',
           textTransform: 'uppercase',
@@ -169,8 +169,8 @@ function PlanCard({ plan, selected, onSelect }) {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-        <span style={{ fontSize: '18px', fontWeight: '900', color: isPopular ? '#ffffff' : isPremium ? 'var(--color-indigo)' : '#017f8b' }}>{plan.price}</span>
-        <span style={{ fontSize: '15px', color: isPopular ? 'rgba(255,255,255,0.78)' : isPremium ? 'var(--color-indigo-text)' : 'var(--color-applied-teal-muted)' }}>/ {plan.period}</span>
+        <span style={{ fontSize: '18px', fontWeight: '900', color: isPopular ? '#ffffff' : isPremium ? 'var(--color-indigo)' : 'var(--color-applied-teal)' }}>{plan.price}</span>
+        <span style={{ fontSize: '15px', color: isPopular ? 'rgba(255,255,255,0.78)' : isPremium ? 'var(--color-applied-teal)' : 'var(--color-applied-teal-muted)' }}>/ {plan.period}</span>
       </div>
 
       <ul style={{ display: 'grid', alignContent: 'start', gap: '10px', fontSize: '15px', lineHeight: '1.45' }}>
@@ -190,8 +190,8 @@ function PlanCard({ plan, selected, onSelect }) {
           style={{
             ...ctaStyle,
             borderColor: isPopular ? 'rgba(255,255,255,0.42)' : 'var(--color-border)',
-            background: selected ? (isPremium ? 'var(--color-indigo)' : '#0ac7a8') : isPopular ? 'rgba(255,255,255,0.12)' : '#ffffff',
-            color: selected ? (isPremium ? '#ffffff' : '#063237') : isPopular ? '#ffffff' : 'var(--color-text-primary)',
+            background: selected ? 'var(--color-indigo)' : isPopular ? 'rgba(255,255,255,0.12)' : '#ffffff',
+            color: selected ? '#ffffff' : isPopular ? '#ffffff' : 'var(--color-text-primary)',
           }}
         >
           {selected ? <Check size={16} strokeWidth={2.5} /> : <Zap size={15} strokeWidth={2.5} />}
@@ -223,7 +223,7 @@ export default function Subscription() {
         <BrandLogo
           width={210}
           style={{ paddingTop: '4px', background: 'transparent' }}
-          imgStyle={{ mixBlendMode: 'multiply', background: 'transparent' }}
+          imgStyle={{ background: 'transparent' }}
         />
       </header>
 

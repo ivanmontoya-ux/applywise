@@ -145,7 +145,7 @@ function Panel({ title, eyebrow, icon: Icon, children, action }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start', marginBottom: '16px' }}>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
           {Icon && (
-            <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#edf7f7', color: 'var(--color-applied-teal)', flexShrink: 0 }}>
+            <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', flexShrink: 0 }}>
               <Icon size={17} strokeWidth={2.4} />
             </span>
           )}

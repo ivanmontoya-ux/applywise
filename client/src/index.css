@@ -158,39 +158,39 @@ img, video {
 :root {
   /* Backgrounds */
   --color-bg: #ffffff;
-  --color-bg-page: #f4f7fa;
+  --color-bg-page: #f3f7fb;
   --color-bg-sidebar: #ffffff;
-  --color-bg-secondary: #f1f5f7;
-  --color-bg-hover: #eaf3f3;
+  --color-bg-secondary: #eef5fb;
+  --color-bg-hover: #eaf4ff;
   --color-surface-raised: rgba(255, 255, 255, 0.94);
-  --color-surface-soft: #f9fbfc;
+  --color-surface-soft: #f8fbff;
 
   /* Borders */
-  --color-border: #dde6ec;
-  --color-border-strong: #c3d0d8;
+  --color-border: #dbe7f3;
+  --color-border-strong: #b8cfe6;
 
   /* Text */
-  --color-text-primary: #111827;
-  --color-text-secondary: #64707d;
-  --color-text-muted: #9aa4af;
+  --color-text-primary: #0b1f33;
+  --color-text-secondary: #5d7288;
+  --color-text-muted: #91a4b7;
 
-  /* Brand — Applied Teal */
-  --color-navy: #27676b;
-  --color-navy-light: #3a8286;
-  --color-navy-hover: #1f5559;
-  --color-applied-teal: #276f73;
-  --color-applied-teal-soft: #e9f6f5;
-  --color-applied-teal-muted: #5f8589;
+  /* Brand — ApplyWise Blue */
+  --color-navy: #0b1f33;
+  --color-navy-light: #2568a8;
+  --color-navy-hover: #175892;
+  --color-applied-teal: #2168b3;
+  --color-applied-teal-soft: #eaf4ff;
+  --color-applied-teal-muted: #5f83a8;
 
-  /* Secondary Accent — AI Indigo */
-  --color-indigo: #4f63b6;
-  --color-indigo-hover: #4052a0;
-  --color-indigo-soft: #eef1ff;
-  --color-indigo-border: #cdd5ff;
-  --color-indigo-text: #34428a;
+  /* Secondary Accent — Bright Sky */
+  --color-indigo: #39a9e8;
+  --color-indigo-hover: #238fd0;
+  --color-indigo-soft: #e8f6ff;
+  --color-indigo-border: #b9def8;
+  --color-indigo-text: #17649e;
 
   /* Semantic */
-  --color-accent: #276f73;
+  --color-accent: #2168b3;
   --color-success: #2f6b45;
   --color-warning: #a15c07;
   --color-danger: #b42318;
@@ -207,9 +207,9 @@ img, video {
   --shadow-md: 0 18px 38px rgba(15, 23, 42, 0.085);
   --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.045), 0 16px 34px rgba(15, 23, 42, 0.055);
   --shadow-card-hover: 0 2px 4px rgba(15, 23, 42, 0.055), 0 22px 44px rgba(15, 23, 42, 0.095);
-  --shadow-primary: 0 12px 24px rgba(39, 111, 115, 0.22);
-  --shadow-primary-hover: 0 16px 30px rgba(39, 111, 115, 0.28);
-  --shadow-indigo: 0 12px 24px rgba(79, 99, 182, 0.18);
+  --shadow-primary: 0 12px 24px rgba(33, 104, 179, 0.22);
+  --shadow-primary-hover: 0 16px 30px rgba(33, 104, 179, 0.28);
+  --shadow-indigo: 0 12px 24px rgba(57, 169, 232, 0.18);
 
   /* Typography */
   --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
@@ -226,7 +226,7 @@ html, body {
 body {
   font-family: var(--font-sans);
   background:
-    linear-gradient(180deg, #f8fafc 0%, var(--color-bg-page) 44%, #eef3f6 100%);
+    linear-gradient(180deg, #f8fbff 0%, var(--color-bg-page) 44%, #eaf2fb 100%);
   color: var(--color-text-primary);
   font-size: 14px;
   font-weight: 400;
@@ -304,13 +304,13 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--color-applied-teal) !important;
-  box-shadow: 0 0 0 4px rgba(39, 111, 115, 0.11) !important;
+  box-shadow: 0 0 0 4px rgba(33, 104, 179, 0.12) !important;
 }
 
 a:focus-visible,
 button:focus-visible,
 [role="button"]:focus-visible {
-  outline: 3px solid rgba(39, 111, 115, 0.22);
+  outline: 3px solid rgba(33, 104, 179, 0.24);
   outline-offset: 3px;
 }
 

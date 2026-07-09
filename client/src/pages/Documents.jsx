@@ -254,7 +254,7 @@ function TailoringWorkspace({
                 background: active ? '#ffffff' : step.done ? '#f8fafc' : '#ffffff',
               }}
             >
-              <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: active ? 'var(--color-applied-teal)' : '#edf7f7', color: active ? '#ffffff' : 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: active ? 'var(--color-applied-teal)' : 'var(--color-applied-teal-soft)', color: active ? '#ffffff' : 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Icon size={16} strokeWidth={2.4} />
               </span>
               <div>
@@ -319,7 +319,7 @@ function recommendationLabel(value) {
 function recommendationColor(value) {
   if (value === 'strong_match') return { bg: '#f0fdf4', color: 'var(--color-success)', border: '#bbf7d0' }
   if (value === 'weak_match') return { bg: '#fef2f2', color: 'var(--color-danger)', border: '#fecaca' }
-  return { bg: '#edf7f7', color: 'var(--color-applied-teal)', border: '#b9dada' }
+  return { bg: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', border: '#bddbf5' }
 }
 
 function Section({ icon: Icon, title, children }) {
@@ -330,7 +330,7 @@ function Section({ icon: Icon, title, children }) {
           width: 30,
           height: 30,
           borderRadius: 'var(--radius-md)',
-          background: '#edf7f7',
+          background: 'var(--color-applied-teal-soft)',
           color: 'var(--color-applied-teal)',
           display: 'flex',
           alignItems: 'center',
@@ -365,7 +365,7 @@ function EmptyReview() {
         width: 52,
         height: 52,
         borderRadius: '50%',
-        background: '#edf7f7',
+        background: 'var(--color-applied-teal-soft)',
         color: 'var(--color-applied-teal)',
         display: 'flex',
         alignItems: 'center',
@@ -562,7 +562,7 @@ function ReviewPriority({ review }) {
   return (
     <section style={{ ...panelStyle, padding: '18px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '14px' }}>
-        <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-md)', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <ListChecks size={16} strokeWidth={2.4} />
         </span>
         <h2 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--color-text-primary)', margin: 0 }}>Recommendation priorities</h2>
@@ -642,7 +642,7 @@ function EvidenceSeparation({ review }) {
   return (
     <section style={{ ...panelStyle, padding: '18px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '14px' }}>
-        <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-md)', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <ShieldCheck size={16} strokeWidth={2.4} />
         </span>
         <div>
@@ -749,8 +749,8 @@ function PillList({ items }) {
         <span
           key={`${item}-${index}`}
           style={{
-            border: '1px solid #b9dada',
-            background: '#edf7f7',
+            border: '1px solid #bddbf5',
+            background: 'var(--color-applied-teal-soft)',
             color: 'var(--color-applied-teal)',
             borderRadius: '999px',
             padding: '5px 9px',
@@ -832,7 +832,7 @@ function CvProfileResults({ profile }) {
             width: 42,
             height: 42,
             borderRadius: 'var(--radius-md)',
-            background: '#edf7f7',
+            background: 'var(--color-applied-teal-soft)',
             color: 'var(--color-applied-teal)',
             display: 'flex',
             alignItems: 'center',
@@ -1643,9 +1643,9 @@ export default function Documents() {
               alignItems: 'flex-start',
               gap: '10px',
               padding: '12px',
-              border: '1px solid #b9dada',
+              border: '1px solid #bddbf5',
               borderRadius: 'var(--radius-md)',
-              background: '#edf7f7',
+              background: 'var(--color-applied-teal-soft)',
               color: 'var(--color-applied-teal)',
               fontSize: '13px',
               lineHeight: '1.45',

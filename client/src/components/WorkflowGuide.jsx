@@ -58,7 +58,7 @@ export default function WorkflowGuide({ steps = defaultSteps, title = 'Recommend
             >
               {compact ? (
                 <>
-                  <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-md)', background: active ? 'var(--color-applied-teal)' : '#edf7f7', color: active ? '#ffffff' : 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-md)', background: active ? 'var(--color-applied-teal)' : 'var(--color-applied-teal-soft)', color: active ? '#ffffff' : 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Icon size={15} strokeWidth={2.4} />
                   </span>
                   <span style={{ flex: 1, minWidth: 0, fontSize: '13px', fontWeight: '800', color: 'var(--color-text-primary)', lineHeight: '1.25' }}>
@@ -72,7 +72,7 @@ export default function WorkflowGuide({ steps = defaultSteps, title = 'Recommend
               ) : (
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
-                    <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: active ? 'var(--color-applied-teal)' : '#edf7f7', color: active ? '#ffffff' : 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: active ? 'var(--color-applied-teal)' : 'var(--color-applied-teal-soft)', color: active ? '#ffffff' : 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Icon size={17} strokeWidth={2.4} />
                     </span>
                     <span className="workflow-step-state" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: active ? 'var(--color-applied-teal)' : done ? 'var(--color-text-muted)' : 'var(--color-text-muted)', fontSize: '12px', fontWeight: '800' }}>

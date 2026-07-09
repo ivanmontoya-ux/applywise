@@ -51,3 +51,6 @@ Use this file to plan active sprint work before building and mark items complete
 - [x] Add soft indigo as a secondary accent for AI, interview, and premium UI states.
 - [x] Standardize dashboard feature icon sizing and container style.
 - [x] Clean up the Home dashboard by compacting the chatbot, slimming the workflow, and removing repeated lower-page sections.
+- [x] Recolor the ApplyWise UI and logo from green/teal to the blue presentation palette.
+- [x] Replace the shared ApplyWise logo asset with the final blue presentation logo.
+- [x] Update the pricing page cards and buttons to the blue presentation color scheme.

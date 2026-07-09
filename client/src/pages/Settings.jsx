@@ -93,7 +93,7 @@ function PrivacyAction({ icon: Icon, title, copy, action, disabled, onClick, bus
     <article style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '14px', background: '#fbfdff' }}>
       <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-          <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ width: 34, height: 34, borderRadius: 'var(--radius-md)', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon size={17} strokeWidth={2.4} />
           </span>
           <div>
@@ -226,7 +226,7 @@ export default function Settings() {
       <div style={{ display: 'grid', gap: '18px' }}>
         <section style={{ ...panelStyle, padding: '22px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <span style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <KeyRound size={18} strokeWidth={2.4} />
             </span>
             <div>
@@ -257,7 +257,7 @@ export default function Settings() {
 
         <section style={{ ...panelStyle, padding: '22px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <span style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <ShieldCheck size={18} strokeWidth={2.4} />
             </span>
             <div>

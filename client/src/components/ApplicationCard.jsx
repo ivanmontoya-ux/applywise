@@ -132,7 +132,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
                 transition: 'color 0.15s, background 0.15s',
                 textDecoration: 'none',
               }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-applied-teal)'; e.currentTarget.style.background = '#edf7f7' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-applied-teal)'; e.currentTarget.style.background = 'var(--color-applied-teal-soft)' }}
               onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent' }}
             >
               <ExternalLink size={14} strokeWidth={2} />
@@ -239,7 +239,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
             {(hasCvReview || hasCoverLetter) && (
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {hasCvReview && (
-                  <span style={{ minHeight: 24, display: 'inline-flex', alignItems: 'center', padding: '0 8px', borderRadius: '6px', background: '#edf7f7', color: 'var(--color-applied-teal)', fontSize: '11px', fontWeight: '800' }}>
+                  <span style={{ minHeight: 24, display: 'inline-flex', alignItems: 'center', padding: '0 8px', borderRadius: '6px', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', fontSize: '11px', fontWeight: '800' }}>
                     CV review saved
                   </span>
                 )}
@@ -248,7 +248,7 @@ export default function ApplicationCard({ application, onUpdate, onDelete }) {
                     type="button"
                     onClick={() => downloadCoverLetterDoc(application.cover_letter, application)}
                     className="secondary-action pressable"
-                    style={{ minHeight: 24, display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '0 8px', borderRadius: '6px', border: '1px solid #b9dada', background: '#ffffff', color: 'var(--color-applied-teal)', fontSize: '11px', fontWeight: '800', cursor: 'pointer' }}
+                    style={{ minHeight: 24, display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '0 8px', borderRadius: '6px', border: '1px solid #bddbf5', background: '#ffffff', color: 'var(--color-applied-teal)', fontSize: '11px', fontWeight: '800', cursor: 'pointer' }}
                   >
                     <Download size={11} strokeWidth={2.5} />
                     Cover letter doc

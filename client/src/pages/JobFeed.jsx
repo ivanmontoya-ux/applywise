@@ -110,7 +110,7 @@ function fitLabel(value) {
 function fitStyle(value) {
   if (value === 'strong_fit') return { bg: '#f0fdf4', color: 'var(--color-success)', border: '#bbf7d0' }
   if (value === 'stretch') return { bg: '#fff7ed', color: 'var(--color-warning)', border: '#fed7aa' }
-  return { bg: '#edf7f7', color: 'var(--color-applied-teal)', border: '#b9dada' }
+  return { bg: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', border: '#bddbf5' }
 }
 
 function recommendationErrorMessage(err) {
@@ -172,8 +172,8 @@ function FilterDropdown({ label, unit, groups, selected, onChange, minWidth = '1
         onClick={() => setOpen(o => !o)}
         style={{
           display: 'flex', alignItems: 'center', gap: '6px',
-          background: isActive ? '#edf7f7' : '#ffffff',
-          border: `1.5px solid ${isActive ? '#b9dada' : 'var(--color-border)'}`,
+          background: isActive ? 'var(--color-applied-teal-soft)' : '#ffffff',
+          border: `1.5px solid ${isActive ? '#bddbf5' : 'var(--color-border)'}`,
           borderRadius: 'var(--radius-md)',
           padding: '8px 12px',
           fontSize: '13px',
@@ -236,8 +236,8 @@ function FilterDropdown({ label, unit, groups, selected, onChange, minWidth = '1
                       >
                         <span style={{
                           width: 14, height: 14, borderRadius: 3, flexShrink: 0,
-                          border: `1.5px solid ${allOn ? 'var(--color-applied-teal)' : someOn ? '#b9dada' : '#cbd5e1'}`,
-                          background: allOn ? 'var(--color-applied-teal)' : someOn ? '#edf7f7' : 'transparent',
+                          border: `1.5px solid ${allOn ? 'var(--color-applied-teal)' : someOn ? '#bddbf5' : '#cbd5e1'}`,
+                          background: allOn ? 'var(--color-applied-teal)' : someOn ? 'var(--color-applied-teal-soft)' : 'transparent',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 9, color: allOn ? '#fff' : 'var(--color-applied-teal)', lineHeight: 1,
                         }}>
@@ -338,7 +338,7 @@ function RecommendedJobsBand({ enabled, onEnabledChange, recommendations, loadin
     <section style={recommendationsBandStyle}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap', marginBottom: hasContent ? '14px' : 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-          <span style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ width: 32, height: 32, borderRadius: 'var(--radius-md)', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Sparkles size={17} strokeWidth={2.4} />
           </span>
           <div>
@@ -352,9 +352,9 @@ function RecommendedJobsBand({ enabled, onEnabledChange, recommendations, loadin
           gap: '8px',
           minHeight: 34,
           padding: '0 10px',
-          border: `1px solid ${enabled ? '#b9dada' : 'var(--color-border)'}`,
+          border: `1px solid ${enabled ? '#bddbf5' : 'var(--color-border)'}`,
           borderRadius: 'var(--radius-md)',
-          background: enabled ? '#edf7f7' : '#ffffff',
+          background: enabled ? 'var(--color-applied-teal-soft)' : '#ffffff',
           color: enabled ? 'var(--color-applied-teal)' : 'var(--color-text-secondary)',
           fontSize: '12px',
           fontWeight: '800',
@@ -680,7 +680,7 @@ export default function JobFeed() {
           style={selectStyle}
           value={datePosted}
           onChange={e => setDatePosted(e.target.value)}
-          onFocus={e => { e.currentTarget.style.borderColor = 'var(--color-applied-teal)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(47,111,115,0.14)' }}
+          onFocus={e => { e.currentTarget.style.borderColor = 'var(--color-applied-teal)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(33,104,179,0.14)' }}
           onBlur={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.boxShadow = 'none' }}
         >
           <option value="any">Any Time</option>
@@ -700,7 +700,7 @@ export default function JobFeed() {
             onChange={e => setKeyword(e.target.value)}
             onFocus={e => {
               e.currentTarget.parentElement.style.borderColor = 'var(--color-applied-teal)'
-              e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(47,111,115,0.14)'
+              e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(33,104,179,0.14)'
             }}
             onBlur={e => {
               e.currentTarget.parentElement.style.borderColor = 'var(--color-border)'

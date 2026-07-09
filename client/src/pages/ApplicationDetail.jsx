@@ -110,7 +110,7 @@ function Section({ icon: Icon, eyebrow, title, children, action }) {
     <section className="interactive-card" style={{ ...panelStyle, padding: '28px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-          <span style={{ width: 38, height: 38, borderRadius: 'var(--radius-md)', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ width: 38, height: 38, borderRadius: 'var(--radius-md)', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon size={19} strokeWidth={2.4} />
           </span>
           <div>
@@ -581,7 +581,7 @@ export default function ApplicationDetail() {
                 const Icon = item.icon
                 return (
                   <article key={`${item.label}-${index}`} style={{ display: 'grid', gridTemplateColumns: '34px 1fr', gap: '12px', alignItems: 'start' }}>
-                    <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#edf7f7', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--color-applied-teal-soft)', color: 'var(--color-applied-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Icon size={16} strokeWidth={2.4} />
                     </span>
                     <div style={{ paddingBottom: '12px', borderBottom: index === timeline.length - 1 ? 'none' : '1px solid var(--color-border)' }}>

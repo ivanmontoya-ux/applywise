@@ -42,7 +42,7 @@ function NavItem({ to, icon: Icon, label, collapsed }) {
         color: isActive ? 'var(--color-applied-teal)' : 'var(--color-text-secondary)',
         background: isActive ? 'linear-gradient(180deg, #f1fbfa 0%, #e8f5f5 100%)' : 'transparent',
         border: isActive ? '1px solid #c6e3e3' : '1px solid transparent',
-        boxShadow: isActive ? 'inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 5px 14px rgba(39, 111, 115, 0.08)' : 'none',
+        boxShadow: isActive ? 'inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 5px 14px rgba(33, 104, 179, 0.08)' : 'none',
         transition: 'background 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease',
         cursor: 'pointer',
         whiteSpace: 'nowrap',
