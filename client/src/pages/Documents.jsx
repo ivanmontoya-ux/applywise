@@ -1163,25 +1163,25 @@ function ReviewResults({ review, onSave, saving, canSave, auth, selectedApplicat
 function CoverLetterResults({ letter, onSave, saving, canSave, auth, selectedApplication, onCreateDoc, onTextChange }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      <section style={{ ...panelStyle, padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '18px', alignItems: 'flex-start', marginBottom: '16px' }}>
-          <div>
+      <section style={{ ...panelStyle, padding: '24px', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gap: '18px' }}>
+          <div style={{ minWidth: 0 }}>
             <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0', marginBottom: '6px' }}>
               Gemini cover letter draft
             </p>
-            <h2 style={{ fontSize: '19px', fontWeight: '700', color: 'var(--color-text-primary)', marginBottom: '6px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: '750', color: 'var(--color-text-primary)', marginBottom: '8px', lineHeight: '1.2', maxWidth: '780px' }}>
               {letter.title || 'Tailored cover letter'}
             </h2>
-            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.55' }}>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: '1.6', maxWidth: '820px' }}>
               {letter.opening_strategy || 'Drafted from the CV and application context provided.'}
             </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '9px', flexShrink: 0 }}>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'grid', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
               <button
                 type="button"
                 onClick={() => navigator.clipboard?.writeText(letter.cover_letter || '')}
-                style={{ ...secondaryButtonStyle, flexShrink: 0 }}
+                style={{ ...secondaryButtonStyle, flexShrink: 0, minHeight: 40 }}
               >
                 Copy draft
               </button>
@@ -1194,6 +1194,7 @@ function CoverLetterResults({ letter, onSave, saving, canSave, auth, selectedApp
                   opacity: letter.cover_letter ? 1 : 0.6,
                   cursor: letter.cover_letter ? 'pointer' : 'default',
                   flexShrink: 0,
+                  minHeight: 40,
                 }}
               >
                 <Download size={14} strokeWidth={2.5} />
@@ -1208,6 +1209,8 @@ function CoverLetterResults({ letter, onSave, saving, canSave, auth, selectedApp
                   opacity: !canSave || saving ? 0.6 : 1,
                   cursor: !canSave || saving ? 'default' : 'pointer',
                   flexShrink: 0,
+                  minHeight: 40,
+                  maxWidth: '100%',
                 }}
               >
                 {saving ? <RefreshCw size={14} strokeWidth={2.5} /> : <Save size={14} strokeWidth={2.5} />}
