@@ -699,9 +699,6 @@ export default function EmailImport() {
       <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '18px', marginBottom: '26px', flexWrap: 'wrap' }}>
         <div>
           <h1 style={titleStyle}>Email</h1>
-          <p style={subtitleStyle}>
-            Review Gmail messages from the past 2 weeks that look like real job application activity across Inbox and Sent.
-          </p>
         </div>
 
         {auth.session && connected && (
